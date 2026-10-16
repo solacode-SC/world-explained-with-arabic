@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="220" viewBox="0 0 1000 220" role="img" aria-label="تذييل المشروع">
+  <defs>
+    <style>
+      
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&amp;family=Cairo:wght@400;600;700;800;900&amp;family=Reem+Kufi:wght@600;700&amp;family=Aref+Ruqaa:wght@700&amp;display=swap');
+
+      .font-title { font-family: 'Reem Kufi', 'Cairo', Tahoma, sans-serif; font-weight: 700; }
+      .font-body { font-family: 'Cairo', Tahoma, sans-serif; font-weight: 600; }
+      .font-serif { font-family: 'Amiri', 'Georgia', serif; font-size: 21px; }
+    </style>
+  </defs>
+
+  <rect width="1000" height="220" rx="20" fill="#0c152e" stroke="#1e2c56" stroke-width="2"/>
+
+  <!-- Centered Rosette Star -->
+  <g transform="translate(500, 50)">
+    <circle cx="0" cy="0" r="28" fill="#f3ca65" opacity="0.15"/>
+    <path d="M 0,-22 L 4.2,-10.2 L 15.6,-15.6 L 10.2,-4.2 L 22,0 L 10.2,4.2 L 15.6,15.6 L 4.2,10.2 L 0,22 L -4.2,10.2 L -15.6,15.6 L -10.2,4.2 L -22,0 L -10.2,-4.2 L -15.6,-15.6 L -4.2,-10.2 Z" fill="#f3ca65"/>
+    <circle cx="0" cy="0" r="4" fill="#ffffff"/>
+  </g>
+
+  <!-- Poetic Dedication -->
+  <text x="500" y="112" text-anchor="middle" class="font-serif" fill="#f8fafc" direction="rtl">
+    «صُنع بحبٍّ وشغفٍ لخدمة المعرفة، وإثراء لغة الضاد في الفضاء الرقمي»
+  </text>
+
+  
+    <g class="divider">
+      <line x1="270" y1="136" x2="485" y2="136" stroke="#f3ca65" stroke-width="1.2" opacity="0.65"/>
+      <circle cx="481" cy="136" r="2" fill="#f3ca65" opacity="0.85"/>
+      <path d="M 500,131 L 501,133.7 L 503.5,132.5 L 502.3,135 L 505,136 L 502.3,137 L 503.5,139.5 L 501,138.3 L 500,141 L 499,138.3 L 496.5,139.5 L 497.7,137 L 495,136 L 497.7,135 L 496.5,132.5 L 499,133.7 Z" fill="#f3ca65" opacity="0.95"/>
+      <circle cx="500" cy="136" r="1.1" fill="#ffffff" opacity="0.9"/>
+      <circle cx="519" cy="136" r="2" fill="#f3ca65" opacity="0.85"/>
+      <line x1="515" y1="136" x2="730" y2="136" stroke="#f3ca65" stroke-width="1.2" opacity="0.65"/>
+    </g>
+    
+
+  <!-- Project Identity &amp; Copyright -->
+  <text x="500" y="165" text-anchor="middle" class="font-body" font-size="14" fill="#f3ca65" direction="rtl">
+    موسوعة «اشرح لي العالم» • مبادرة مفتوحة المصدر • مرخصة تحت MIT
+  </text>
+  
+  <text x="500" y="190" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#94a3b8">
+    BUILD • EXPLORE • EXPLAIN • IN ARABIC WITH PASSION
+  </text>
+
+  
+    <path d="M 8 28 L 8 8 L 28 8 M 972 8 L 992 8 L 992 28 M 992 192 L 992 212 L 972 212 M 28 212 L 8 212 L 8 192" fill="none" stroke="#f3ca65" stroke-width="1.8" opacity="0.75"/>
+    <circle cx="13" cy="13" r="1.5" fill="#f3ca65"/>
+    <circle cx="987" cy="13" r="1.5" fill="#f3ca65"/>
+    <circle cx="987" cy="207" r="1.5" fill="#f3ca65"/>
+    <circle cx="13" cy="207" r="1.5" fill="#f3ca65"/>
+    
+</svg>

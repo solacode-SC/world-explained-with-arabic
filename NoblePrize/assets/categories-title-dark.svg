@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="75" viewBox="0 0 1000 75" role="img">
+  <defs>
+    <style>
+      
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&amp;family=Cairo:wght@400;600;700;800;900&amp;family=Reem+Kufi:wght@600;700&amp;family=Aref+Ruqaa:wght@700&amp;display=swap');
+
+      .font-title { font-family: 'Reem Kufi', 'Cairo', Tahoma, sans-serif; font-weight: 700; }
+      .font-en { font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 2px; font-weight: 600; }
+    </style>
+  </defs>
+  <rect width="1000" height="75" rx="14" fill="#0c152e" stroke="#1e2c56" stroke-width="1.5"/>
+  <text x="500" y="38" text-anchor="middle" class="font-title" font-size="24" fill="#f3ca65" direction="rtl">
+    ✦ أبواب المعرفة ومحاور الشرح ✦
+  </text>
+  <text x="500" y="58" text-anchor="middle" class="font-en" fill="#94a3b8">
+    EXPLORATION DOMAINS
+  </text>
+  
+    <g class="divider">
+      <line x1="350" y1="68" x2="486" y2="68" stroke="#f3ca65" stroke-width="1.2" opacity="0.65"/>
+      <circle cx="482" cy="68" r="2" fill="#f3ca65" opacity="0.85"/>
+      <path d="M 500,64 L 500.8,66.2 L 502.8,65.2 L 501.8,67.2 L 504,68 L 501.8,68.8 L 502.8,70.8 L 500.8,69.8 L 500,72 L 499.2,69.8 L 497.2,70.8 L 498.2,68.8 L 496,68 L 498.2,67.2 L 497.2,65.2 L 499.2,66.2 Z" fill="#f3ca65" opacity="0.95"/>
+      <circle cx="500" cy="68" r="0.9" fill="#ffffff" opacity="0.9"/>
+      <circle cx="518" cy="68" r="2" fill="#f3ca65" opacity="0.85"/>
+      <line x1="514" y1="68" x2="650" y2="68" stroke="#f3ca65" stroke-width="1.2" opacity="0.65"/>
+    </g>
+    
+</svg>

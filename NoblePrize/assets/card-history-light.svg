@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="485" height="210" viewBox="0 0 485 210" role="img">
+  <defs>
+    <style>
+      
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&amp;family=Cairo:wght@400;600;700;800;900&amp;family=Reem+Kufi:wght@600;700&amp;family=Aref+Ruqaa:wght@700&amp;display=swap');
+
+      .font-title { font-family: 'Reem Kufi', 'Cairo', Tahoma, sans-serif; font-weight: 700; }
+      .font-body { font-family: 'Cairo', Tahoma, sans-serif; font-weight: 600; }
+    </style>
+    <clipPath id="cat-clip-history">
+      <rect x="16" y="20" width="125" height="170" rx="12"/>
+    </clipPath>
+  </defs>
+
+  <rect width="485" height="210" rx="16" fill="#ffffff" stroke="#e5dac4" stroke-width="1.5"/>
+  
+  <!-- Left Side: Art Thumbnail with Frame -->
+  <rect x="14" y="18" width="129" height="174" rx="14" fill="none" stroke="#b08528" stroke-width="1.2" opacity="0.8"/>
+  <g clip-path="url(#cat-clip-history)">
+    <image href="data:image/jpeg;base64,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" x="16" y="20" width="125" height="170" preserveAspectRatio="xMidYMid slice"/>
+    <rect x="16" y="20" width="125" height="170" fill="#faf6ed" opacity="0.08"/>
+  </g>
+
+  <!-- Right Side: Content -->
+  <g transform="translate(150, 20)">
+    <circle cx="310" cy="20" r="18" fill="#b08528" opacity="0.18"/>
+    <text x="310" y="26" text-anchor="middle" font-size="18">🏛️</text>
+    
+    <text x="280" y="26" text-anchor="end" class="font-title" font-size="20" fill="#b08528" direction="rtl">الحضارة والتاريخ</text>
+    <text x="320" y="55" text-anchor="end" class="font-body" font-size="13" fill="#475569" direction="rtl">محطات فاصلة صنعت عالمنا</text>
+    
+    <line x1="20" y1="72" x2="320" y2="72" stroke="#ded1b8" stroke-width="1"/>
+    
+    
+        <g transform="translate(0, 105)">
+          <circle cx="320" cy="-4" r="3" fill="#b08528"/>
+          <text x="305" y="0" text-anchor="end" class="font-body" font-size="13" fill="#334155" direction="rtl">📜 ولادة الكتابة والمدن</text>
+        </g>
+        
+        <g transform="translate(0, 131)">
+          <circle cx="320" cy="-4" r="3" fill="#b08528"/>
+          <text x="305" y="0" text-anchor="end" class="font-body" font-size="13" fill="#334155" direction="rtl">⚔️ الثورات الكبرى في التاريخ</text>
+        </g>
+        
+        <g transform="translate(0, 157)">
+          <circle cx="320" cy="-4" r="3" fill="#b08528"/>
+          <text x="305" y="0" text-anchor="end" class="font-body" font-size="13" fill="#334155" direction="rtl">💰 كيف نشأ الاقتصاد والمال؟</text>
+        </g>
+        
+  </g>
+  
+  
+    <path d="M 6 20 L 6 6 L 20 6 M 465 6 L 479 6 L 479 20 M 479 190 L 479 204 L 465 204 M 20 204 L 6 204 L 6 190" fill="none" stroke="#b08528" stroke-width="1.8" opacity="0.75"/>
+    <circle cx="11" cy="11" r="1.5" fill="#b08528"/>
+    <circle cx="474" cy="11" r="1.5" fill="#b08528"/>
+    <circle cx="474" cy="199" r="1.5" fill="#b08528"/>
+    <circle cx="11" cy="199" r="1.5" fill="#b08528"/>
+    
+</svg>
