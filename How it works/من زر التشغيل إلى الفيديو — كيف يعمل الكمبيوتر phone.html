@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>من زر التشغيل إلى الفيديو — كيف يعمل الكمبيوتر</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b1a;--cy:#35e0ff;--mg:#ff3df2;--am:#ffb347;--gr:#5dff9a;--vi:#b78bff;--tx:#e8f0ff;--pane:clamp(160px,34vh,270px)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:Cairo,system-ui,sans-serif}
+body{background:radial-gradient(ellipse at 50% 35%,#16225a 0,#070b1a 70%);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+body::before{content:"";position:fixed;inset:0;background:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:36px 36px;animation:gm 8s linear infinite}
+@keyframes gm{to{background-position:36px 36px}}
+.hud{position:absolute;inset:calc(8px + env(safe-area-inset-top,0px)) 12px auto;z-index:5;display:flex;align-items:center;gap:10px}
+#num{font:900 28px/1 ui-monospace,monospace;color:var(--cy);text-shadow:0 0 14px var(--cy)}
+#ttl{font-size:clamp(15px,2.8vw,26px);font-weight:900;white-space:nowrap}
+#ttl small{display:block;font-size:.55em;color:var(--cy);font-weight:700;direction:ltr;text-align:start;letter-spacing:.08em}
+.pg{flex:1;height:6px;border-radius:6px;background:#ffffff1f;overflow:hidden}.pg i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cy),var(--mg));box-shadow:0 0 10px var(--cy)}
+button{font:inherit;cursor:pointer;border:1.5px solid #ffffff55;background:#ffffff14;color:var(--tx);border-radius:10px;padding:2px 10px}
+.dots{position:absolute;top:calc(52px + env(safe-area-inset-top,0px));inset-inline:0;display:flex;justify-content:center;gap:7px;z-index:5}
+.dots span{width:9px;height:9px;border-radius:50%;background:#ffffff33;cursor:pointer;transition:.4s}.dots span.on{background:var(--cy);box-shadow:0 0 10px var(--cy);transform:scale(1.4)}
+.view{position:absolute;inset:calc(66px + env(safe-area-inset-top,0px)) 0 calc(var(--pane) + env(safe-area-inset-bottom,0px)) 0}
+svg#sv{width:100%;height:100%;display:block}
+#cam{transform-origin:0 0;transition:transform 1.6s cubic-bezier(.65,0,.2,1)}
+.pane{position:absolute;inset:auto 0 calc(env(safe-area-inset-bottom,0px)) 0;height:var(--pane);z-index:5;display:flex;gap:18px;align-items:center;padding:10px 20px;background:linear-gradient(#070b1a00,#070b1acc 25%);flex-wrap:wrap;align-content:center}
+.cap{flex:1 1 300px;min-width:0}
+.cap h2{font-size:clamp(17px,3vw,28px);font-weight:900;color:var(--am);text-shadow:0 0 12px #ffb34766}
+.cap p{font-size:clamp(12px,1.9vw,17px);line-height:1.7;color:#d6e2ff;margin-top:4px}
+.viz{flex:1 1 300px;direction:ltr;text-align:center}
+.x{animation:pop .6s var(--d,0s) cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{opacity:0;transform:translateY(18px) scale(.8)}to{opacity:1;transform:none}}
+.ch{display:inline-block;border:1.5px solid var(--c,var(--cy));color:var(--c,var(--cy));background:#ffffff0d;border-radius:10px;padding:2px 10px;font-weight:700;margin:3px;font-size:clamp(11px,1.8vw,15px);box-shadow:0 0 12px color-mix(in srgb,var(--c,var(--cy)) 35%,transparent)}
+.ar{color:#fff9;font-weight:900}
+.big{font:900 clamp(22px,5vw,44px) ui-monospace,monospace;color:var(--gr);text-shadow:0 0 18px var(--gr)}
+.ly{display:block;margin:3px auto;width:min(100%,380px);padding:2px 10px;border-radius:8px;color:#fff;font-weight:700;font-size:clamp(11px,1.8vw,15px);background:color-mix(in srgb,var(--c) 28%,#0b1030);border:1.5px solid var(--c);text-align:center}
+.wipe{position:fixed;inset:0;z-index:20;pointer-events:none;background:linear-gradient(105deg,transparent 30%,#35e0ff55 45%,#ff3df255 55%,transparent 70%);transform:translateX(-120%)}
+.wipe.go{animation:wp .9s ease-in-out}@keyframes wp{to{transform:translateX(120%)}}
+/* svg parts */
+.c{opacity:.3;transition:opacity .7s,filter .7s}.c.on{opacity:1;filter:drop-shadow(0 0 7px var(--c))}
+.c rect.b,.c circle.b{fill:#0f1a40;stroke:var(--c);stroke-width:2}
+.c text{fill:#e8f0ff;font:700 11px ui-monospace,monospace;text-anchor:middle}
+.tr{fill:none;stroke:#2a6f86;stroke-width:3;opacity:.3;transition:.6s}.tr.on{opacity:1;stroke:#35e0ff;stroke-dasharray:6 6;animation:ds 1s linear infinite}
+@keyframes ds{to{stroke-dashoffset:-12}}
+.die{fill:var(--c);opacity:.25}.on .die{animation:pl 1s ease-in-out infinite}@keyframes pl{50%{opacity:.9}}
+.fan{transform-box:fill-box;transform-origin:center}.on .fan{animation:sp 1.2s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+[data-s="0"] #btn .b{animation:pr .5s 1.2s both}@keyframes pr{50%{transform:scale(.82)}}
+#btn .b{transform-box:fill-box;transform-origin:center}
+.rip{fill:none;stroke:var(--am);stroke-width:3;opacity:0}[data-s="0"] .rip{animation:rp 1.4s 1.3s ease-out both}@keyframes rp{from{r:24;opacity:1}to{r:90;opacity:0}}
+#pt{filter:drop-shadow(0 0 4px #fff)}
+
+
+/* Responsive enhancements for mobile / phone & all devices */
+@media (max-width: 768px), (max-aspect-ratio: 1/1) {
+  :root {
+    --pane: clamp(210px, 46vh, 340px);
+  }
+  .hud {
+    inset: calc(6px + env(safe-area-inset-top, 0px)) 10px auto;
+    gap: 6px;
+  }
+  #num {
+    font: 900 20px/1 ui-monospace, monospace;
+  }
+  #ttl {
+    font-size: clamp(12px, 3.2vw, 16px);
+    max-width: 44vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #ttl small {
+    font-size: 0.6em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pg {
+    flex: 1;
+    min-width: 32px;
+    height: 5px;
+  }
+  button {
+    padding: 1px 7px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+  .dots {
+    top: calc(44px + env(safe-area-inset-top, 0px));
+    gap: 5px;
+  }
+  .dots span {
+    width: 7px;
+    height: 7px;
+  }
+  .dots span.on {
+    transform: scale(1.3);
+  }
+  .view {
+    position: absolute;
+    inset: calc(56px + env(safe-area-inset-top, 0px)) 0 calc(var(--pane) + env(safe-area-inset-bottom, 0px)) 0;
+  }
+  .pane {
+    position: absolute;
+    inset: auto 0 calc(env(safe-area-inset-bottom, 0px)) 0;
+    height: var(--pane);
+    padding: 10px 14px;
+    background: linear-gradient(180deg, rgba(15, 24, 61, 0.92), rgba(7, 11, 26, 0.98));
+    border-top: 1.5px solid rgba(53, 224, 255, 0.25);
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: stretch;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+  }
+  .cap {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+  }
+  .cap h2 {
+    font-size: clamp(14px, 3.8vw, 18px);
+    margin-bottom: 2px;
+  }
+  .cap p {
+    font-size: clamp(12px, 3.1vw, 14px);
+    line-height: 1.5;
+    margin-top: 2px;
+  }
+  .viz {
+    flex: 0 0 auto;
+    width: 100%;
+    direction: ltr;
+    text-align: center;
+  }
+  .ch {
+    font-size: clamp(10px, 2.7vw, 12px);
+    padding: 2px 7px;
+    margin: 2px;
+    border-radius: 8px;
+  }
+  .ly {
+    width: min(100%, 320px);
+    font-size: clamp(10px, 2.6vw, 12px);
+    padding: 2px 6px;
+    margin: 2px auto;
+    border-radius: 6px;
+  }
+  .big {
+    font-size: clamp(17px, 4.6vw, 26px);
+  }
+}
+
+/* Landscape / short-height mobile phones adjustments */
+@media (max-height: 480px) and (orientation: landscape) {
+  :root {
+    --pane: clamp(110px, 32vh, 140px);
+  }
+  .hud {
+    inset: 4px 10px auto;
+  }
+  .dots {
+    top: 36px;
+  }
+  .view {
+    inset: 44px 0 var(--pane) 0;
+  }
+  .pane {
+    padding: 6px 14px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+  .cap {
+    flex: 1 1 50%;
+  }
+  .cap h2 {
+    font-size: 13px;
+  }
+  .cap p {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .viz {
+    flex: 1 1 50%;
+  }
+  .ch, .ly {
+    font-size: 10px;
+    padding: 1px 5px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="hud"><div id="num">01</div><div id="ttl"></div><div class="pg"><i id="pg"></i></div><button id="pp">⏸</button><button id="rs">↻</button></div>
+<div class="dots" id="dots"></div>
+<div class="view"><svg id="sv" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+<defs><pattern id="mem" width="16" height="12" patternUnits="userSpaceOnUse"><rect x="3" y="2" width="10" height="7" rx="1" fill="#b78bff" opacity=".7"/></pattern>
+<pattern id="gd" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#35e0ff" stroke-opacity=".12"/></pattern></defs>
+<g id="cam">
+<rect x="190" y="30" width="420" height="390" rx="18" fill="#0a2230" stroke="#1f7a8c" stroke-width="3"/><rect x="190" y="30" width="420" height="390" rx="18" fill="url(#gd)"/>
+<path id="p_btn" class="tr" d="M70 356V132"/><path id="p_psu" class="tr" d="M150 85H260V185H330"/><path id="p_bios" class="tr" d="M290 165H330"/><path id="p_ram" class="tr" d="M420 175H450"/><path id="p_ssd" class="tr" d="M375 230V275H280V320"/><path id="p_gpu" class="tr" d="M400 230V300"/><path id="p_scr" class="tr" d="M570 330H620V200H650"/>
+<g class="c" id="psu" style="--c:#ffb347"><rect class="b" x="40" y="40" width="110" height="90" rx="8"/><circle class="b fan" cx="95" cy="92" r="20"/><path class="fan" d="M95 76V108M79 92H111" stroke="#ffb347" stroke-width="3"/><text x="95" y="62">PSU</text></g>
+<g class="c" id="btn" style="--c:#35e0ff"><circle class="b" cx="70" cy="380" r="24"/><path d="M70 366V378M61 371A13 13 0 1 0 79 371" fill="none" stroke="#35e0ff" stroke-width="3" stroke-linecap="round"/><circle class="rip" cx="70" cy="380" r="24"/><text x="70" y="424">POWER</text></g>
+<g class="c" id="bios" style="--c:#5dff9a"><rect class="b" x="240" y="150" width="50" height="30" rx="4"/><text x="265" y="169">UEFI</text></g>
+<g class="c" id="cpu" style="--c:#35e0ff"><rect class="b" x="330" y="140" width="90" height="90" rx="8"/><rect class="die" x="345" y="155" width="60" height="60" rx="4"/><text x="375" y="191">CPU</text></g>
+<g class="c" id="ram" style="--c:#b78bff"><rect class="b" x="450" y="100" width="16" height="120" rx="3"/><rect class="b" x="474" y="100" width="16" height="120" rx="3"/><rect x="451" y="104" width="14" height="112" fill="url(#mem)"/><rect x="475" y="104" width="14" height="112" fill="url(#mem)"/><text x="470" y="240">RAM</text></g>
+<g class="c" id="ssd" style="--c:#ffb347"><rect class="b" x="225" y="320" width="110" height="50" rx="6"/><text x="280" y="350">SSD</text></g>
+<g class="c" id="gpu" style="--c:#ff3df2"><rect class="b" x="400" y="300" width="170" height="60" rx="6"/><circle class="b fan" cx="450" cy="330" r="18"/><circle class="b fan" cx="520" cy="330" r="18"/><path class="fan" d="M450 316V344M436 330H464" stroke="#ff3df2" stroke-width="2"/><path class="fan" d="M520 316V344M506 330H534" stroke="#ff3df2" stroke-width="2"/><text x="485" y="376">GPU</text></g>
+<g class="c" id="scr" style="--c:#35e0ff"><rect class="b" x="650" y="148" width="130" height="78" rx="6"/><foreignObject x="655" y="153" width="120" height="67.5"><canvas id="cv" width="320" height="180" style="width:100%;height:100%;display:block;border-radius:3px"></canvas></foreignObject><path d="M715 226V246M695 246H735" stroke="#35e0ff" stroke-width="3"/><text x="715" y="262">DISPLAY</text></g>
+<g id="pt"></g>
+</g></svg></div>
+<div class="pane"><div class="cap"><h2 id="ct"></h2><p id="cd"></p></div><div class="viz" id="vz"></div></div>
+<div class="wipe" id="wipe"></div>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)},sv=$('sv'),cam=$('cam'),pt=$('pt'),cv=$('cv'),g=cv.getContext('2d');g.direction='ltr';
+function ch(a,ar,d0){return a.map(function(s,i){var p=s.split('|');return (ar&&i?'<span class="ar x" style="--d:'+(d0+i*.5-.2)+'s">→</span>':'')+'<span class="ch x" style="--c:'+(p[1]||'#35e0ff')+';--d:'+(d0+i*.5)+'s">'+p[0]+'</span>'}).join('')}
+var CY='#35e0ff',AM='#ffb347',GR='#5dff9a',MG='#ff3df2',VI='#b78bff';
+var S=[
+{t:'الضغط على زر التشغيل',e:'POWER BUTTON',c:'الضغطة تُغلق دارة صغيرة في اللوحة الأم فتطلب من مزوّد الطاقة PSU أن يبدأ. المزوّد يحوّل كهرباء الجدار المتناوبة AC إلى جهود منخفضة مستمرة DC تكفي القطع.',on:['btn','psu'],fl:[['p_btn',AM,5,1.6],['p_psu',CY,5,3.5]],cam:[290,240,1.0],s:'off',v:ch(['AC 220V|'+AM,'12V|'+CY,'5V|'+GR,'3.3V|'+VI],1,2)},
+{t:'إشارة الاستعداد وإعادة الضبط',e:'POWER GOOD · RESET',c:'عندما يستقر الجهد يرسل المزوّد إشارة Power Good، فيستيقظ المعالج. أول ما يفعله قراءة تعليمة من عنوان ثابت داخل شريحة البرنامج الثابت UEFI.',on:['psu','cpu','bios'],fl:[['p_psu',CY,4,0],['-p_bios',GR,6,2]],cam:[300,170,1.9],s:'off',v:'<div class="big x" style="--d:.5s">0xFFFFFFF0</div>'+ch(['Power Good ✓|'+GR,'Reset ▶|'+CY,'CPU ⇄ UEFI|'+AM],1,1.5)},
+{t:'الفحص الذاتي POST',e:'POWER-ON SELF TEST',c:'يتأكد البرنامج الثابت أن كل قطعة تعمل: الذاكرة والبطاقة الرسومية والقرص ولوحة المفاتيح. أي خلل يظهر كرسالة أو كصفّارات.',on:['cpu','bios','ram','gpu','ssd','scr'],fl:[['p_ram',VI,2,1.5],['p_gpu',MG,2,4],['p_ssd',AM,2,6.5],['p_scr',CY,2,9]],cam:[400,238,1.05],s:'post',v:ch(['CPU ✓|'+GR,'RAM ✓|'+GR,'GPU ✓|'+GR,'SSD ✓|'+GR,'Screen ✓|'+GR],0,1.5)},
+{t:'تحميل نظام التشغيل',e:'BOOT LOADER',c:'يبحث UEFI في القرص عن قسم EFI الذي فيه المُحمِّل Bootloader. المُحمِّل ينسخ نواة النظام من القرص البطيء نسبياً إلى الذاكرة RAM السريعة.',on:['bios','cpu','ssd','ram'],fl:[['-p_ssd',AM,8,1],['p_ram',AM,8,3]],cam:[350,215,1.5],s:'logo',v:ch(['UEFI','EFI Partition|'+AM,'Bootloader|'+GR,'Kernel|'+MG,'RAM|'+VI],1,.8)},
+{t:'تشغيل النواة',e:'KERNEL',c:'النواة قلب النظام: تُعرّف القطع عبر برامج التشغيل Drivers، وتدير الذاكرة، وتوزّع وقت المعالج على البرامج، ثم تُطلق الخدمات في الخلفية.',on:['cpu','ram','ssd','gpu'],fl:[['p_ram',VI,6,0],['-p_ram',CY,6,.2],['-p_ssd',AM,3,2]],cam:[390,215,1.4],s:'logo',v:['Apps التطبيقات|'+MG,'Services الخدمات|'+VI,'Kernel النواة|'+CY,'Drivers التعريفات|'+GR,'Hardware العتاد|'+AM].map(function(s,i){var p=s.split('|');return '<span class="ly x" style="--c:'+p[1]+';--d:'+(.6+i*.5)+'s">'+p[0]+'</span>'}).join('')},
+{t:'ظهور سطح المكتب',e:'DESKTOP · GUI',c:'مدير النوافذ يطلب من GPU رسم الأيقونات والنوافذ في ذاكرة الإطار Framebuffer، ثم تُرسل الصورة إلى الشاشة مرات كثيرة في الثانية.',on:['cpu','gpu','scr'],fl:[['p_gpu',MG,5,0],['p_scr',MG,8,1.5]],cam:[560,250,1.6],s:'desk',v:ch(['Window Manager|'+VI,'GPU|'+MG,'Framebuffer|'+AM,'Screen|'+CY],1,.8)},
+{t:'النقر على ملف الفيديو',e:'CLICK → INTERRUPT',c:'حركة الفأرة والنقرة تصل إلى المعالج كمقاطعة Interrupt. يسأل النظام نظام الملفات أين الملف، ثم يقرأه من القرص إلى الذاكرة.',on:['cpu','ssd','ram','scr'],fl:[['-p_ssd',AM,7,6],['p_ram',AM,7,7.5],['p_scr',CY,2,0]],cam:[430,240,1.15],s:'desk',v:ch(['Mouse 🖱|'+CY,'Interrupt ⚡|'+AM,'Driver|'+GR,'File System|'+VI,'SSD|'+AM],1,.8)},
+{t:'فك ضغط الفيديو',e:'DEMUX · DECODE',c:'الفيديو ملف مضغوط مثل H.264. المشغّل يفصل الصوت عن الصورة Demux، ثم يفك ضغط كل إطار بالمعالج أو بمسرّع الفيديو داخل GPU.',on:['cpu','ram','gpu'],fl:[['-p_ram',VI,7,0],['p_gpu',MG,7,2],['p_ram',CY,4,3]],cam:[430,220,1.5],s:'load',v:ch(['video.mp4|'+AM,'Demux|'+VI,'Decode H.264|'+CY,'Frames 🖼|'+MG],1,.8)+'<br>'+ch(['Audio 🔊|'+GR],0,3.2)},
+{t:'من الإطار إلى البكسل',e:'GPU → DISPLAY',c:'تضع GPU الإطار الجاهز في Framebuffer فتقرؤه الشاشة عبر HDMI أو DisplayPort وتضيء ملايين البكسلات، ثم يتكرر ذلك عشرات المرات في الثانية.',on:['gpu','scr'],fl:[['p_scr',MG,12,0]],cam:[640,260,2],s:'vid',v:'<div class="big x" style="--d:.5s;color:'+MG+';text-shadow:0 0 18px '+MG+'">1920×1080 = 2,073,600 px</div>'+ch(['24–60 FPS|'+CY,'HDMI / DP|'+AM],0,1.5)},
+{t:'الفيديو يعمل!',e:'NOW PLAYING',c:'الصوت يسير بالتوازي إلى السماعات والصورة تتجدد باستمرار. هذه رحلة كاملة حدثت في ثوانٍ معدودة: كهرباء، ثم برنامج ثابت، ثم نواة، ثم فك ضغط، ثم بكسلات.',on:['scr'],fl:[],cam:[715,187,4.1],s:'vid',v:ch(['زر التشغيل|'+AM,'UEFI|'+GR,'Kernel|'+CY,'Desktop|'+VI,'Decode|'+MG,'GPU|'+MG,'Screen|'+CY],1,.3)}
+];
+var D=17,T=S.length*D,t=0,playing=true,cur=-1,last=performance.now(),acc=[],P=[],lens={},dots=$('dots');
+S.forEach(function(_,i){var d=document.createElement('span');d.onclick=function(){t=i*D+.01};dots.appendChild(d)});
+function go(i){
+ cur=i;var s=S[i];sv.removeAttribute('data-s');void sv.offsetWidth;sv.setAttribute('data-s',i);
+ $('num').textContent=('0'+(i+1)).slice(-2);$('ttl').innerHTML=s.t+'<small>'+s.e+'</small>';$('ct').textContent=s.t;$('cd').textContent=s.c;$('vz').innerHTML=s.v;
+ var k=s.cam;cam.style.transform='translate('+(400-k[0]*k[2])+'px,'+(225-k[1]*k[2])+'px) scale('+k[2]+')';
+ [].forEach.call(document.querySelectorAll('.c'),function(e){e.classList.toggle('on',s.on.indexOf(e.id)>-1)});
+ [].forEach.call(document.querySelectorAll('.tr'),function(e){e.classList.toggle('on',s.fl.some(function(f){return f[0].replace('-','')==e.id}))});
+ [].forEach.call(dots.children,function(d,j){d.classList.toggle('on',j===i)});
+ acc=s.fl.map(function(){return 0});P.forEach(function(p){p.e.remove()});P=[];
+ var w=$('wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go');
+}
+function spawn(f){var id=f[0].replace('-',''),p=$(id);if(!lens[id])lens[id]=p.getTotalLength();
+ var e=document.createElementNS('http://www.w3.org/2000/svg','circle');e.setAttribute('r',3.2);e.setAttribute('fill',f[1]);pt.appendChild(e);P.push({e:e,p:p,L:lens[id],x:0,r:f[0][0]=='-'})}
+function draw(m,tt,i){
+ var W=320,H=180,x;g.fillStyle='#000';g.fillRect(0,0,W,H);
+ if(m=='post'){g.fillStyle='#5dff9a';g.font='13px monospace';['UEFI v2.8','CPU ........ OK','RAM 16 GB .. OK','GPU ........ OK','SSD ........ OK','Display ..... OK'].forEach(function(l,k){if(tt>.8+k*1.4)g.fillText(l+(tt%1<.5&&k==5?'_':''),12,24+k*20)})}
+ else if(m=='logo'||m=='load'){g.strokeStyle='#35e0ff';g.lineWidth=5;g.lineCap='round';for(x=0;x<3;x++){g.globalAlpha=1-x*.3;g.beginPath();g.arc(160,78,24,tt*4-x*.4,tt*4-x*.4+1.6);g.stroke()}g.globalAlpha=1;g.fillStyle='#cfe';g.font='700 14px sans-serif';g.textAlign='center';g.fillText(m=='logo'?(i==3?'Loading OS…':'Starting services…'):'Decoding…',160,135);g.textAlign='start'}
+ else if(m=='desk'){var gr=g.createLinearGradient(0,0,W,H);gr.addColorStop(0,'#1d2b8f');gr.addColorStop(1,'#a02fd0');g.fillStyle=gr;g.fillRect(0,0,W,H);g.fillStyle='#0009';g.fillRect(0,158,W,22);g.fillStyle='#35e0ff';g.fillRect(8,164,10,10);
+  g.fillStyle='#fff3';g.fillRect(40,28,38,38);g.fillStyle='#fff';g.font='20px sans-serif';g.fillText('▶',50,56);g.font='10px sans-serif';g.fillText('video.mp4',38,80);
+  var cx=200,cy=110;if(i==6){var u=Math.min(1,Math.max(0,(tt-1)/4));u=u*u*(3-2*u);cx=200+(60-200)*u;cy=110+(55-110)*u;if(tt>5.3){g.strokeStyle='#fff';g.lineWidth=2;g.beginPath();g.arc(60,55,(tt-5.3)*30%24,0,7);g.stroke()}}
+  g.fillStyle='#fff';g.strokeStyle='#000';g.beginPath();g.moveTo(cx,cy);g.lineTo(cx,cy+16);g.lineTo(cx+4,cy+12);g.lineTo(cx+10,cy+12);g.closePath();g.fill();g.stroke()}
+ else if(m=='vid'){var h=tt+i*5,sg=g.createLinearGradient(0,0,0,H);sg.addColorStop(0,'#2a1060');sg.addColorStop(.6,'#ff6a3d');sg.addColorStop(1,'#ffd36b');g.fillStyle=sg;g.fillRect(0,0,W,H);g.fillStyle='#fff6c8';g.beginPath();g.arc(160+Math.sin(h*.4)*60,86-Math.cos(h*.4)*10,26,0,7);g.fill();
+  for(x=0;x<4;x++){g.fillStyle='hsl('+(240-x*14)+',70%,'+(22-x*4)+'%)';g.beginPath();g.moveTo(0,H);for(var k=0;k<=W;k+=8)g.lineTo(k,105+x*18+Math.sin(k*.03+h*(1+x*.4))*8);g.lineTo(W,H);g.fill()}
+  g.fillStyle='#fff4';g.fillRect(10,168,300,3);g.fillStyle='#ff3df2';g.fillRect(10,168,300*((h%40)/40),3)}
+}
+function frame(n){
+ var dt=Math.min(.1,Math.max(0,(n-last)/1000));last=n;if(playing){t+=dt;if(t>=T)t=T-.01}
+ var i=Math.max(0,Math.min(S.length-1,Math.floor(t/D))),tt=t-i*D;if(i!==cur)go(i);
+ S[i].fl.forEach(function(f,k){if(tt>=f[3]){acc[k]+=f[2]*dt;while(acc[k]>=1&&P.length<90){acc[k]--;spawn(f)}}});
+ for(var k=P.length-1;k>=0;k--){var p=P[k];p.x+=dt*170;if(p.x>=p.L){p.e.remove();P.splice(k,1);continue}var q=p.p.getPointAtLength(p.r?p.L-p.x:p.x);p.e.setAttribute('cx',q.x);p.e.setAttribute('cy',q.y)}
+ draw(S[i].s,tt,i);
+ $('pg').style.width=(t/T*100)+'%';requestAnimationFrame(frame)}
+$('pp').onclick=function(){playing=!playing;this.textContent=playing?'⏸':'▶'};
+$('rs').onclick=function(){t=0;playing=true;$('pp').textContent='⏸';cur=-1};
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

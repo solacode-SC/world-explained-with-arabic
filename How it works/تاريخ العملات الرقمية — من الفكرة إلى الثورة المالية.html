@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تاريخ العملات الرقمية — من الفكرة إلى الثورة المالية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;600;700;800;900&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f4eee2;
+  --paper-card: #fffdf7;
+  --ink: #14110e;
+  --ink-secondary: #2c251e;
+  --red: #c93426;
+  --red-bg: #ffe4e0;
+  --mus: #e59a24;
+  --mus-bg: #fff3cb;
+  --teal: #1d7f75;
+  --teal-bg: #d7f2ee;
+  --blue: #295ea3;
+  --blue-bg: #dbe8fa;
+  --purple: #6f36bc;
+  --purple-bg: #eedeff;
+  --btc-gold: #f7931a;
+  --cap: clamp(165px, 34vh, 255px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'Alexandria', 'Tajawal', system-ui, -apple-system, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+}
+
+/* Subtle ledger / cryptographic paper grid texture */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  opacity: 0.38;
+  mix-blend-mode: multiply;
+  background-image: 
+    linear-gradient(rgba(20, 17, 14, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 17, 14, 0.05) 1px, transparent 1px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .4 0 0 0 .4 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 28px 28px, 28px 28px, auto;
+}
+
+/* Top Navigation HUD */
+.top {
+  position: absolute;
+  inset: calc(10px + env(safe-area-inset-top, 0px)) 16px auto;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#num {
+  font-family: 'Alexandria', sans-serif;
+  font-weight: 800;
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  border-radius: 18px 8px 16px 8px;
+  padding: 2px 10px;
+  background: var(--mus);
+  font-size: 13px;
+  box-shadow: 2px 2px 0 var(--ink);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.title-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 44vw;
+}
+
+#ttl {
+  font-family: 'Alexandria', sans-serif;
+  font-weight: 800;
+  font-size: clamp(13px, 2.3vw, 21px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+#subttl {
+  display: block;
+  font-family: 'Alexandria', sans-serif;
+  font-size: clamp(9px, 1.35vw, 11px);
+  font-weight: 700;
+  color: var(--red);
+  letter-spacing: 0.08em;
+  direction: ltr;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.bar {
+  flex: 1;
+  min-width: 32px;
+  height: 12px;
+  border: 2.5px solid var(--ink);
+  border-radius: 9px 5px 9px 5px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: repeating-linear-gradient(-45deg, var(--btc-gold) 0 8px, #ffb85c 8px 16px);
+  transition: width 0.15s ease-out;
+}
+
+.ctrls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+button {
+  font-family: 'Alexandria', sans-serif;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 2.5px solid var(--ink);
+  background: var(--paper-card);
+  color: var(--ink);
+  border-radius: 10px 5px 10px 5px;
+  padding: 3px 9px;
+  box-shadow: 2px 2.5px 0 var(--ink);
+  min-width: 30px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s, box-shadow 0.1s, background-color 0.15s;
+}
+
+button:active {
+  transform: translate(1.5px, 2px);
+  box-shadow: 0.5px 1px 0 var(--ink);
+  background: var(--mus-bg);
+}
+
+/* Dots navigation */
+.dots {
+  position: absolute;
+  top: calc(52px + env(safe-area-inset-top, 0px));
+  inset-inline: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 25;
+}
+
+.dots span {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 1px 1.5px 0 var(--ink);
+  transition: transform 0.3s cubic-bezier(0.2, 1.5, 0.4, 1), background-color 0.25s;
+}
+
+.dots span:hover {
+  background: var(--mus);
+  transform: scale(1.2);
+}
+
+.dots span.on {
+  background: var(--btc-gold);
+  transform: scale(1.35) rotate(15deg);
+  border-radius: 40% 60% 50% 50%;
+}
+
+/* Main Visual Stage */
+.stage {
+  position: absolute;
+  inset: calc(70px + env(safe-area-inset-top, 0px)) 12px calc(var(--cap) + 18px + env(safe-area-inset-bottom, 0px)) 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: pan-y pinch-zoom;
+}
+
+#art {
+  width: 100%;
+  height: 100%;
+  max-width: 980px;
+  max-height: 100%;
+  display: block;
+}
+
+/* Bottom Explanatory Card */
+.cap {
+  position: absolute;
+  inset: auto 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  height: var(--cap);
+  z-index: 25;
+  background: var(--paper-card);
+  border: 3px solid var(--ink);
+  border-radius: 18px 8px 20px 8px / 8px 20px 8px 18px;
+  box-shadow: 4.5px 5.5px 0 var(--ink);
+  padding: 12px 18px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Washi tape visual accent */
+.cap::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 45%;
+  width: 70px;
+  height: 18px;
+  background: rgba(247, 147, 26, 0.65);
+  transform: rotate(-3.5deg);
+  border: 1px dashed rgba(20, 17, 14, 0.3);
+  pointer-events: none;
+}
+
+.cap::-webkit-scrollbar {
+  width: 5px;
+}
+.cap::-webkit-scrollbar-thumb {
+  background: var(--mus);
+  border-radius: 4px;
+}
+
+.ct {
+  flex: 1.5 1 300px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ct h2 {
+  font-family: 'Alexandria', sans-serif;
+  font-size: clamp(15px, 2.3vw, 22px);
+  font-weight: 800;
+  color: var(--red);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.ct p {
+  font-family: 'Tajawal', sans-serif;
+  font-size: clamp(12.5px, 1.6vw, 15.5px);
+  line-height: 1.7;
+  color: var(--ink-secondary);
+  font-weight: 700;
+}
+
+.rt {
+  flex: 1 1 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+.fct {
+  background: var(--mus-bg);
+  border: 2px solid var(--ink);
+  border-radius: 8px 16px 8px 16px;
+  padding: 7px 12px;
+  font-family: 'Tajawal', sans-serif;
+  font-size: clamp(11.5px, 1.45vw, 13.5px);
+  line-height: 1.6;
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 2.5px 3px 0 var(--ink);
+  animation: pop 0.5s 0.2s both cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.fct b {
+  color: var(--red);
+  font-family: 'Alexandria', sans-serif;
+  font-weight: 800;
+}
+
+.chs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  direction: ltr;
+}
+
+.ch {
+  border: 2px solid var(--ink);
+  border-radius: 12px 6px 12px 6px;
+  padding: 2px 10px;
+  font-family: 'Alexandria', sans-serif;
+  font-weight: 700;
+  font-size: clamp(10px, 1.3vw, 12.5px);
+  background: var(--bg, #fff);
+  color: var(--ink);
+  box-shadow: 1.5px 2px 0 var(--ink);
+  animation: pop 0.4s var(--d, 0s) cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(12px) scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Page wipe transition */
+.wipe {
+  position: fixed;
+  inset: -5% auto -5% 0;
+  width: 120%;
+  z-index: 50;
+  pointer-events: none;
+  background: var(--paper) repeating-linear-gradient(60deg, transparent 0 14px, rgba(20, 17, 14, 0.12) 14px 17px);
+  border-inline: 5px solid var(--ink);
+  transform: translateX(-125%) rotate(-2deg);
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.3);
+}
+
+.wipe.go {
+  animation: wp 0.75s ease-in-out;
+}
+
+@keyframes wp {
+  0% { transform: translateX(-125%) rotate(-2deg); }
+  100% { transform: translateX(125%) rotate(-2deg); }
+}
+
+/* STRICT CONTRAST: Deep Ink Font, Never White */
+svg text {
+  font-family: 'Alexandria', sans-serif;
+  font-weight: 700;
+  fill: var(--ink) !important;
+  stroke: none !important;
+  text-anchor: middle;
+  direction: ltr;
+}
+
+.sc {
+  display: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sc.on {
+  display: inline;
+}
+
+.f {
+  filter: url(#rough);
+}
+
+/* Badge Cards inside SVG for 100% contrast & legibility */
+.lbl-box {
+  fill: #fffdf7;
+  stroke: var(--ink);
+  stroke-width: 2;
+  rx: 6;
+  filter: drop-shadow(1.5px 2px 0 var(--ink));
+}
+
+.lbl-box.accent-gold   { fill: #fff3cb; }
+.lbl-box.accent-teal   { fill: #d7f2ee; }
+.lbl-box.accent-blue   { fill: #dbe8fa; }
+.lbl-box.accent-red    { fill: #ffe4e0; }
+.lbl-box.accent-purple { fill: #eedeff; }
+
+/* Animation utilities */
+.x { animation: pop 0.5s var(--d, 0s) cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.rot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sp 3s linear infinite;
+}
+@keyframes sp {
+  to { transform: rotate(360deg); }
+}
+
+.pul {
+  animation: pl 1.2s ease-in-out infinite alternate;
+}
+@keyframes pl {
+  from { opacity: 0.5; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1.04); }
+}
+
+.dr {
+  stroke-dasharray: 450;
+  stroke-dashoffset: 450;
+  animation: dr 1.6s var(--d, 0s) ease-out forwards;
+}
+@keyframes dr {
+  to { stroke-dashoffset: 0; }
+}
+
+.bw {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: bw 1.6s var(--d, 0s) cubic-bezier(0.3, 1.3, 0.5, 1) both;
+}
+@keyframes bw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.float-up {
+  animation: flt 2s ease-in-out infinite alternate;
+}
+@keyframes flt {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8px); }
+}
+
+#pt circle {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+/* ========================================================
+   RESPONSIVE ENHANCEMENTS FOR MOBILE & TABLETS
+   ======================================================== */
+@media (max-width: 768px), (max-aspect-ratio: 1/1) {
+  :root {
+    --cap: clamp(190px, 42vh, 310px);
+  }
+
+  .top {
+    inset: calc(6px + env(safe-area-inset-top, 0px)) 10px auto;
+    gap: 6px;
+  }
+
+  #num {
+    font-size: 11px;
+    padding: 1.5px 7px;
+    border-width: 2px;
+  }
+
+  .title-wrap {
+    max-width: 38vw;
+  }
+
+  #ttl {
+    font-size: clamp(11.5px, 3.2vw, 15px);
+  }
+
+  #subttl {
+    font-size: 8.5px;
+  }
+
+  .bar {
+    height: 9px;
+    border-width: 2px;
+  }
+
+  .ctrls {
+    gap: 3px;
+  }
+
+  button {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-width: 2px;
+    min-width: 26px;
+    min-height: 26px;
+    border-radius: 8px 4px 8px 4px;
+    box-shadow: 1.5px 2px 0 var(--ink);
+  }
+
+  .dots {
+    top: calc(44px + env(safe-area-inset-top, 0px));
+    gap: 5.5px;
+  }
+
+  .dots span {
+    width: 9.5px;
+    height: 9.5px;
+    border-width: 1.8px;
+  }
+
+  .dots span.on {
+    transform: scale(1.3) rotate(15deg);
+  }
+
+  .stage {
+    position: absolute;
+    inset: calc(56px + env(safe-area-inset-top, 0px)) 8px calc(var(--cap) + 12px + env(safe-area-inset-bottom, 0px)) 8px;
+  }
+
+  .cap {
+    inset: auto 8px calc(8px + env(safe-area-inset-bottom, 0px));
+    height: var(--cap);
+    padding: 10px 12px;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 7px;
+    border-width: 2.5px;
+    box-shadow: 3.5px 4px 0 var(--ink);
+  }
+
+  .cap::before {
+    top: -7px;
+    width: 48px;
+    height: 14px;
+  }
+
+  .ct {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .ct h2 {
+    font-size: clamp(13.5px, 3.8vw, 17px);
+    margin-bottom: 2px;
+  }
+
+  .ct p {
+    font-size: clamp(11.5px, 3.1vw, 13.5px);
+    line-height: 1.55;
+  }
+
+  .rt {
+    flex: 0 0 auto;
+    width: 100%;
+    gap: 5px;
+  }
+
+  .fct {
+    padding: 5px 9px;
+    font-size: clamp(10.5px, 2.8vw, 12.5px);
+    line-height: 1.5;
+    border-width: 1.8px;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .chs {
+    gap: 4px;
+    justify-content: flex-start;
+  }
+
+  .ch {
+    padding: 1px 7px;
+    font-size: clamp(9.5px, 2.6vw, 11.5px);
+    border-width: 1.8px;
+    box-shadow: 1px 1.5px 0 var(--ink);
+  }
+
+  svg text {
+    font-size: 13.5px;
+  }
+}
+
+/* Landscape / short-height screens */
+@media (max-height: 480px) and (orientation: landscape) {
+  :root {
+    --cap: clamp(100px, 34vh, 140px);
+  }
+
+  .top {
+    inset: 4px 10px auto;
+  }
+
+  .dots {
+    top: 36px;
+    gap: 5px;
+  }
+
+  .dots span {
+    width: 8px;
+    height: 8px;
+  }
+
+  .stage {
+    inset: 44px 10px calc(var(--cap) + 6px) 10px;
+  }
+
+  .cap {
+    padding: 6px 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ct h2 {
+    font-size: 12px;
+  }
+
+  .ct p {
+    font-size: 10.5px;
+    line-height: 1.35;
+  }
+
+  .fct {
+    font-size: 9.5px;
+    padding: 3px 6px;
+  }
+
+  .ch {
+    font-size: 9px;
+    padding: 1px 5px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Header HUD -->
+<header class="top">
+  <div id="num">1/9</div>
+  <div class="title-wrap">
+    <div id="ttl">بذرة الفكرة: النقود الرقمية والتعمية</div>
+    <div id="subttl">DIGITAL CASH & BLIND SIGNATURES (1980s–1990s)</div>
+  </div>
+  <div class="bar"><i id="pg"></i></div>
+  <div class="ctrls">
+    <button id="prevBtn" title="المشهد السابق">⏮</button>
+    <button id="pp" title="إيقاف مؤقت / تشغيل">⏸</button>
+    <button id="nextBtn" title="المشهد التالي">⏭</button>
+    <button id="rs" title="إعادة تشغيل">↻</button>
+  </div>
+</header>
+
+<!-- Step Navigation Dots -->
+<nav class="dots" id="dots"></nav>
+
+<!-- Main Visual Stage (SVG) -->
+<main class="stage" id="stageArea">
+  <svg id="art" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Hand-drawn boil filter applied only to geometry -->
+      <filter id="rough" x="-3%" y="-3%" width="106%" height="106%">
+        <feTurbulence id="tb" type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="1" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5"/>
+      </filter>
+
+      <!-- Grid pattern for cryptographic matrix -->
+      <pattern id="cryptoGrid" width="16" height="16" patternUnits="userSpaceOnUse">
+        <path d="M16 0H0V16" fill="none" stroke="#14110e" stroke-opacity=".12" stroke-width="1.5"/>
+      </pattern>
+
+      <!-- Golden Bitcoin Gradient -->
+      <linearGradient id="btcG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#fff4b8"/>
+        <stop offset="40%" stop-color="#f7931a"/>
+        <stop offset="100%" stop-color="#c96f08"/>
+      </linearGradient>
+
+      <!-- Ethereum Diamond Gradient -->
+      <linearGradient id="ethG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#9a5aff"/>
+        <stop offset="50%" stop-color="#295ea3"/>
+        <stop offset="100%" stop-color="#7fe7ff"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ==========================================
+         SCENE 0: بذرة الفكرة: النقود الرقمية والتعمية (1980s–1990s)
+         ========================================== -->
+    <g class="sc" id="s0">
+      <g class="f">
+        <!-- Cryptographic Envelope Box (David Chaum's Blind Signature) -->
+        <rect x="60" y="80" width="220" height="150" rx="14" fill="#fffdf7"/>
+        <path d="M60 80 L170 160 L280 80" fill="none" stroke="#14110e" stroke-width="3"/>
+        
+        <!-- Padlock on Envelope -->
+        <rect x="150" y="170" width="40" height="34" rx="6" fill="#e59a24"/>
+        <path d="M160 170 V155 Q170 142 180 155 V170" fill="none" stroke="#14110e" stroke-width="4"/>
+        
+        <!-- eCash Coin emerging from envelope -->
+        <g class="float-up" transform="translate(170, 75)">
+          <circle cx="0" cy="0" r="28" fill="#fff3cb" stroke="#14110e" stroke-width="2.5"/>
+          <text y="6" style="font-size:18px;font-weight:900">eCash</text>
+        </g>
+
+        <!-- DigiCash Bank Server (Centralized Point of Failure) -->
+        <rect x="330" y="110" width="130" height="160" rx="12" fill="#8294a8"/>
+        <rect x="345" y="130" width="100" height="18" rx="4" fill="#14110e"/>
+        <circle cx="360" cy="139" r="4" fill="#c93426"/>
+        <rect x="345" y="160" width="100" height="18" rx="4" fill="#14110e"/>
+        <circle cx="360" cy="169" r="4" fill="#e59a24"/>
+        <rect x="345" y="190" width="100" height="18" rx="4" fill="#14110e"/>
+        <circle cx="360" cy="199" r="4" fill="#1d7f75"/>
+
+        <!-- Nick Szabo's Bit Gold (Decentralized Proof-of-Work Puzzle) -->
+        <rect x="520" y="70" width="230" height="230" rx="16" fill="#fffdf7"/>
+        <rect x="540" y="90" width="190" height="190" fill="url(#cryptoGrid)" stroke="none"/>
+
+        <!-- Gold Nugget / Hash Puzzle -->
+        <polygon class="rot" points="635,140 670,165 655,205 615,205 600,165" fill="#f7931a"/>
+        <circle cx="635" cy="175" r="16" fill="#fff3cb" stroke="#14110e" stroke-width="2"/>
+        <text x="635" y="181" style="font-size:14px;font-weight:800">PoW</text>
+      </g>
+
+      <!-- Particle Path: Encrypted bits flowing from Chaum to Szabo -->
+      <path id="p_blind" d="M170 120 H330 M460 175 H520" fill="none" stroke="none"/>
+
+      <!-- HIGH-CONTRAST BADGES (NO WHITE FONT) -->
+      <g transform="translate(170, 45)">
+        <rect class="lbl-box accent-gold" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">ديفيد تشوم: التوقيع الأعمى (1983)</text>
+      </g>
+      <g transform="translate(395, 85)">
+        <rect class="lbl-box accent-red" x="-75" y="-14" width="150" height="28"/>
+        <text y="4">خادم DigiCash المركزي</text>
+      </g>
+      <g transform="translate(635, 45)">
+        <rect class="lbl-box accent-teal" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">نيك زابو: بت غولد Bit Gold (1998)</text>
+      </g>
+      <g transform="translate(400, 360)">
+        <rect class="lbl-box" x="-180" y="-13" width="360" height="26"/>
+        <text y="4" style="font-size:11.5px">المعضلة: النقود الرقمية السابقة احتاجت وسيطاً مركزياً حتى جاء البيتكوين</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 1: ولادة البيتكوين والكتلة الصفرية (2008–2009)
+         ========================================== -->
+    <g class="sc" id="s1">
+      <g class="f">
+        <!-- Satoshi Nakamoto Whitepaper Sheet -->
+        <rect class="x" x="60" y="80" width="180" height="230" rx="10" fill="#fffdf7" style="--d:.3s"/>
+        <line x1="80" y1="120" x2="220" y2="120" stroke="#14110e" stroke-width="3"/>
+        <line x1="80" y1="140" x2="200" y2="140" stroke="#14110e" stroke-width="2"/>
+        <line x1="80" y1="160" x2="210" y2="160" stroke="#14110e" stroke-width="2"/>
+        <line x1="80" y1="180" x2="170" y2="180" stroke="#14110e" stroke-width="2"/>
+        <line x1="80" y1="200" x2="220" y2="200" stroke="#14110e" stroke-width="2"/>
+
+        <!-- The Genesis Block 0 (Mined Jan 3, 2009) -->
+        <rect class="x" x="290" y="70" width="220" height="150" rx="14" fill="#fff3cb" style="--d:1.2s"/>
+        <rect x="310" y="90" width="180" height="40" rx="6" fill="#fffdf7"/>
+        <text x="400" y="112" style="font-size:11px;font-weight:800">The Times 03/Jan/2009</text>
+        <text x="400" y="125" style="font-size:8.5px">Chancellor on brink of second bailout</text>
+        <circle cx="400" cy="175" r="24" fill="#f7931a"/>
+        <text x="400" y="182" style="font-size:20px;font-weight:900">₿</text>
+
+        <!-- First Peer-to-Peer Transaction: Satoshi to Hal Finney (10 BTC) -->
+        <g class="x" style="--d:2.5s">
+          <rect x="560" y="110" width="180" height="180" rx="14" fill="#d7f2ee"/>
+          <circle cx="650" cy="170" r="32" fill="#fffdf7" stroke="#14110e" stroke-width="2.5"/>
+          <text x="650" y="176" style="font-size:16px;font-weight:800">10 BTC</text>
+        </g>
+      </g>
+
+      <!-- Connecting Blockchain Transaction Pipe -->
+      <path id="p_tx1" d="M240 180 H290 M510 145 H560" fill="none" stroke="#14110e" stroke-width="3"/>
+
+      <!-- BADGES -->
+      <g transform="translate(150, 45)">
+        <rect class="lbl-box accent-gold" x="-85" y="-14" width="170" height="28"/>
+        <text y="4">ورقة ساتوشي (31 أكتوبر 2008)</text>
+      </g>
+      <g transform="translate(400, 45)">
+        <rect class="lbl-box accent-red" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">كتلة التكوين Genesis Block 0</text>
+      </g>
+      <g transform="translate(650, 75)">
+        <rect class="lbl-box accent-teal" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">أول معاملة ➔ هال فيني (12 يناير)</text>
+      </g>
+      <g transform="translate(400, 360)">
+        <rect class="lbl-box" x="-170" y="-13" width="340" height="26"/>
+        <text y="4" style="font-size:11px">رسالة كتلة التكوين كانت نقداً لاذعاً لنظام البنوك بعد أزمة 2008</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 2: أغلى بيتزا في تاريخ البشرية (2010)
+         ========================================== -->
+    <g class="sc" id="s2">
+      <g class="f">
+        <!-- Table surface -->
+        <rect x="80" y="270" width="640" height="35" rx="8" fill="#d9ab6a"/>
+
+        <!-- 2 Pizza Delivery Boxes -->
+        <g class="x" style="--d:.5s">
+          <rect x="120" y="170" width="220" height="95" rx="10" fill="#fffdf7"/>
+          <path d="M120 200 H340" stroke="#c93426" stroke-width="4"/>
+          <!-- Pizza Brand Stamp -->
+          <circle cx="230" cy="230" r="22" fill="#ffe4e0"/>
+          <text x="230" y="236" style="font-size:14px;font-weight:900">PIZZA</text>
+        </g>
+        <g class="x" style="--d:.9s">
+          <rect x="140" y="115" width="200" height="75" rx="10" fill="#fff3cb"/>
+          <circle cx="240" cy="150" r="18" fill="#f7931a"/>
+          <text x="240" y="156" style="font-size:16px;font-weight:900">₿</text>
+        </g>
+
+        <!-- Right Side: Value Escalation Gauge -->
+        <rect x="420" y="60" width="310" height="240" rx="16" fill="#fffdf7"/>
+        
+        <!-- Transaction Price Tag (10,000 BTC = $41) -->
+        <rect x="445" y="95" width="260" height="55" rx="10" fill="#ffe4e0"/>
+        <text x="575" y="122" style="font-size:15px;font-weight:800">10,000 بيتكوين = 41 دولاراً</text>
+        <text x="575" y="140" style="font-size:11px">تاريخ الشراء: 22 مايو 2010</text>
+
+        <!-- Value Milestone Growth Bar -->
+        <rect x="445" y="175" width="260" height="32" rx="10" fill="#e9edf2"/>
+        <rect class="bw" x="445" y="175" width="258" height="32" rx="10" fill="#f7931a" style="--d:1.8s"/>
+        <text x="575" y="196" style="font-size:13px;font-weight:800">قيمة البيتزا اليوم: تتجاوز المليار $!</text>
+      </g>
+
+      <!-- Particle path for Coins paid for pizza -->
+      <path id="p_pizza" d="M600 230 H240 V190" fill="none" stroke="none"/>
+
+      <!-- BADGES -->
+      <g transform="translate(230, 80)">
+        <rect class="lbl-box accent-gold" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">أول صفقة شراء تجارية مادية</text>
+      </g>
+      <g transform="translate(575, 40)">
+        <rect class="lbl-box accent-red" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">يوم بيتكوين بيتزا (Bitcoin Pizza Day)</text>
+      </g>
+      <g transform="translate(400, 360)">
+        <rect class="lbl-box" x="-160" y="-13" width="320" height="26"/>
+        <text y="4" style="font-size:11.5px">أثبتت البيتزا للعالم أن عملة الكود الافتراضية تملك قوة شرائية حقيقية</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 3: التفرّع وسقوط منصة إم تي غوكس (2011–2014)
+         ========================================== -->
+    <g class="sc" id="s3">
+      <g class="f">
+        <!-- Central Bitcoin Tree/Trunk -->
+        <circle cx="160" cy="170" r="45" fill="#f7931a"/>
+        <text x="160" y="180" style="font-size:32px;font-weight:900">₿</text>
+
+        <!-- Altcoin Branch 1: Litecoin (2011) -->
+        <g class="x" style="--d:.6s">
+          <path d="M160 125 Q230 70 300 70" fill="none" stroke="#14110e" stroke-width="3"/>
+          <circle cx="330" cy="70" r="28" fill="#dbe8fa"/>
+          <text x="330" y="77" style="font-size:16px;font-weight:900">Ł</text>
+        </g>
+
+        <!-- Altcoin Branch 2: Peercoin (2012) Proof of Stake -->
+        <g class="x" style="--d:1.2s">
+          <path d="M160 215 Q230 270 300 270" fill="none" stroke="#14110e" stroke-width="3"/>
+          <circle cx="330" cy="270" r="28" fill="#d7f2ee"/>
+          <text x="330" y="277" style="font-size:15px;font-weight:900">PoS</text>
+        </g>
+
+        <!-- Mt. Gox Exchange Fortress (Cracking & Breached in Feb 2014) -->
+        <g class="x" style="--d:2.2s">
+          <rect x="470" y="70" width="260" height="210" rx="16" fill="#ffe4e0"/>
+          <!-- Mt. Gox Bank Columns -->
+          <rect x="500" y="110" width="24" height="120" fill="#fffdf7"/>
+          <rect x="540" y="110" width="24" height="120" fill="#fffdf7"/>
+          <rect x="580" y="110" width="24" height="120" fill="#fffdf7"/>
+          <rect x="620" y="110" width="24" height="120" fill="#fffdf7"/>
+          <rect x="660" y="110" width="24" height="120" fill="#fffdf7"/>
+          <!-- Crack Line across Mt. Gox -->
+          <path d="M490 85 L560 145 L540 180 L620 230 L690 275" fill="none" stroke="#c93426" stroke-width="5"/>
+        </g>
+      </g>
+
+      <!-- Particle path: Coins leaking out of Mt Gox -->
+      <path id="p_leak" d="M600 150 L680 230 V310" fill="none" stroke="none"/>
+
+      <!-- BADGES -->
+      <g transform="translate(340, 25)">
+        <rect class="lbl-box accent-blue" x="-75" y="-14" width="150" height="28"/>
+        <text y="4">لايتكوين Litecoin (2011)</text>
+      </g>
+      <g transform="translate(340, 320)">
+        <rect class="lbl-box accent-teal" x="-85" y="-14" width="170" height="28"/>
+        <text y="4">بيركوين: أول بذور PoS (2012)</text>
+      </g>
+      <g transform="translate(600, 45)">
+        <rect class="lbl-box accent-red" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">اختراق منصة Mt.Gox (فبراير 2014)</text>
+      </g>
+      <g transform="translate(600, 360)">
+        <rect class="lbl-box" x="-140" y="-13" width="280" height="26"/>
+        <text y="4" style="font-size:11px">فقدان 850,000 BTC تسبب في أول شتاء هبوطي طويل</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 4: ثورة إيثيريوم والعقود الذكية (2015–2017)
+         ========================================== -->
+    <g class="sc" id="s4">
+      <g class="f">
+        <!-- Ethereum Diamond Prism (Launched 2015) -->
+        <polygon points="150,55 210,150 150,245 90,150" fill="url(#ethG)"/>
+        <polygon points="150,55 150,245 210,150" fill="#295ea3" opacity=".4"/>
+        <text x="150" y="275" style="font-size:14px;font-weight:900">Ethereum</text>
+
+        <!-- Smart Contract Code Box -->
+        <rect class="x" x="270" y="60" width="210" height="200" rx="14" fill="#fffdf7" style="--d:1s"/>
+        <rect x="290" y="85" width="170" height="30" rx="6" fill="#d7f2ee"/>
+        <text x="375" y="105" style="font-size:11px;font-weight:800">Smart Contract Code</text>
+        <!-- Logic execution flow lines -->
+        <line x1="290" y1="135" x2="440" y2="135" stroke="#1d7f75" stroke-width="3"/>
+        <line x1="290" y1="155" x2="420" y2="155" stroke="#1d7f75" stroke-width="3"/>
+        <line x1="290" y1="175" x2="450" y2="175" stroke="#1d7f75" stroke-width="3"/>
+        <line x1="290" y1="195" x2="380" y2="195" stroke="#1d7f75" stroke-width="3"/>
+
+        <!-- The DAO Split & 2017 Bull Run ($20,000) -->
+        <g class="x" style="--d:2s">
+          <rect x="530" y="60" width="210" height="200" rx="14" fill="#fff3cb"/>
+          <!-- Hard Fork Branches (ETH vs ETC) -->
+          <path d="M560 110 H620 L680 85 M620 110 L680 135" fill="none" stroke="#14110e" stroke-width="3"/>
+          <text x="705" y="90" style="font-size:11px;font-weight:800">ETH</text>
+          <text x="705" y="140" style="font-size:11px;font-weight:800">ETC</text>
+
+          <!-- Bitcoin Hits $20,000 December 2017 -->
+          <rect x="550" y="165" width="170" height="65" rx="8" fill="#ffe4e0"/>
+          <text x="635" y="195" style="font-size:17px;font-weight:900">20,000 $</text>
+          <text x="635" y="215" style="font-size:10px">ديسمبر 2017 + عقود CME</text>
+        </g>
+      </g>
+
+      <!-- Particle path for smart contract tokens -->
+      <path id="p_smart" d="M150 150 H270 M480 150 H530" fill="none" stroke="none"/>
+
+      <!-- BADGES -->
+      <g transform="translate(150, 30)">
+        <rect class="lbl-box accent-purple" x="-75" y="-14" width="150" height="28"/>
+        <text y="4">إيثيريوم والعقود الذكية (2015)</text>
+      </g>
+      <g transform="translate(375, 30)">
+        <rect class="lbl-box accent-teal" x="-85" y="-14" width="170" height="28"/>
+        <text y="4">برمجة المال دون وسيط بنكي</text>
+      </g>
+      <g transform="translate(635, 30)">
+        <rect class="lbl-box accent-gold" x="-85" y="-14" width="170" height="28"/>
+        <text y="4">انقسام The DAO وقمة 20,000$</text>
+      </g>
+      <g transform="translate(400, 360)">
+        <rect class="lbl-box" x="-165" y="-13" width="330" height="26"/>
+        <text y="4" style="font-size:11px">حولت إيثيريوم البلوكشين من مجرد دفتر حسابات إلى كمبيوتر عالمي لامركزي</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 5: صيف التمويل اللامركزي وثورة NFT (2020–2021)
+         ========================================== -->
+    <g class="sc" id="s5">
+      <g class="f">
+        <!-- DeFi Liquidity Pool & Stacking Farm -->
+        <rect class="x" x="60" y="80" width="220" height="190" rx="14" fill="#d7f2ee" style="--d:.4s"/>
+        <!-- Stacked tokens -->
+        <g stroke="#1d7f75" stroke-width="2.5">
+          <ellipse cx="170" cy="190" rx="45" ry="14" fill="#fff3cb"/>
+          <ellipse cx="170" cy="170" rx="45" ry="14" fill="#fff3cb"/>
+          <ellipse cx="170" cy="150" rx="45" ry="14" fill="#fff3cb"/>
+          <ellipse cx="170" cy="130" rx="45" ry="14" fill="#f7931a"/>
+        </g>
+        <text x="170" y="235" style="font-size:13px;font-weight:800">زراعة العائد Yield Farming</text>
+
+        <!-- NFT Digital Art Frame (2021) -->
+        <rect class="x" x="310" y="80" width="190" height="190" rx="14" fill="#eedeff" style="--d:1.2s"/>
+        <!-- Golden Picture Frame -->
+        <rect x="335" y="105" width="140" height="110" rx="8" fill="#fffdf7" stroke="#e59a24" stroke-width="4"/>
+        <!-- Pixel Art / CryptoPunk avatar -->
+        <rect x="375" y="130" width="60" height="60" rx="6" fill="#6f36bc"/>
+        <circle cx="392" cy="150" r="5" fill="#fff3cb"/>
+        <circle cx="418" cy="150" r="5" fill="#fff3cb"/>
+        <text x="405" y="245" style="font-size:13px;font-weight:800">رموز NFT غير القابلة للاستبدال</text>
+
+        <!-- Bull Run Peak: Bitcoin ~$69,000 (Nov 2021) -->
+        <g class="x" style="--d:2.2s">
+          <rect x="530" y="80" width="210" height="190" rx="14" fill="#fffdf7"/>
+          <!-- Ascending Line Chart -->
+          <polyline points="550,220 590,190 630,205 670,120 710,105" fill="none" stroke="#1d7f75" stroke-width="4"/>
+          <!-- $69k Flag Badge -->
+          <rect x="620" y="125" width="105" height="35" rx="6" fill="#ffe4e0"/>
+          <text x="672" y="148" style="font-size:14px;font-weight:900">~69,000 $</text>
+        </g>
+      </g>
+
+      <!-- Particle Path: Liquidity Flow -->
+      <path id="p_defi" d="M170 110 Q280 40 400 110 T620 100" fill="none" stroke="none"/>
+
+      <!-- BADGES -->
+      <g transform="translate(170, 45)">
+        <rect class="lbl-box accent-teal" x="-85" y="-14" width="170" height="28"/>
+        <text y="4">صيف التمويل اللامركزي DeFi (2020)</text>
+      </g>
+      <g transform="translate(405, 45)">
+        <rect class="lbl-box accent-purple" x="-75" y="-14" width="150" height="28"/>
+        <text y="4">انفجار فنون NFT الرقمية</text>
+      </g>
+      <g transform="translate(635, 45)">
+        <rect class="lbl-box accent-gold" x="-85" y="-14" width="170" height="28"/>
+        <text y="4">قمة نوفمبر 2021 (~69,000$)</text>
+      </g>
+      <g transform="translate(400, 360)">
+        <rect class="lbl-box" x="-165" y="-13" width="330" height="26"/>
+        <text y="4" style="font-size:11px">لوحة Beeple بيعت بـ 69 مليون دولار كأكبر صفقة فنية رقمية بالتاريخ</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 6: الغربال التنظيمي وصناديق ETF التاريخية (2022–2024)
+         ========================================== -->
+    <g class="sc" id="s6">
+      <g class="f">
+        <!-- 2022 Bear Market Crash Line -->
+        <rect x="60" y="70" width="200" height="210" rx="14" fill="#ffe4e0"/>
+        <polyline points="80,105 120,130 160,200 210,180 240,240" fill="none" stroke="#c93426" stroke-width="4"/>
+        <text x="160" y="115" style="font-size:12px;font-weight:800">تصحيحات وانهيارات 2022</text>
+
+        <!-- European Union MiCA Regulation Shield -->
+        <rect x="290" y="70" width="180" height="210" rx="14" fill="#dbe8fa"/>
+        <polygon points="380,100 440,130 440,200 380,240 320,200 320,130" fill="#fffdf7" stroke="#295ea3" stroke-width="3"/>
+        <text x="380" y="165" style="font-size:16px;font-weight:900">MiCA</text>
+        <text x="380" y="185" style="font-size:10px">قانون أوروبا للأصول المشفرة</text>
+
+        <!-- SEC Spot Bitcoin ETF Approval Stamp (Jan 10, 2024) -->
+        <g class="x" style="--d:1.8s">
+          <rect x="500" y="70" width="240" height="210" rx="14" fill="#fffdf7"/>
+          <circle cx="620" cy="160" r="55" fill="#d7f2ee" stroke="#1d7f75" stroke-width="4"/>
+          <text x="620" y="145" style="font-size:13px;font-weight:800">APPROVED</text>
+          <text x="620" y="165" style="font-size:15px;font-weight:900">Spot BTC ETF</text>
+          <text x="620" y="182" style="font-size:10px">10 يناير 2024 · وول ستريت</text>
+        </g>
+      </g>
+
+      <!-- Particle path: Institutional Wall Street Capital Inflow -->
+      <path id="p_etf" d="M380 240 H500 V160 H620" fill="none" stroke="none"/>
+
+      <!-- BADGES -->
+      <g transform="translate(160, 35)">
+        <rect class="lbl-box accent-red" x="-75" y="-14" width="150" height="28"/>
+        <text y="4">تنظيف السوق والغربلة (2022)</text>
+      </g>
+      <g transform="translate(380, 35)">
+        <rect class="lbl-box accent-blue" x="-80" y="-14" width="160" height="28"/>
+        <text y="4">تنظيم MiCA الأوروبي الشامل</text>
+      </g>
+      <g transform="translate(620, 35)">
+        <rect class="lbl-box accent-teal" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">موافقة SEC التاريخية (يناير 2024)</text>
+      </g>
+      <g transform="translate(400, 360)">
+        <rect class="lbl-box" x="-165" y="-13" width="330" height="26"/>
+        <text y="4" style="font-size:11px">فتحت صناديق ETF الفورية الباب رسمياً لمليارات الدولارات من مدخرات التقاعد</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 7: عصر الاحتياطي الاستراتيجي للدول (2025–2026)
+         ========================================== -->
+    <g class="sc" id="s7">
+      <g class="f">
+        <!-- US Treasury & Capitol Dome (Strategic Bitcoin Reserve - March 2025) -->
+        <rect class="x" x="60" y="70" width="220" height="210" rx="14" fill="#fffdf7" style="--d:.4s"/>
+        <!-- Capitol Dome Graphic -->
+        <path d="M120 180 H220 V150 Q170 100 120 150 Z" fill="#dbe8fa"/>
+        <rect x="155" y="110" width="30" height="30" rx="4" fill="#e59a24"/>
+        <text x="170" y="130" style="font-size:15px;font-weight:900">₿</text>
+        <text x="170" y="215" style="font-size:12.5px;font-weight:800">احتياطي البيتكوين الاستراتيجي</text>
+        <text x="170" y="235" style="font-size:10px">أمر رئاسي أمريكي (مارس 2025)</text>
+
+        <!-- GENIUS Act: National Stablecoin Law (July 2025) -->
+        <rect class="x" x="300" y="70" width="200" height="210" rx="14" fill="#fff3cb" style="--d:1.2s"/>
+        <rect x="325" y="105" width="150" height="50" rx="8" fill="#fffdf7"/>
+        <text x="400" y="130" style="font-size:14px;font-weight:900">GENIUS Act</text>
+        <text x="400" y="145" style="font-size:9.5px">أول إطار فيدرالي للعملات المستقرة</text>
+        <text x="400" y="200" style="font-size:12px;font-weight:800">تنظيم الـ Stablecoins</text>
+        <text x="400" y="220" style="font-size:10px">يوليو 2025</text>
+
+        <!-- UK FCA 2026 Gateway & $120,000+ Record High -->
+        <g class="x" style="--d:2.2s">
+          <rect x="520" y="70" width="220" height="210" rx="14" fill="#d7f2ee"/>
+          <!-- $120,000 Milestone Banner -->
+          <rect x="540" y="95" width="180" height="55" rx="10" fill="#f7931a"/>
+          <text x="630" y="125" style="font-size:18px;font-weight:900">120,000 $ +</text>
+          <text x="630" y="142" style="font-size:10px">قمة تاريخية جديدة</text>
+          
+          <!-- UK FCA Gateway -->
+          <rect x="540" y="170" width="180" height="55" rx="8" fill="#fffdf7"/>
+          <text x="630" y="195" style="font-size:13px;font-weight:800">بوابة ترخيص UK FCA</text>
+          <text x="630" y="212" style="font-size:9.5px">2026 تمهيداً للتنظيم الكامل 2027</text>
+        </g>
+      </g>
+
+      <!-- Particle path: Sovereign treasury flows -->
+      <path id="p_reserve" d="M170 170 H300 M500 120 H540" fill="none" stroke="none"/>
+
+      <!-- BADGES -->
+      <g transform="translate(170, 35)">
+        <rect class="lbl-box accent-blue" x="-85" y="-14" width="170" height="28"/>
+        <text y="4">الاحتياطي الأمريكي الاستراتيجي</text>
+      </g>
+      <g transform="translate(400, 35)">
+        <rect class="lbl-box accent-gold" x="-85" y="-14" width="170" height="28"/>
+        <text y="4">قانون GENIUS للعملات المستقرة</text>
+      </g>
+      <g transform="translate(630, 35)">
+        <rect class="lbl-box accent-teal" x="-85" y="-14" width="170" height="28"/>
+        <text y="4">اختراق 120,000$ وتنظيم بريطانيا</text>
+      </g>
+      <g transform="translate(400, 360)">
+        <rect class="lbl-box" x="-165" y="-13" width="330" height="26"/>
+        <text y="4" style="font-size:11px">تأسس الاحتياطي الأمريكي من مصادرات الجرائم دون إنفاق دولار واحد من الميزانية!</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 8: المسار الشامل: من حلم مشفر إلى نظام عالمي
+         ========================================== -->
+    <g class="sc" id="s8">
+      <g class="f">
+        <!-- 6 Connected Timeline Stations -->
+        <!-- 1983: eCash -->
+        <rect class="x" x="40" y="60" width="100" height="95" rx="10" fill="#fffdf7" style="--d:.2s"/>
+        <text x="90" y="90" style="font-size:12px;font-weight:800">1983</text>
+        <text x="90" y="115" style="font-size:10px">eCash تشوم</text>
+
+        <!-- 2008: Bitcoin -->
+        <rect class="x" x="160" y="60" width="100" height="95" rx="10" fill="#fff3cb" style="--d:.6s"/>
+        <text x="210" y="90" style="font-size:12px;font-weight:800">2008–2009</text>
+        <text x="210" y="115" style="font-size:10px">ورقة ساتوشي</text>
+
+        <!-- 2010: Pizza Day -->
+        <rect class="x" x="280" y="60" width="100" height="95" rx="10" fill="#ffe4e0" style="--d:1s"/>
+        <text x="330" y="90" style="font-size:12px;font-weight:800">2010</text>
+        <text x="330" y="115" style="font-size:10px">بيتزا لازلو</text>
+
+        <!-- 2015: Ethereum -->
+        <rect class="x" x="400" y="60" width="100" height="95" rx="10" fill="#eedeff" style="--d:1.4s"/>
+        <text x="450" y="90" style="font-size:12px;font-weight:800">2015</text>
+        <text x="450" y="115" style="font-size:10px">إيثيريوم والعقود</text>
+
+        <!-- 2020: DeFi & NFT -->
+        <rect class="x" x="520" y="60" width="100" height="95" rx="10" fill="#d7f2ee" style="--d:1.8s"/>
+        <text x="570" y="90" style="font-size:12px;font-weight:800">2020–2021</text>
+        <text x="570" y="115" style="font-size:10px">DeFi & NFT</text>
+
+        <!-- 2024–2026: Institutional Era -->
+        <rect class="x" x="640" y="60" width="120" height="95" rx="10" fill="#dbe8fa" style="--d:2.2s"/>
+        <text x="700" y="90" style="font-size:12px;font-weight:800">2024–2026</text>
+        <text x="700" y="115" style="font-size:10px">ETF واحتياطي الدول</text>
+
+        <!-- Central Summary Card -->
+        <rect class="x" x="200" y="195" width="400" height="155" rx="18" fill="#fffdf7" style="--d:2.8s"/>
+        <circle cx="270" cy="265" r="38" fill="#f7931a"/>
+        <text x="270" y="277" style="font-size:36px;font-weight:900">₿</text>
+      </g>
+
+      <!-- Connecting Timeline Pipeline -->
+      <g stroke="#14110e" stroke-width="3" fill="none">
+        <path d="M140 107 H160"/>
+        <path d="M260 107 H280"/>
+        <path d="M380 107 H400"/>
+        <path d="M500 107 H520"/>
+        <path d="M620 107 H640"/>
+        <path d="M700 155 V180 H400 V195"/>
+      </g>
+
+      <!-- SUMMARY TEXT (NO WHITE FONT) -->
+      <g transform="translate(450, 240)">
+        <rect class="lbl-box accent-gold" x="-105" y="-14" width="210" height="28"/>
+        <text y="4" style="font-size:14px">من حلم مشفر إلى أصل مالي كوكبي</text>
+      </g>
+      <g transform="translate(450, 275)">
+        <rect class="lbl-box accent-teal" x="-105" y="-12" width="210" height="24"/>
+        <text y="4" style="font-size:11.5px">قيمة سوقية تتجاوز 2.5 تريليون دولار</text>
+      </g>
+      <g transform="translate(450, 310)">
+        <rect class="lbl-box accent-blue" x="-105" y="-12" width="210" height="24"/>
+        <text y="4" style="font-size:11px">الذهب الرقمي الأسرع نمواً في التاريخ الحديث</text>
+      </g>
+      <g transform="translate(400, 385)">
+        <rect class="lbl-box" x="-155" y="-13" width="310" height="26"/>
+        <text y="4" style="font-size:11.5px">أثبتت العملات المشفرة أن الثقة تصنعها الرياضيات وليس الوسطاء ⚡</text>
+      </g>
+    </g>
+
+    <!-- Global Particle Flow Layer -->
+    <g id="pt"></g>
+  </svg>
+</main>
+
+<!-- Bottom Explanatory Card -->
+<footer class="cap" id="capBox">
+  <div class="ct">
+    <h2 id="ct"></h2>
+    <p id="cd"></p>
+  </div>
+  <div class="rt">
+    <div class="fct" id="ft"></div>
+    <div class="chs" id="cs"></div>
+  </div>
+</footer>
+
+<!-- Page wipe overlay -->
+<div class="wipe" id="wipe"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+
+  function ch(arr){
+    return arr.map(function(item, idx){
+      var parts = item.split('|');
+      return '<span class="ch" style="--bg:' + (parts[1] || '#ffffff') + ';--d:' + (0.7 + idx * 0.35) + 's">' + parts[0] + '</span>';
+    }).join('');
+  }
+
+  var K = '#14110e',
+      BL = '#295ea3',
+      GD = '#e59a24',
+      RD = '#c93426',
+      TL = '#1d7f75',
+      PR = '#6f36bc';
+
+  // 9 Causal Historical Scenes
+  var S = [
+    {
+      t: 'بذرة الفكرة: النقود الرقمية والتعمية',
+      e: 'DIGITAL CASH & BLIND SIGNATURES (1980s–1990s)',
+      c: 'في الثمانينيات ابتكر عالم التشفير ديفيد تشوم تقنية «التوقيع الأعمى» للدفع الرقمي الخاص دون كشف هوية المشتري (eCash). لاحقاً في التسعينيات اقترح نيك زابو مشروع «بت غولد» معتمداً على حل ألغاز حاسوبية، ليمهد الطريق لنظام لا مركزي.',
+      f: '💡 <b>معلومة نادرة:</b> شركة DigiCash لتشوم أعلنت إفلاسها عام 1998؛ لأن الفكرة سبقت عصرها قبل التجارة الإلكترونية واعتمدت على بنك وسيط!',
+      fl: [['p_blind', GD, 3.5, 0.5, 17]],
+      v: ch(['توقيع أعمى Blind Sig|#fff3cb', 'نقد eCash|#ffe4e0', 'بت غولد Bit Gold|#d7f2ee', 'سايفربانك Cypherpunks|#dbe8fa'])
+    },
+    {
+      t: 'ولادة البيتكوين والكتلة الصفرية',
+      e: 'BITCOIN & THE GENESIS BLOCK (2008–2009)',
+      c: 'في 31 أكتوبر 2008 نشر المطور المجهول ساتوشي ناكاموتو ورقة البيتكوين. وفي 3 يناير 2009 تم تعدين «كتلة التكوين الأولى» متضمنة عنواناً صحفياً يندد بإنقاذ البنوك التقليدية، ثم أرسل ساتوشي 10 BTC للمشفر هال فيني كأول معاملة بالتاريخ.',
+      f: '💡 <b>معلومة نادرة:</b> لم يحصل ساتوشي على تمويل مسبق أو مكافآت تأسيسية؛ بل برمج البيتكوين وطرحه مفتوح المصدر للبشرية جمعاء قبل أن يختفي للأبد.',
+      fl: [['p_tx1', GD, 4, 1.5, 17]],
+      v: ch(['ساتوشي ناكاموتو|#fff3cb', 'كتلة التكوين Genesis|#ffe4e0', 'هال فيني Hal Finney|#d7f2ee', 'ند للند P2P|#dbe8fa'])
+    },
+    {
+      t: 'أغلى بيتزا في تاريخ البشرية',
+      e: 'BITCOIN PIZZA DAY & REAL COMMERCE (2010)',
+      c: 'في 22 مايو 2010 اشترى المبرمج لازلو هانييتش شطيرتي بيتزا مقابل 10,000 بيتكوين، مسجلاً أول شراء تجاري لسلعة مادية في عالم الكريبتو. أثبتت هذه الصفقة أن العملة الرقمية تمتلك قوة شرائية حقيقية وأصبح ذلك اليوم عيداً سنوياً.',
+      f: '💡 <b>معلومة نادرة:</b> طلب لازلو البيتزا عبر منتدى BitcoinTalk؛ حيث تطوع بريطاني ودفع بالدولار لفرع Papa John\'s أمريكي وأخذ البيتكوين بدلاً منها!',
+      fl: [['p_pizza', RD, 3.5, 1, 17]],
+      v: ch(['بيتزا داي Pizza Day|#fff3cb', '10,000 بيتكوين|#ffe4e0', 'أول شراء تجاري|#d7f2ee', 'لازلو هانييتش|#dbe8fa'])
+    },
+    {
+      t: 'التفرّع وسقوط منصة إم تي غوكس',
+      e: 'ALTCOINS & MT. GOX COLLAPSE (2011–2014)',
+      c: 'ظهرت عملات بديلة مثل لايتكوين عام 2011 وبيركوين عام 2012 كأول نموذج يدمج إثبات الحصة (PoS). ولكن في فبراير 2014 تعرضت منصة Mt.Gox — التي عالجت 70% من التداولات — لاختراق كارثي أدى لخسائر فادحة ودخول السوق في أول شتاء قارس.',
+      f: '💡 <b>معلومة نادرة:</b> اسم Mt.Gox اختصار لـ "Magic: The Gathering Online eXchange"، حيث كانت المنصة موقعاً لتبادل بطاقات ألعاب سحرية قبل تحولها للبيتكوين!',
+      fl: [['p_leak', RD, 4, 2, 17]],
+      v: ch(['منصة Mt.Gox|#ffe4e0', 'لايتكوين Litecoin|#fff3cb', 'إثبات الحصة PoS|#d7f2ee', 'شتاء الكريبتو|#dbe8fa'])
+    },
+    {
+      t: 'ثورة إيثيريوم والعقود الذكية',
+      e: 'ETHEREUM, SMART CONTRACTS & FORKS (2015–2017)',
+      c: 'في 2015 انطلقت شبكة إيثيريوم لتقدم «العقود الذكية» المبرمجة القابلة للتنفيذ الذاتي وبناء التطبيقات اللامركزية. ورغم صدمة اختراق The DAO وانقسام الشبكة عام 2016، شهد عام 2017 انفجاراً هائلاً وبلغ البيتكوين 20,000 دولار لأول مرة.',
+      f: '💡 <b>معلومة نادرة:</b> كان فيتاليك بوتيرين في التاسعة عشرة من عمره فقط عندما اقترح إيثيريوم بعدما حظرت شركة ألعاب مهارات شخصيته المفضلة!',
+      fl: [['p_smart', PR, 4.5, 1, 17]],
+      v: ch(['إيثيريوم Ethereum|#dbe8fa', 'عقود ذكية Smart Contracts|#d7f2ee', 'انقسام The DAO Fork|#ffe4e0', 'قمة $20,000|#fff3cb'])
+    },
+    {
+      t: 'صيف التمويل اللامركزي وثورة NFT',
+      e: 'DEFI SUMMER & NFT PHENOMENON (2020–2021)',
+      c: 'شهد عام 2020 ولادة «التمويل اللامركزي DeFi» للإقراض والاقتراض دون بنوك. وفي 2021 اجتاحت الرموز غير القابلة للاستبدال (NFT) العالم في الفنون والألعاب، ودخلت كبرى شركات المدفوعات القطاع ليحلق البيتكوين مقترباً من 69,000 دولار.',
+      f: '💡 <b>معلومة نادرة:</b> بيعت لوحة فنية رقمية واحدة لـ Beeple بصيغة NFT بنحو 69.3 مليون دولار، مما جعله ثالث أغلى فنان حي في العالم حينها!',
+      fl: [['p_defi', TL, 4, 1, 17]],
+      v: ch(['تمويل لامركزي DeFi|#d7f2ee', 'رموز NFT الفنية|#ffe4e0', 'زراعة العائد Yield|#fff3cb', 'قمة $69,000|#dbe8fa'])
+    },
+    {
+      t: 'الغربال التنظيمي وصناديق ETF التاريخية',
+      e: 'SEC SPOT ETF & MICA REGULATION (2022–2024)',
+      c: 'بعد تصحيحات قاسية وانهيارات عام 2022، تحركت الهيئات التنظيمية عالمياً فأقر الاتحاد الأوروبي قانون MiCA. وفي 10 يناير 2024 حققت الصناعة أكبر انتصار تاريخي بموافقة SEC على أول صناديق استثمار فورية (Spot ETFs) في وول ستريت.',
+      f: '💡 <b>معلومة نادرة:</b> رفضت هيئة SEC صناديق البيتكوين الفورية لأكثر من عشر سنوات متتالية، ولم توافق عليها إلا بعد خسارتها دعوى قضائية أمام شركة Grayscale عام 2023!',
+      fl: [['p_etf', BL, 4, 1.5, 17]],
+      v: ch(['صناديق Spot ETF|#d7f2ee', 'موافقة SEC 2024|#fff3cb', 'قانون MiCA الأوروبي|#dbe8fa', 'دخول وول ستريت|#ffe4e0'])
+    },
+    {
+      t: 'عصر الاحتياطي الاستراتيجي للدول',
+      e: 'STRATEGIC BITCOIN RESERVE & $120,000+ (2025–2026)',
+      c: 'في مارس 2025 أسست الولايات المتحدة رسمياً «الاحتياطي الاستراتيجي للبيتكوين»، ثم وقعت قانون GENIUS لتنظيم العملات المستقرة، ليخترق البيتكوين حاجز 120,000 دولار. وبحلول 2026 فتحت بريطانيا (FCA) بوابة التراخيص تمهيداً للتنظيم الكامل بحلول أكتوبر 2027.',
+      f: '💡 <b>معلومة نادرة:</b> لم تتكلف الخزانة الأمريكية شراء عملات جديدة، بل خصصت ما يقارب 200,000 بيتكوين كانت قد صادرتها الحكومة سابقاً في قضايا الجرائم الإلكترونية!',
+      fl: [['p_reserve', GD, 4, 1, 17]],
+      v: ch(['احتياطي استراتيجي|#fff3cb', 'قانون GENIUS|#d7f2ee', 'حاجز $120,000|#ffe4e0', 'تنظيم بريطانيا FCA|#dbe8fa'])
+    },
+    {
+      t: 'المسار الشامل: من حلم مشفر إلى نظام عالمي',
+      e: 'THE FULL TIMELINE: CYPHERPUNKS TO GLOBAL ASSET',
+      c: 'هذه هي الرحلة المذهلة: فكرة خصوصية رياضية في أذهان السايفربانك في الثمانينيات تحولت خلال أربعة عقود إلى شبكة مالية عالمية لا مركزية، تحمي ثروات الملايين وتعتمدها كبرى دول ومؤسسات العالم كذهب رقمي لا يمكن إيقافه.',
+      f: '💡 <b>معلومة نادرة:</b> رغم إعلان وفاته مئات المرات في عناوين الصحف العالمية، كان البيتكوين الأصل المالي الأعلى أداءً على الإطلاق في العقد الماضي بمتوسط نمو فاق كافة الأسهم والسندات!',
+      fl: [],
+      v: ch(['1983 ➔ 2026|#fff3cb', 'ذهب رقمي Digital Gold|#d7f2ee', 'سوق يتجاوز 2.5T$|#ffe4e0', 'ثورة مالية عالمية|#dbe8fa'])
+    }
+  ];
+
+  var D = 17,
+      T = S.length * D,
+      t = 0,
+      playing = true,
+      cur = -1,
+      last = performance.now(),
+      acc = [],
+      P = [],
+      lens = {},
+      dots = $('dots'),
+      sn = 1,
+      sc = [].slice.call(document.querySelectorAll('.sc'));
+
+  // Build Dots Navigation
+  S.forEach(function(_, i){
+    var d = document.createElement('span');
+    d.title = S[i].t;
+    d.onclick = function(){ jumpTo(i); };
+    dots.appendChild(d);
+  });
+
+  // Boiling line perturbation
+  setInterval(function(){
+    sn = (sn % 7) + 1;
+    var tb = $('tb');
+    if(tb) tb.setAttribute('seed', sn);
+  }, 150);
+
+  function jumpTo(i){
+    t = i * D + 0.01;
+    if(!playing){
+      playing = true;
+      $('pp').textContent = '⏸';
+    }
+  }
+
+  function go(i){
+    cur = i;
+    var m = S[i];
+    $('num').textContent = (i + 1) + ' / ' + S.length;
+    $('ttl').textContent = m.t;
+    $('subttl').textContent = m.e;
+    $('ct').textContent = m.t;
+    $('cd').textContent = m.c;
+    $('ft').innerHTML = m.f;
+    $('cs').innerHTML = m.v;
+
+    sc.forEach(function(el){ el.classList.remove('on'); });
+    void $('art').getBoundingClientRect();
+    sc[i].classList.add('on');
+
+    [].forEach.call(dots.children, function(d, j){
+      d.classList.toggle('on', j === i);
+    });
+
+    acc = m.fl.map(function(){ return 0; });
+    P.forEach(function(p){ if(p.e && p.e.parentNode) p.e.remove(); });
+    P = [];
+
+    // Screen wipe transition
+    var w = $('wipe');
+    w.classList.remove('go');
+    void w.offsetWidth;
+    w.classList.add('go');
+
+    var capBox = $('capBox');
+    if(capBox) capBox.scrollTop = 0;
+  }
+
+  function spawn(f){
+    var p = $(f[0]);
+    if(!p) return;
+    if(!lens[f[0]]) lens[f[0]] = p.getTotalLength();
+    var e = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    e.setAttribute('r', 4.5);
+    e.setAttribute('fill', f[1]);
+    $('pt').appendChild(e);
+    P.push({ e: e, p: p, L: lens[f[0]], x: 0 });
+  }
+
+  function frame(now){
+    var dt = Math.min(0.1, Math.max(0, (now - last) / 1000));
+    last = now;
+
+    if(playing){
+      t += dt;
+      if(t >= T) t = T - 0.01;
+    }
+
+    var i = Math.max(0, Math.min(S.length - 1, Math.floor(t / D))),
+        tt = t - i * D,
+        m = S[i];
+
+    if(i !== cur) go(i);
+
+    // Particle emissions
+    m.fl.forEach(function(f, k){
+      if(tt >= f[3] && tt < f[4]){
+        acc[k] += f[2] * dt;
+        while(acc[k] >= 1 && P.length < 80){
+          acc[k]--;
+          spawn(f);
+        }
+      }
+    });
+
+    // Particle translation along paths
+    for(var k = P.length - 1; k >= 0; k--){
+      var ptObj = P[k];
+      ptObj.x += dt * 115;
+      if(ptObj.x >= ptObj.L){
+        if(ptObj.e.parentNode) ptObj.e.remove();
+        P.splice(k, 1);
+        continue;
+      }
+      var q = ptObj.p.getPointAtLength(ptObj.x);
+      ptObj.e.setAttribute('cx', q.x);
+      ptObj.e.setAttribute('cy', q.y);
+    }
+
+    $('pg').style.width = ((t / T) * 100) + '%';
+    requestAnimationFrame(frame);
+  }
+
+  // Event Listeners
+  $('pp').onclick = function(){
+    playing = !playing;
+    this.textContent = playing ? '⏸' : '▶';
+  };
+
+  $('rs').onclick = function(){
+    t = 0;
+    playing = true;
+    $('pp').textContent = '⏸';
+    cur = -1;
+  };
+
+  $('prevBtn').onclick = function(){
+    var target = Math.max(0, cur - 1);
+    jumpTo(target);
+  };
+
+  $('nextBtn').onclick = function(){
+    var target = Math.min(S.length - 1, cur + 1);
+    jumpTo(target);
+  };
+
+  // Keyboard navigation
+  window.addEventListener('keydown', function(ev){
+    if(ev.key === 'ArrowLeft'){
+      var target = Math.min(S.length - 1, cur + 1);
+      jumpTo(target);
+    } else if(ev.key === 'ArrowRight'){
+      var target = Math.max(0, cur - 1);
+      jumpTo(target);
+    } else if(ev.key === ' '){
+      ev.preventDefault();
+      $('pp').click();
+    } else if(ev.key === 'Home'){
+      $('rs').click();
+    }
+  });
+
+  // Touch swipe gestures
+  var touchStartX = 0, touchStartY = 0;
+  window.addEventListener('touchstart', function(e){
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  window.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].screenX - touchStartX;
+    var dy = e.changedTouches[0].screenY - touchStartY;
+    if(Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5){
+      if(dx < 0){
+        var target = Math.min(S.length - 1, cur + 1);
+        jumpTo(target);
+      } else {
+        var target = Math.max(0, cur - 1);
+        jumpTo(target);
+      }
+    }
+  }, { passive: true });
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

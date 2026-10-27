@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>كيف تُصنع الرقائق الإلكترونية؟ — أشباه الموصلات والترانزستور</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;600;700;800;900&family=Tajawal:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f4eee2;
+  --paper-card: #fffdf7;
+  --ink: #14110e;
+  --ink-secondary: #2c251e;
+  --red: #c93426;
+  --red-bg: #ffe4e0;
+  --mus: #e59a24;
+  --mus-bg: #fff3cb;
+  --teal: #1d7f75;
+  --teal-bg: #d7f2ee;
+  --blue: #295ea3;
+  --blue-bg: #dbe8fa;
+  --purple: #6f36bc;
+  --purple-bg: #eedeff;
+  --cap: clamp(165px, 34vh, 255px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'Alexandria', 'Tajawal', system-ui, -apple-system, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+}
+
+/* Subtle architectural blueprint / paper grid */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  opacity: 0.38;
+  mix-blend-mode: multiply;
+  background-image: 
+    linear-gradient(rgba(20, 17, 14, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 17, 14, 0.05) 1px, transparent 1px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .4 0 0 0 .4 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 28px 28px, 28px 28px, auto;
+}
+
+/* Top Navigation HUD */
+.top {
+  position: absolute;
+  inset: calc(10px + env(safe-area-inset-top, 0px)) 16px auto;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#num {
+  font-family: 'Alexandria', sans-serif;
+  font-weight: 800;
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  border-radius: 18px 8px 16px 8px;
+  padding: 2px 10px;
+  background: var(--mus);
+  font-size: 13px;
+  box-shadow: 2px 2px 0 var(--ink);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.title-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 44vw;
+}
+
+#ttl {
+  font-family: 'Alexandria', sans-serif;
+  font-weight: 800;
+  font-size: clamp(13px, 2.3vw, 21px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+#subttl {
+  display: block;
+  font-family: 'Alexandria', sans-serif;
+  font-size: clamp(9px, 1.35vw, 11px);
+  font-weight: 700;
+  color: var(--red);
+  letter-spacing: 0.08em;
+  direction: ltr;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.bar {
+  flex: 1;
+  min-width: 32px;
+  height: 12px;
+  border: 2.5px solid var(--ink);
+  border-radius: 9px 5px 9px 5px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: repeating-linear-gradient(-45deg, var(--red) 0 8px, #ff9b91 8px 16px);
+  transition: width 0.15s ease-out;
+}
+
+.ctrls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+button {
+  font-family: 'Alexandria', sans-serif;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 2.5px solid var(--ink);
+  background: var(--paper-card);
+  color: var(--ink);
+  border-radius: 10px 5px 10px 5px;
+  padding: 3px 9px;
+  box-shadow: 2px 2.5px 0 var(--ink);
+  min-width: 30px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s, box-shadow 0.1s, background-color 0.15s;
+}
+
+button:active {
+  transform: translate(1.5px, 2px);
+  box-shadow: 0.5px 1px 0 var(--ink);
+  background: var(--mus-bg);
+}
+
+/* Dots navigation */
+.dots {
+  position: absolute;
+  top: calc(52px + env(safe-area-inset-top, 0px));
+  inset-inline: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 25;
+}
+
+.dots span {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 1px 1.5px 0 var(--ink);
+  transition: transform 0.3s cubic-bezier(0.2, 1.5, 0.4, 1), background-color 0.25s;
+}
+
+.dots span:hover {
+  background: var(--mus);
+  transform: scale(1.2);
+}
+
+.dots span.on {
+  background: var(--red);
+  transform: scale(1.35) rotate(15deg);
+  border-radius: 40% 60% 50% 50%;
+}
+
+/* Main Visual Stage */
+.stage {
+  position: absolute;
+  inset: calc(70px + env(safe-area-inset-top, 0px)) 12px calc(var(--cap) + 18px + env(safe-area-inset-bottom, 0px)) 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: pan-y pinch-zoom;
+}
+
+#art {
+  width: 100%;
+  height: 100%;
+  max-width: 980px;
+  max-height: 100%;
+  display: block;
+}
+
+/* Bottom Explanatory Card */
+.cap {
+  position: absolute;
+  inset: auto 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  height: var(--cap);
+  z-index: 25;
+  background: var(--paper-card);
+  border: 3px solid var(--ink);
+  border-radius: 18px 8px 20px 8px / 8px 20px 8px 18px;
+  box-shadow: 4.5px 5.5px 0 var(--ink);
+  padding: 12px 18px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Washi tape visual accent */
+.cap::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 45%;
+  width: 70px;
+  height: 18px;
+  background: rgba(229, 154, 36, 0.65);
+  transform: rotate(-3.5deg);
+  border: 1px dashed rgba(20, 17, 14, 0.3);
+  pointer-events: none;
+}
+
+.cap::-webkit-scrollbar {
+  width: 5px;
+}
+.cap::-webkit-scrollbar-thumb {
+  background: var(--mus);
+  border-radius: 4px;
+}
+
+.ct {
+  flex: 1.5 1 300px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ct h2 {
+  font-family: 'Alexandria', sans-serif;
+  font-size: clamp(15px, 2.3vw, 22px);
+  font-weight: 800;
+  color: var(--red);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.ct p {
+  font-family: 'Tajawal', sans-serif;
+  font-size: clamp(12.5px, 1.6vw, 15.5px);
+  line-height: 1.7;
+  color: var(--ink-secondary);
+  font-weight: 700;
+}
+
+.rt {
+  flex: 1 1 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+.fct {
+  background: var(--mus-bg);
+  border: 2px solid var(--ink);
+  border-radius: 8px 16px 8px 16px;
+  padding: 7px 12px;
+  font-family: 'Tajawal', sans-serif;
+  font-size: clamp(11.5px, 1.45vw, 13.5px);
+  line-height: 1.6;
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 2.5px 3px 0 var(--ink);
+  animation: pop 0.5s 0.2s both cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.fct b {
+  color: var(--red);
+  font-family: 'Alexandria', sans-serif;
+  font-weight: 800;
+}
+
+.chs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  direction: ltr;
+}
+
+.ch {
+  border: 2px solid var(--ink);
+  border-radius: 12px 6px 12px 6px;
+  padding: 2px 10px;
+  font-family: 'Alexandria', sans-serif;
+  font-weight: 700;
+  font-size: clamp(10px, 1.3vw, 12.5px);
+  background: var(--bg, #fff);
+  color: var(--ink);
+  box-shadow: 1.5px 2px 0 var(--ink);
+  animation: pop 0.4s var(--d, 0s) cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(12px) scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Page wipe transition */
+.wipe {
+  position: fixed;
+  inset: -5% auto -5% 0;
+  width: 120%;
+  z-index: 50;
+  pointer-events: none;
+  background: var(--paper) repeating-linear-gradient(60deg, transparent 0 14px, rgba(20, 17, 14, 0.12) 14px 17px);
+  border-inline: 5px solid var(--ink);
+  transform: translateX(-125%) rotate(-2deg);
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.3);
+}
+
+.wipe.go {
+  animation: wp 0.75s ease-in-out;
+}
+
+@keyframes wp {
+  0% { transform: translateX(-125%) rotate(-2deg); }
+  100% { transform: translateX(125%) rotate(-2deg); }
+}
+
+/* STRICT CONTRAST RULES: All SVG text uses deep ink fill, NO WHITE FONT */
+svg text {
+  font-family: 'Alexandria', sans-serif;
+  font-weight: 700;
+  fill: var(--ink) !important;
+  stroke: none !important;
+  text-anchor: middle;
+  direction: ltr;
+}
+
+.sc {
+  display: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sc.on {
+  display: inline;
+}
+
+.f {
+  filter: url(#rough);
+}
+
+/* Badge Cards inside SVG for 100% contrast & legibility */
+.lbl-box {
+  fill: #fffdf7;
+  stroke: var(--ink);
+  stroke-width: 2;
+  rx: 6;
+  filter: drop-shadow(1.5px 2px 0 var(--ink));
+}
+
+.lbl-box.accent-gold { fill: #fff3cb; }
+.lbl-box.accent-teal { fill: #d7f2ee; }
+.lbl-box.accent-blue { fill: #dbe8fa; }
+.lbl-box.accent-red  { fill: #ffe4e0; }
+
+/* Animation utilities */
+.x { animation: pop 0.5s var(--d, 0s) cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.rot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sp 2.5s linear infinite;
+}
+@keyframes sp {
+  to { transform: rotate(360deg); }
+}
+
+.pul {
+  animation: pl 1.2s ease-in-out infinite alternate;
+}
+@keyframes pl {
+  from { opacity: 0.5; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1.04); }
+}
+
+.dr {
+  stroke-dasharray: 450;
+  stroke-dashoffset: 450;
+  animation: dr 1.6s var(--d, 0s) ease-out forwards;
+}
+@keyframes dr {
+  to { stroke-dashoffset: 0; }
+}
+
+.bw {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: bw 1.6s var(--d, 0s) cubic-bezier(0.3, 1.3, 0.5, 1) both;
+}
+@keyframes bw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.fl {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fk 0.35s ease-in-out infinite alternate;
+}
+@keyframes fk {
+  to { transform: scale(0.85, 1.25); }
+}
+
+#pt circle {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+/* ========================================================
+   RESPONSIVE ENHANCEMENTS FOR MOBILE & TABLETS
+   ======================================================== */
+@media (max-width: 768px), (max-aspect-ratio: 1/1) {
+  :root {
+    --cap: clamp(190px, 42vh, 310px);
+  }
+
+  .top {
+    inset: calc(6px + env(safe-area-inset-top, 0px)) 10px auto;
+    gap: 6px;
+  }
+
+  #num {
+    font-size: 11px;
+    padding: 1.5px 7px;
+    border-width: 2px;
+  }
+
+  .title-wrap {
+    max-width: 38vw;
+  }
+
+  #ttl {
+    font-size: clamp(11.5px, 3.2vw, 15px);
+  }
+
+  #subttl {
+    font-size: 8.5px;
+  }
+
+  .bar {
+    height: 9px;
+    border-width: 2px;
+  }
+
+  .ctrls {
+    gap: 3px;
+  }
+
+  button {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-width: 2px;
+    min-width: 26px;
+    min-height: 26px;
+    border-radius: 8px 4px 8px 4px;
+    box-shadow: 1.5px 2px 0 var(--ink);
+  }
+
+  .dots {
+    top: calc(44px + env(safe-area-inset-top, 0px));
+    gap: 5.5px;
+  }
+
+  .dots span {
+    width: 9.5px;
+    height: 9.5px;
+    border-width: 1.8px;
+  }
+
+  .dots span.on {
+    transform: scale(1.3) rotate(15deg);
+  }
+
+  .stage {
+    position: absolute;
+    inset: calc(56px + env(safe-area-inset-top, 0px)) 8px calc(var(--cap) + 12px + env(safe-area-inset-bottom, 0px)) 8px;
+  }
+
+  .cap {
+    inset: auto 8px calc(8px + env(safe-area-inset-bottom, 0px));
+    height: var(--cap);
+    padding: 10px 12px;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 7px;
+    border-width: 2.5px;
+    box-shadow: 3.5px 4px 0 var(--ink);
+  }
+
+  .cap::before {
+    top: -7px;
+    width: 48px;
+    height: 14px;
+  }
+
+  .ct {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .ct h2 {
+    font-size: clamp(13.5px, 3.8vw, 17px);
+    margin-bottom: 2px;
+  }
+
+  .ct p {
+    font-size: clamp(11.5px, 3.1vw, 13.5px);
+    line-height: 1.55;
+  }
+
+  .rt {
+    flex: 0 0 auto;
+    width: 100%;
+    gap: 5px;
+  }
+
+  .fct {
+    padding: 5px 9px;
+    font-size: clamp(10.5px, 2.8vw, 12.5px);
+    line-height: 1.5;
+    border-width: 1.8px;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .chs {
+    gap: 4px;
+    justify-content: flex-start;
+  }
+
+  .ch {
+    padding: 1px 7px;
+    font-size: clamp(9.5px, 2.6vw, 11.5px);
+    border-width: 1.8px;
+    box-shadow: 1px 1.5px 0 var(--ink);
+  }
+
+  svg text {
+    font-size: 13.5px;
+  }
+}
+
+/* Landscape / short-height screens */
+@media (max-height: 480px) and (orientation: landscape) {
+  :root {
+    --cap: clamp(100px, 34vh, 140px);
+  }
+
+  .top {
+    inset: 4px 10px auto;
+  }
+
+  .dots {
+    top: 36px;
+    gap: 5px;
+  }
+
+  .dots span {
+    width: 8px;
+    height: 8px;
+  }
+
+  .stage {
+    inset: 44px 10px calc(var(--cap) + 6px) 10px;
+  }
+
+  .cap {
+    padding: 6px 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ct h2 {
+    font-size: 12px;
+  }
+
+  .ct p {
+    font-size: 10.5px;
+    line-height: 1.35;
+  }
+
+  .fct {
+    font-size: 9.5px;
+    padding: 3px 6px;
+  }
+
+  .ch {
+    font-size: 9px;
+    padding: 1px 5px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Header HUD -->
+<header class="top">
+  <div id="num">1/9</div>
+  <div class="title-wrap">
+    <div id="ttl">من الرمال إلى البلورة الفائقة</div>
+    <div id="subttl">QUARTZ TO 11-NINES SILICON</div>
+  </div>
+  <div class="bar"><i id="pg"></i></div>
+  <div class="ctrls">
+    <button id="prevBtn" title="المشهد السابق">⏮</button>
+    <button id="pp" title="إيقاف مؤقت / تشغيل">⏸</button>
+    <button id="nextBtn" title="المشهد التالي">⏭</button>
+    <button id="rs" title="إعادة تشغيل">↻</button>
+  </div>
+</header>
+
+<!-- Step Navigation Dots -->
+<nav class="dots" id="dots"></nav>
+
+<!-- Main Visual Stage (SVG) -->
+<main class="stage" id="stageArea">
+  <svg id="art" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Hand-drawn boil filter applied only to geometry -->
+      <filter id="rough" x="-3%" y="-3%" width="106%" height="106%">
+        <feTurbulence id="tb" type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="1" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5"/>
+      </filter>
+
+      <!-- Polishing slurry pattern -->
+      <pattern id="slurry" width="12" height="12" patternUnits="userSpaceOnUse">
+        <circle cx="3" cy="3" r="1.5" fill="#1d7f75" opacity=".4"/>
+        <circle cx="9" cy="9" r="1.5" fill="#295ea3" opacity=".35"/>
+      </pattern>
+
+      <!-- Silicon Ingot Crucible Clip -->
+      <clipPath id="crucibleClip">
+        <path d="M220 230 C220 330 380 330 380 230 Z"/>
+      </clipPath>
+
+      <!-- Molten Silicon Thermal Gradient -->
+      <linearGradient id="meltG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fff4b8"/>
+        <stop offset="40%" stop-color="#e59a24"/>
+        <stop offset="100%" stop-color="#c93426"/>
+      </linearGradient>
+
+      <!-- EUV Plasma Glow Radial Gradient -->
+      <radialGradient id="euvG" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="40%" stop-color="#7fe7ff"/>
+        <stop offset="75%" stop-color="#9a5aff"/>
+        <stop offset="100%" stop-color="#1f143d" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+
+    <!-- ==========================================
+         SCENE 0: من الرمال إلى البلورة الفائقة (QUARTZ TO 11-NINES SILICON)
+         ========================================== -->
+    <g class="sc" id="s0">
+      <g class="f">
+        <!-- Sand Mound on Left -->
+        <path d="M35 345 Q95 210 155 345 Z" fill="#d9c4a0"/>
+        <path d="M55 345 Q100 240 145 345" fill="none" stroke="#b88f66" stroke-width="2"/>
+        <circle cx="80" cy="320" r="3" fill="#8d6b4a" stroke="none"/>
+        <circle cx="115" cy="315" r="4" fill="#8d6b4a" stroke="none"/>
+        <circle cx="95" cy="285" r="3" fill="#8d6b4a" stroke="none"/>
+
+        <!-- Czochralski Quartz Crucible -->
+        <rect x="235" y="170" width="130" height="155" rx="14" fill="#cdb18a"/>
+        <path d="M245 180 C245 310 355 310 355 180 Z" fill="#fffdf7"/>
+        <g clip-path="url(#crucibleClip)">
+          <!-- Molten Silicon at 1425°C -->
+          <rect x="220" y="225" width="160" height="110" fill="url(#meltG)" stroke="none"/>
+          <ellipse cx="300" cy="230" rx="55" ry="12" fill="#fffdf7" opacity=".7"/>
+        </g>
+
+        <!-- Induction Heating Coils around crucible -->
+        <path d="M225 210 H240 M225 240 H240 M225 270 H240" fill="none" stroke="#c93426" stroke-width="5"/>
+        <path d="M360 210 H375 M360 240 H375 M360 270 H375" fill="none" stroke="#c93426" stroke-width="5"/>
+
+        <!-- Rotating Growing Ingot (Boule) -->
+        <g id="bouleGroup">
+          <rect x="296" y="20" width="8" height="70" fill="#9a9a9a"/>
+          <rect x="294" y="90" width="12" height="18" fill="#e59a24"/>
+          <path id="bouleBody" d="M272 135 L300 108 L328 135 V230 H272 Z" fill="#8294a8"/>
+          <ellipse cx="300" cy="155" rx="27" ry="6" fill="none" stroke="#4a5d73" stroke-width="2"/>
+          <ellipse cx="300" cy="180" rx="27" ry="6" fill="none" stroke="#4a5d73" stroke-width="2"/>
+          <ellipse cx="300" cy="205" rx="27" ry="6" fill="none" stroke="#4a5d73" stroke-width="2"/>
+        </g>
+
+        <!-- Right Side: Purity Meter & Crystal Lattice Box -->
+        <rect x="520" y="70" width="240" height="260" rx="16" fill="#fffdf7"/>
+        <rect x="540" y="115" width="200" height="24" rx="12" fill="#e9edf2"/>
+        <rect class="bw" x="540" y="115" width="198" height="24" rx="12" fill="#1d7f75" style="--d:1.5s"/>
+
+        <!-- Diamond Cubic Atomic Lattice schematic -->
+        <g class="x" style="--d:3s">
+          <circle cx="580" cy="220" r="10" fill="#295ea3"/>
+          <circle cx="640" cy="220" r="10" fill="#295ea3"/>
+          <circle cx="700" cy="220" r="10" fill="#295ea3"/>
+          <circle cx="610" cy="265" r="10" fill="#295ea3"/>
+          <circle cx="670" cy="265" r="10" fill="#295ea3"/>
+          <path d="M580 220 L640 220 L700 220 M580 220 L610 265 L640 220 L670 265 L700 220" fill="none" stroke="#14110e" stroke-width="2.5"/>
+        </g>
+      </g>
+
+      <!-- HIGH-CONTRAST LABELS: Dark Ink on Light Cream/Gold Badges -->
+      <g transform="translate(95, 230)">
+        <rect class="lbl-box" x="-75" y="-14" width="150" height="28"/>
+        <text y="4">رمال الكوارتز SiO₂</text>
+      </g>
+      <g transform="translate(300, 45)">
+        <rect class="lbl-box accent-gold" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">سحب سبيكة البول Boule ⟳</text>
+      </g>
+      <g transform="translate(300, 360)">
+        <rect class="lbl-box accent-red" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">مصهور السيليكون 1425°م</text>
+      </g>
+      <g transform="translate(640, 102)">
+        <rect class="lbl-box accent-teal" x="-110" y="-14" width="220" height="28"/>
+        <text y="4" style="font-size:12.5px">نقاوة 99.9999999% (11N)</text>
+      </g>
+      <g class="x" transform="translate(640, 315)" style="--d:3.5s">
+        <rect class="lbl-box" x="-110" y="-13" width="220" height="26"/>
+        <text y="4" style="font-size:11.5px">شبكة بلورية أحادية فائقة النقاء</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 1: تقطيع الرقاقة والصقل الذري (WAFER SLICING & CMP)
+         ========================================== -->
+    <g class="sc" id="s1">
+      <g class="f">
+        <!-- Ingot being sliced horizontally -->
+        <rect x="50" y="90" width="140" height="230" rx="18" fill="#8294a8"/>
+        <g stroke="#c93426" stroke-width="2.5" stroke-dasharray="8 4">
+          <line x1="30" y1="150" x2="210" y2="150"/>
+          <line x1="30" y1="180" x2="210" y2="180"/>
+          <line x1="30" y1="210" x2="210" y2="210"/>
+          <line x1="30" y1="240" x2="210" y2="240"/>
+          <line x1="30" y1="270" x2="210" y2="270"/>
+        </g>
+
+        <!-- Sliced Wafer Flying out -->
+        <g class="x" style="--d:2s">
+          <ellipse cx="280" cy="180" rx="55" ry="55" fill="#bcccd9"/>
+          <path d="M330 180 A50 50 0 0 1 330 195" fill="none" stroke="#14110e" stroke-width="3"/>
+          <text x="280" y="184" style="font-size:12px">سُمك 775 ميكرون</text>
+        </g>
+
+        <!-- CMP Polishing Platen/Pad -->
+        <rect x="440" y="280" width="310" height="40" rx="8" fill="#d9ab6a"/>
+        <rect x="440" y="280" width="310" height="40" rx="8" fill="url(#slurry)" stroke="none"/>
+
+        <!-- Wafer Carrier Head -->
+        <rect x="520" y="95" width="150" height="45" rx="6" fill="#7a8793"/>
+        <rect x="575" y="40" width="40" height="55" fill="#9a9a9a"/>
+        <rect x="530" y="140" width="130" height="12" rx="3" fill="#bcccd9"/>
+
+        <!-- Slurry Dispenser Arm -->
+        <path d="M430 160 H470 V250" fill="none" stroke="#1d7f75" stroke-width="6"/>
+        <circle cx="470" cy="265" r="6" fill="#1d7f75"/>
+        <circle class="pul" cx="470" cy="275" r="8" fill="#7fe7ff" opacity=".6"/>
+
+        <!-- Atomic Smoothness Zoom Window -->
+        <rect x="480" y="175" width="240" height="85" rx="12" fill="#fffdf7"/>
+        <path d="M500 205 L520 195 L540 215 L560 198 L580 205" fill="none" stroke="#c93426" stroke-width="3"/>
+        <path d="M620 205 H700" fill="none" stroke="#1d7f75" stroke-width="3.5"/>
+      </g>
+
+      <!-- Particle path for slurry -->
+      <path id="p_slurry" d="M470 250 V285 H720" fill="none" stroke="none"/>
+
+      <!-- BADGES -->
+      <g transform="translate(120, 68)">
+        <rect class="lbl-box accent-gold" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">منشار أسلاك الألماس 300 ملم</text>
+      </g>
+      <g transform="translate(595, 26)">
+        <rect class="lbl-box accent-teal" x="-105" y="-14" width="210" height="28"/>
+        <text y="4">رأس الصقل الذري CMP ⟳</text>
+      </g>
+      <g transform="translate(435, 145)">
+        <rect class="lbl-box" x="-70" y="-13" width="140" height="26"/>
+        <text y="4" style="font-size:11.5px">محلول التلميع Slurry</text>
+      </g>
+      <g transform="translate(600, 246)">
+        <rect class="lbl-box" x="-105" y="-13" width="210" height="26"/>
+        <text y="4" style="font-size:11px">خشونة السطح أقل من 0.1 نانومتر</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 2: الغرفة البيضاء النظيفة (CLASS 1 CLEANROOM)
+         ========================================== -->
+    <g class="sc" id="s2">
+      <g class="f">
+        <!-- Room Architecture with Laminar Flow Grid -->
+        <rect x="60" y="30" width="680" height="340" rx="16" fill="#ffffff" stroke="none"/>
+        <rect x="60" y="30" width="680" height="45" fill="#dbe8fa"/>
+        <!-- Ceiling Fan Filter Units (FFU / ULPA) -->
+        <g stroke="#295ea3" stroke-width="2">
+          <line x1="80" y1="75" x2="720" y2="75"/>
+          <line x1="120" y1="30" x2="120" y2="75"/><line x1="200" y1="30" x2="200" y2="75"/><line x1="280" y1="30" x2="280" y2="75"/>
+          <line x1="360" y1="30" x2="360" y2="75"/><line x1="440" y1="30" x2="440" y2="75"/><line x1="520" y1="30" x2="520" y2="75"/>
+          <line x1="600" y1="30" x2="600" y2="75"/><line x1="680" y1="30" x2="680" y2="75"/>
+        </g>
+
+        <!-- Perforated Raised Access Floor -->
+        <rect x="60" y="325" width="680" height="45" fill="#d9c4a0"/>
+        <g fill="#14110e" stroke="none">
+          <circle cx="100" cy="345" r="4"/><circle cx="150" cy="345" r="4"/><circle cx="200" cy="345" r="4"/>
+          <circle cx="250" cy="345" r="4"/><circle cx="300" cy="345" r="4"/><circle cx="350" cy="345" r="4"/>
+          <circle cx="400" cy="345" r="4"/><circle cx="450" cy="345" r="4"/><circle cx="500" cy="345" r="4"/>
+          <circle cx="550" cy="345" r="4"/><circle cx="600" cy="345" r="4"/><circle cx="650" cy="345" r="4"/>
+        </g>
+
+        <!-- Laminar Airflow Streams down -->
+        <g stroke="#7fb6d9" stroke-width="2" stroke-dasharray="6 6">
+          <line x1="150" y1="85" x2="150" y2="320"/>
+          <line x1="260" y1="85" x2="260" y2="320"/>
+          <line x1="370" y1="85" x2="370" y2="320"/>
+          <line x1="480" y1="85" x2="480" y2="320"/>
+          <line x1="590" y1="85" x2="590" y2="320"/>
+        </g>
+
+        <!-- Bunny Suit Fab Technician -->
+        <g transform="translate(140, 105)">
+          <ellipse cx="60" cy="40" rx="24" ry="26" fill="#fffdf7"/>
+          <rect x="46" y="32" width="28" height="12" rx="3" fill="#295ea3"/>
+          <path d="M35 66 Q60 60 85 66 L95 160 H25 Z" fill="#fffdf7"/>
+          <path d="M25 90 L-10 115 H20 M95 90 L130 115 H100" fill="none" stroke-width="8" stroke="#fffdf7"/>
+          <!-- FOUP Wafer Pod -->
+          <rect x="10" y="110" width="70" height="55" rx="8" fill="#1d7f75"/>
+          <line x1="18" y1="125" x2="72" y2="125" stroke="#ffffff" stroke-width="2"/>
+          <line x1="18" y1="137" x2="72" y2="137" stroke="#ffffff" stroke-width="2"/>
+          <line x1="18" y1="149" x2="72" y2="149" stroke="#ffffff" stroke-width="2"/>
+        </g>
+
+        <!-- Microscopic Dust Threat Callout Card on Right -->
+        <rect x="420" y="105" width="280" height="195" rx="14" fill="#fffdf7"/>
+        <circle cx="560" cy="180" r="38" fill="#e59a24"/>
+        <text x="560" y="184" style="font-size:12px">حبة غبار 10µm</text>
+        <rect x="555" y="235" width="10" height="8" fill="#c93426"/>
+        <text x="560" y="260" style="font-size:11.5px">ترانزستور 3 نانومتر</text>
+      </g>
+
+      <!-- BADGES -->
+      <g transform="translate(400, 56)">
+        <rect class="lbl-box accent-blue" x="-115" y="-14" width="230" height="28"/>
+        <text y="4">فلاتر هواء فائقة ULPA / HEPA</text>
+      </g>
+      <g transform="translate(200, 300)">
+        <rect class="lbl-box" x="-95" y="-13" width="190" height="26"/>
+        <text y="4" style="font-size:11.5px">بدلة الأرنب تحبس قشور الجلد</text>
+      </g>
+      <g transform="translate(560, 132)">
+        <rect class="lbl-box accent-gold" x="-80" y="-14" width="160" height="28"/>
+        <text y="4">تصنيف ISO Class 1</text>
+      </g>
+      <g transform="translate(400, 385)">
+        <rect class="lbl-box" x="-135" y="-13" width="270" height="26"/>
+        <text y="4" style="font-size:11px">تيار صفائحي يطرد الغبار نحو الأرضية المثقوبة</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 3: الطباعة الضوئية بالأشعة القصوى (13.5nm EUV LITHOGRAPHY)
+         ========================================== -->
+    <g class="sc" id="s3">
+      <g class="f">
+        <!-- Vacuum Chamber boundary -->
+        <rect x="40" y="25" width="720" height="350" rx="18" fill="#201a24" stroke="#e59a24" stroke-width="3"/>
+        
+        <!-- Tin Droplet Generator on Top Left -->
+        <rect x="70" y="45" width="75" height="50" rx="8" fill="#8294a8"/>
+        <!-- High-Power CO2 Laser Source -->
+        <rect x="70" y="150" width="85" height="40" rx="6" fill="#c93426"/>
+        <!-- Laser Beam Path shooting at droplet -->
+        <line x1="155" y1="170" x2="230" y2="170" stroke="#c93426" stroke-width="5" stroke-dasharray="10 5"/>
+
+        <!-- Tin Droplet Vaporization into EUV Plasma -->
+        <circle cx="230" cy="170" r="32" fill="url(#euvG)" stroke="none"/>
+        <circle cx="230" cy="170" r="6" fill="#ffffff" stroke="#9a5aff" stroke-width="2"/>
+
+        <!-- Multi-layer Bragg Collector Mirror (Mo/Si) -->
+        <path d="M190 70 Q140 170 190 270" fill="none" stroke="#7fe7ff" stroke-width="12"/>
+
+        <!-- Reflected EUV Light Cones through Mask Reticle -->
+        <polygon points="190,170 410,120 410,220" fill="#9a5aff" opacity=".25" stroke="none"/>
+        <line x1="190" y1="170" x2="410" y2="120" stroke="#7fe7ff" stroke-width="2.5"/>
+        <line x1="190" y1="170" x2="410" y2="220" stroke="#7fe7ff" stroke-width="2.5"/>
+
+        <!-- Photomask Reticle (Pattern Template) -->
+        <rect x="410" y="105" width="22" height="130" rx="3" fill="#fffdf7"/>
+        <path d="M410 130 H432 M410 150 H432 M410 170 H432 M410 190 H432 M410 210 H432" stroke="#14110e" stroke-width="3"/>
+
+        <!-- Projection Optics -->
+        <path d="M490 120 Q520 170 490 220" fill="none" stroke="#7fe7ff" stroke-width="8"/>
+
+        <!-- Wafer Stage Scanning on Bottom Right -->
+        <rect x="580" y="270" width="150" height="26" rx="5" fill="#7a8793"/>
+        <rect x="590" y="258" width="130" height="12" rx="2" fill="#bcccd9"/>
+        <rect class="pul" x="625" y="254" width="60" height="6" fill="#9a5aff"/>
+      </g>
+
+      <!-- Particle paths -->
+      <path id="p_tin" d="M107 95 V270" fill="none" stroke="none"/>
+      <path id="p_euv" d="M230 170 L420 170 L500 170 L650 255" fill="none" stroke="none"/>
+
+      <!-- HIGH-CONTRAST BADGES ON DARK VACUUM CHAMBER (NO WHITE FONT) -->
+      <g transform="translate(110, 40)">
+        <rect class="lbl-box accent-gold" x="-90" y="-14" width="180" height="28"/>
+        <text y="4" style="font-size:11.5px">قاذف قطرات القصدير (50k/ث)</text>
+      </g>
+      <g transform="translate(112, 215)">
+        <rect class="lbl-box accent-red" x="-70" y="-14" width="140" height="28"/>
+        <text y="4">ليزر CO₂ نبضي</text>
+      </g>
+      <g transform="translate(230, 225)">
+        <rect class="lbl-box accent-teal" x="-85" y="-14" width="170" height="28"/>
+        <text y="4" style="font-size:12px">بلازما EUV (13.5 نانومتر)</text>
+      </g>
+      <g transform="translate(420, 88)">
+        <rect class="lbl-box" x="-75" y="-14" width="150" height="28"/>
+        <text y="4">قناع الدوائر Reticle</text>
+      </g>
+      <g transform="translate(655, 238)">
+        <rect class="lbl-box accent-gold" x="-85" y="-14" width="170" height="28"/>
+        <text y="4" style="font-size:11.5px">المقاوم الضوئي Photoresist</text>
+      </g>
+      <g transform="translate(400, 360)">
+        <rect class="lbl-box" x="-150" y="-13" width="300" height="26"/>
+        <text y="4" style="font-size:11px">تفريغ هوائي تام شبيه بالفضاء لمنع امتصاص الأشعة</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 4: الحفر بالبلازما وزرع الأيونات (PLASMA ETCHING & ION IMPLANT)
+         ========================================== -->
+    <g class="sc" id="s4">
+      <g class="f">
+        <!-- Substrate Base Layer (Silicon) -->
+        <rect x="80" y="230" width="640" height="120" rx="8" fill="#8294a8"/>
+        <!-- Silicon Dioxide / Photoresist Mask Stacks -->
+        <rect x="130" y="150" width="130" height="80" fill="#fffdf7"/>
+        <rect x="130" y="125" width="130" height="25" fill="#e59a24"/>
+
+        <rect x="340" y="150" width="120" height="80" fill="#fffdf7"/>
+        <rect x="340" y="125" width="120" height="25" fill="#e59a24"/>
+
+        <rect x="540" y="150" width="130" height="80" fill="#fffdf7"/>
+        <rect x="540" y="125" width="130" height="25" fill="#e59a24"/>
+
+        <!-- Deep Vertical Etched Trenches (Anisotropic RIE) -->
+        <path d="M260 230 V290 H340 V230" fill="#201a24"/>
+        <path d="M460 230 V290 H540 V230" fill="#201a24"/>
+
+        <!-- Plasma Cloud & Accelerating Electric Field -->
+        <rect x="80" y="35" width="640" height="60" rx="10" fill="#9a5aff" opacity=".25"/>
+        <g stroke="#9a5aff" stroke-width="2.5" stroke-dasharray="6 4">
+          <line x1="280" y1="50" x2="280" y2="220"/>
+          <line x1="300" y1="50" x2="300" y2="280"/>
+          <line x1="320" y1="50" x2="320" y2="220"/>
+          <line x1="480" y1="50" x2="480" y2="220"/>
+          <line x1="500" y1="50" x2="500" y2="280"/>
+          <line x1="520" y1="50" x2="520" y2="220"/>
+        </g>
+
+        <!-- Dopant Wells (Source & Drain) -->
+        <rect class="pul" x="270" y="290" width="60" height="25" rx="6" fill="#1d7f75"/>
+        <rect class="pul" x="470" y="290" width="60" height="25" rx="6" fill="#1d7f75"/>
+      </g>
+
+      <!-- Particle Paths for ion beams -->
+      <path id="p_ion1" d="M300 40 V290" fill="none" stroke="none"/>
+      <path id="p_ion2" d="M500 40 V290" fill="none" stroke="none"/>
+
+      <!-- BADGES -->
+      <g transform="translate(400, 30)">
+        <rect class="lbl-box accent-blue" x="-120" y="-14" width="240" height="28"/>
+        <text y="4">سحابة البلازما التفاعلية RIE</text>
+      </g>
+      <g transform="translate(195, 140)">
+        <rect class="lbl-box accent-gold" x="-80" y="-13" width="160" height="26"/>
+        <text y="4" style="font-size:11.5px">المقاوم Photoresist</text>
+      </g>
+      <g transform="translate(195, 195)">
+        <rect class="lbl-box" x="-70" y="-13" width="140" height="26"/>
+        <text y="4" style="font-size:11.5px">عازل الأكسيد SiO₂</text>
+      </g>
+      <g transform="translate(400, 270)">
+        <rect class="lbl-box" x="-75" y="-13" width="150" height="26"/>
+        <text y="4" style="font-size:11.5px">حفر عمودي حاد RIE</text>
+      </g>
+      <g transform="translate(300, 335)">
+        <rect class="lbl-box accent-teal" x="-75" y="-13" width="150" height="26"/>
+        <text y="4" style="font-size:11px">تطعيم المصدر (Source)</text>
+      </g>
+      <g transform="translate(500, 335)">
+        <rect class="lbl-box accent-teal" x="-75" y="-13" width="150" height="26"/>
+        <text y="4" style="font-size:11px">تطعيم المصب (Drain)</text>
+      </g>
+      <g transform="translate(400, 380)">
+        <rect class="lbl-box" x="-85" y="-13" width="170" height="26"/>
+        <text y="4" style="font-size:11.5px">السيليكون الأساسي (Substrate)</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 5: تشريح الترانزستور: المفتاح الذري (HOW A TRANSISTOR WORKS)
+         ========================================== -->
+    <g class="sc" id="s5">
+      <g class="f">
+        <!-- Transistor Base Block -->
+        <rect x="70" y="80" width="660" height="270" rx="16" fill="#fffdf7"/>
+
+        <!-- Source Terminal (Left) -->
+        <rect x="100" y="160" width="160" height="140" rx="10" fill="#295ea3"/>
+        <g transform="translate(180, 220)">
+          <rect class="lbl-box accent-blue" x="-65" y="-14" width="130" height="28"/>
+          <text y="4" style="font-size:13px">المصدر Source</text>
+        </g>
+        <g transform="translate(180, 258)">
+          <rect class="lbl-box" x="-65" y="-12" width="130" height="24"/>
+          <text y="4" style="font-size:11px">خزان الإلكترونات (e⁻)</text>
+        </g>
+
+        <!-- Drain Terminal (Right) -->
+        <rect x="540" y="160" width="160" height="140" rx="10" fill="#295ea3"/>
+        <g transform="translate(620, 220)">
+          <rect class="lbl-box accent-blue" x="-65" y="-14" width="130" height="28"/>
+          <text y="4" style="font-size:13px">المصرف Drain</text>
+        </g>
+        <g transform="translate(620, 258)">
+          <rect class="lbl-box" x="-65" y="-12" width="130" height="24"/>
+          <text y="4" style="font-size:11px">مستقبل التيار</text>
+        </g>
+
+        <!-- Gate Electrode on Top (Center) -->
+        <rect id="gateBlock" x="310" y="100" width="180" height="65" rx="8" fill="#e59a24"/>
+        <g transform="translate(400, 132)">
+          <rect class="lbl-box accent-gold" x="-55" y="-13" width="110" height="26"/>
+          <text y="4">البوابة Gate</text>
+        </g>
+
+        <!-- Ultra-thin High-k Dielectric Oxide Layer (Insulator) -->
+        <rect id="oxideBarrier" x="310" y="165" width="180" height="16" rx="3" fill="#c93426"/>
+
+        <!-- Silicon Conduction Channel (Bridge) -->
+        <rect id="channelPath" x="260" y="181" width="280" height="65" fill="#e8dfcd"/>
+        
+        <!-- Voltage On/Off Indicator Switch -->
+        <rect x="330" y="30" width="140" height="36" rx="18" fill="#1d7f75"/>
+        <circle id="swKnob" cx="445" cy="48" r="14" fill="#ffffff" stroke="#14110e" stroke-width="2"/>
+        <text id="swText" x="375" y="53" style="font-size:12.5px">جهد البوابة ON</text>
+      </g>
+
+      <!-- Electron Current Flow Channel Path -->
+      <path id="p_electrons" d="M160 215 H640" fill="none" stroke="none"/>
+
+      <!-- BADGES (NO WHITE FONT) -->
+      <g transform="translate(400, 178)">
+        <rect class="lbl-box accent-red" x="-85" y="-11" width="170" height="22"/>
+        <text y="4" style="font-size:10px">عازل High-k (بضع ذرات فقط)</text>
+      </g>
+      <g transform="translate(400, 222)">
+        <rect class="lbl-box accent-teal" x="-120" y="-13" width="240" height="26"/>
+        <text id="chStateText" y="4" style="font-size:12px">قناة التوصيل مفتوحة: التيار يتدفق = 1</text>
+      </g>
+      <g transform="translate(400, 325)">
+        <rect class="lbl-box" x="-125" y="-12" width="250" height="24"/>
+        <text y="4" style="font-size:11px">بدون جهد على البوابة: العازل يمنع الإلكترونات = 0</text>
+      </g>
+      <g transform="translate(400, 375)">
+        <rect class="lbl-box accent-red" x="-155" y="-12" width="310" height="24"/>
+        <text y="4" style="font-size:10.5px">المعضلة: في المقاييس الذرية تتسرب إلكترونات بالنفق الكمي!</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 6: شبكة الأسلاك النحاسية المعلقة (15+ LAYERS OF COPPER WIRING)
+         ========================================== -->
+    <g class="sc" id="s6">
+      <g class="f">
+        <!-- Transistor Substrate Layer at Bottom -->
+        <rect x="70" y="320" width="660" height="50" rx="6" fill="#8294a8"/>
+        <!-- Tiny Transistor Gates on bottom -->
+        <rect x="130" y="305" width="25" height="15" fill="#c93426"/>
+        <rect x="230" y="305" width="25" height="15" fill="#c93426"/>
+        <rect x="330" y="305" width="25" height="15" fill="#c93426"/>
+        <rect x="430" y="305" width="25" height="15" fill="#c93426"/>
+        <rect x="530" y="305" width="25" height="15" fill="#c93426"/>
+        <rect x="630" y="305" width="25" height="15" fill="#c93426"/>
+
+        <!-- Low-k Dielectric Stack Background -->
+        <rect x="70" y="40" width="660" height="265" rx="10" fill="#fffdf7" opacity=".9"/>
+
+        <!-- Layer M1 (Local fine wires) -->
+        <g stroke="#d9ab6a" stroke-width="6">
+          <line x1="100" y1="285" x2="260" y2="285"/>
+          <line x1="300" y1="285" x2="480" y2="285"/>
+          <line x1="510" y1="285" x2="680" y2="285"/>
+        </g>
+        <!-- Tungsten Vias V1 -->
+        <g stroke="#9a9a9a" stroke-width="5">
+          <line x1="142" y1="305" x2="142" y2="285"/>
+          <line x1="242" y1="305" x2="242" y2="285"/>
+          <line x1="342" y1="305" x2="342" y2="285"/>
+          <line x1="442" y1="305" x2="442" y2="285"/>
+          <line x1="542" y1="305" x2="542" y2="285"/>
+          <line x1="642" y1="305" x2="642" y2="285"/>
+        </g>
+
+        <!-- Layer M2 & M3 Intermediate Routing -->
+        <g stroke="#e59a24" stroke-width="8">
+          <line x1="120" y1="225" x2="380" y2="225"/>
+          <line x1="420" y1="225" x2="660" y2="225"/>
+          <line x1="180" y1="165" x2="540" y2="165"/>
+        </g>
+        <!-- Vias connecting levels -->
+        <g stroke="#9a9a9a" stroke-width="6">
+          <line x1="160" y1="285" x2="160" y2="225"/>
+          <line x1="350" y1="285" x2="350" y2="225"/>
+          <line x1="460" y1="285" x2="460" y2="225"/>
+          <line x1="250" y1="225" x2="250" y2="165"/>
+          <line x1="490" y1="225" x2="490" y2="165"/>
+        </g>
+
+        <!-- Top Thick Global Power/Clock Rails (M10+) -->
+        <g stroke="#c93426" stroke-width="14">
+          <line x1="100" y1="90" x2="680" y2="90"/>
+        </g>
+        <g stroke="#9a9a9a" stroke-width="8">
+          <line x1="280" y1="165" x2="280" y2="90"/>
+          <line x1="520" y1="165" x2="520" y2="90"/>
+        </g>
+      </g>
+
+      <!-- Pulse Paths for Signals in Copper Wires -->
+      <path id="p_sig1" d="M100 285 H260 V225 H380 V165 H540 V90 H680" fill="none" stroke="none"/>
+      <path id="p_sig2" d="M680 285 H510 V225 H420 V165 H180" fill="none" stroke="none"/>
+
+      <!-- BADGES -->
+      <g transform="translate(400, 30)">
+        <rect class="lbl-box accent-gold" x="-135" y="-14" width="270" height="28"/>
+        <text y="4">شبكة التوصيل BEOL (من 10 إلى 18 طبقة نحاس)</text>
+      </g>
+      <g transform="translate(400, 78)">
+        <rect class="lbl-box accent-red" x="-125" y="-13" width="250" height="26"/>
+        <text y="4" style="font-size:11.5px">خطوط التغذية الرئيسية وساعة المعالج</text>
+      </g>
+      <g transform="translate(645, 160)">
+        <rect class="lbl-box" x="-75" y="-13" width="150" height="26"/>
+        <text y="4" style="font-size:11px">عازل Low-k لمنع التداخل</text>
+      </g>
+      <g transform="translate(640, 220)">
+        <rect class="lbl-box accent-gold" x="-70" y="-13" width="140" height="26"/>
+        <text y="4" style="font-size:11px">مسارات إشارات النحاس</text>
+      </g>
+      <g transform="translate(400, 350)">
+        <rect class="lbl-box" x="-120" y="-13" width="240" height="26"/>
+        <text y="4" style="font-size:12px">مليارات الترانزستورات في القاعدة السفلية</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 7: التقطيع، الاختبار، والتغليف (DICING & 3D PACKAGING)
+         ========================================== -->
+    <g class="sc" id="s7">
+      <g class="f">
+        <!-- Wafer on Left with Test Probes -->
+        <ellipse cx="200" cy="180" rx="120" ry="120" fill="#bcccd9"/>
+        <!-- Wafer grid streets -->
+        <g stroke="#14110e" stroke-width="1.8">
+          <line x1="100" y1="130" x2="300" y2="130"/><line x1="85" y1="165" x2="315" y2="165"/>
+          <line x1="85" y1="200" x2="315" y2="200"/><line x1="100" y1="235" x2="300" y2="235"/>
+          <line x1="145" y1="85" x2="145" y2="275"/><line x1="180" y1="65" x2="180" y2="295"/>
+          <line x1="215" y1="65" x2="215" y2="295"/><line x1="250" y1="85" x2="250" y2="275"/>
+        </g>
+
+        <!-- Test Probe Head touching Die -->
+        <rect x="175" y="40" width="50" height="35" rx="5" fill="#7a8793"/>
+        <line x1="188" y1="75" x2="192" y2="155" stroke="#e59a24" stroke-width="2.5"/>
+        <line x1="212" y1="75" x2="208" y2="155" stroke="#e59a24" stroke-width="2.5"/>
+
+        <!-- Pass / Fail Badges on dies -->
+        <circle cx="162" cy="148" r="8" fill="#1d7f75"/><text x="162" y="152" style="font-size:10px">✓</text>
+        <circle cx="198" cy="148" r="8" fill="#1d7f75"/><text x="198" y="152" style="font-size:10px">✓</text>
+        <circle cx="232" cy="148" r="8" fill="#c93426"/><text x="232" y="152" style="font-size:10px">✗</text>
+
+        <!-- Advanced 3D Packaging Substrate on Right -->
+        <rect x="420" y="270" width="320" height="35" rx="6" fill="#1d7f75"/>
+        <rect x="450" y="235" width="260" height="20" rx="3" fill="#8294a8"/>
+        <!-- Micro-bumps -->
+        <g fill="#e59a24" stroke="none">
+          <circle cx="470" cy="262" r="4"/><circle cx="500" cy="262" r="4"/><circle cx="530" cy="262" r="4"/>
+          <circle cx="560" cy="262" r="4"/><circle cx="590" cy="262" r="4"/><circle cx="620" cy="262" r="4"/>
+          <circle cx="650" cy="262" r="4"/><circle cx="680" cy="262" r="4"/>
+        </g>
+
+        <!-- Compute Die (Chiplet 1) -->
+        <rect x="465" y="170" width="105" height="55" rx="5" fill="#295ea3"/>
+        <text x="517" y="202" style="font-size:13px">معالج CPU</text>
+
+        <!-- Memory HBM Stack (Chiplet 2) -->
+        <rect x="590" y="150" width="105" height="75" rx="5" fill="#e59a24"/>
+        <text x="642" y="195" style="font-size:13px">ذاكرة HBM</text>
+
+        <!-- Metallic Heat Spreader Lid Outline -->
+        <path d="M410 270 V130 H750 V270" fill="none" stroke="#7a8793" stroke-width="6"/>
+      </g>
+
+      <!-- BADGES -->
+      <g transform="translate(200, 335)">
+        <rect class="lbl-box accent-teal" x="-95" y="-14" width="190" height="28"/>
+        <text y="4">فحص الإبر المجهرية ATE & Yield</text>
+      </g>
+      <g transform="translate(580, 115)">
+        <rect class="lbl-box accent-gold" x="-110" y="-14" width="220" height="28"/>
+        <text y="4">تغليف ثلاثي الأبعاد CoWoS</text>
+      </g>
+      <g transform="translate(580, 340)">
+        <rect class="lbl-box" x="-125" y="-13" width="250" height="26"/>
+        <text y="4" style="font-size:11.5px">توصيل الرقائق بركيزة السيليكون وكريات اللحام</text>
+      </g>
+    </g>
+
+    <!-- ==========================================
+         SCENE 8: السلسلة الكاملة: من الرمل إلى التفكير (THE FULL CHAIN)
+         ========================================== -->
+    <g class="sc" id="s8">
+      <g class="f">
+        <!-- 6 Step Connected Chain Pathway -->
+        <!-- Step 1: Sand -->
+        <rect class="x" x="40" y="50" width="105" height="110" rx="12" fill="#fffdf7" style="--d:.3s"/>
+        <path d="M60 135 Q90 85 125 135 Z" fill="#d9c4a0"/>
+        <text x="92" y="80">رمال الكوارتز</text>
+
+        <!-- Step 2: Silicon Ingot -->
+        <rect class="x" x="180" y="50" width="105" height="110" rx="12" fill="#fffdf7" style="--d:.9s"/>
+        <rect x="215" y="75" width="35" height="65" rx="8" fill="#8294a8"/>
+        <text x="232" y="80">سبيكة 11N</text>
+
+        <!-- Step 3: Mirror Wafer -->
+        <rect class="x" x="320" y="50" width="105" height="110" rx="12" fill="#fffdf7" style="--d:1.5s"/>
+        <ellipse cx="372" cy="115" rx="35" ry="35" fill="#bcccd9"/>
+        <text x="372" y="80">قرص مصقول</text>
+
+        <!-- Step 4: EUV Nanopattern -->
+        <rect class="x" x="460" y="50" width="105" height="110" rx="12" fill="#fffdf7" style="--d:2.1s"/>
+        <circle cx="512" cy="115" r="24" fill="#9a5aff" opacity=".3"/>
+        <line x1="492" y1="115" x2="532" y2="115" stroke="#7fe7ff" stroke-width="4"/>
+        <text x="512" y="80">طباعة EUV</text>
+
+        <!-- Step 5: Transistors & Wiring -->
+        <rect class="x" x="600" y="50" width="160" height="110" rx="12" fill="#fffdf7" style="--d:2.7s"/>
+        <rect x="620" y="88" width="120" height="18" fill="#c93426"/>
+        <line x1="620" y1="120" x2="740" y2="120" stroke="#e59a24" stroke-width="4"/>
+        <text x="680" y="78">ترانزستور + أسلاك</text>
+
+        <!-- Big Center: The Finished High-Tech Processor Chip -->
+        <rect class="x" x="220" y="200" width="360" height="160" rx="18" fill="#201a24" style="--d:3.5s"/>
+        <rect x="250" y="225" width="300" height="110" rx="10" fill="#1d7f75" opacity=".3"/>
+        <polygon points="230,210 248,210 230,228" fill="#e59a24"/>
+        <rect class="pul" x="330" y="240" width="140" height="80" rx="6" fill="#e59a24"/>
+      </g>
+
+      <!-- Connecting arrows between steps -->
+      <g stroke="#14110e" stroke-width="3" fill="none">
+        <path d="M145 105 H180"/>
+        <path d="M285 105 H320"/>
+        <path d="M425 105 H460"/>
+        <path d="M565 105 H600"/>
+        <path d="M680 160 V185 H400 V200"/>
+      </g>
+
+      <!-- BADGES INSIDE CENTER CHIP (NO WHITE FONT) -->
+      <g transform="translate(400, 268)">
+        <rect class="lbl-box accent-gold" x="-95" y="-14" width="190" height="28"/>
+        <text y="4" style="font-size:14px">شريحة المعالج الفائقة</text>
+      </g>
+      <g transform="translate(400, 305)">
+        <rect class="lbl-box accent-teal" x="-125" y="-12" width="250" height="24"/>
+        <text y="4" style="font-size:11.5px">أكثر من 50 مليار ترانزستور في مساحة ظفر!</text>
+      </g>
+      <g transform="translate(400, 385)">
+        <rect class="lbl-box" x="-155" y="-13" width="310" height="26"/>
+        <text y="4" style="font-size:11.5px">من حبة رمل بسيطة إلى أعظم معجزة هندسية في التاريخ ⚡</text>
+      </g>
+    </g>
+
+    <!-- Global Particle Emission Layer -->
+    <g id="pt"></g>
+  </svg>
+</main>
+
+<!-- Bottom Explanatory Card -->
+<footer class="cap" id="capBox">
+  <div class="ct">
+    <h2 id="ct"></h2>
+    <p id="cd"></p>
+  </div>
+  <div class="rt">
+    <div class="fct" id="ft"></div>
+    <div class="chs" id="cs"></div>
+  </div>
+</footer>
+
+<!-- Page wipe overlay -->
+<div class="wipe" id="wipe"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+
+  function ch(arr){
+    return arr.map(function(item, idx){
+      var parts = item.split('|');
+      return '<span class="ch" style="--bg:' + (parts[1] || '#ffffff') + ';--d:' + (0.7 + idx * 0.35) + 's">' + parts[0] + '</span>';
+    }).join('');
+  }
+
+  var K = '#14110e',
+      BL = '#295ea3',
+      GD = '#e59a24',
+      RD = '#c93426',
+      TL = '#1d7f75',
+      CY = '#7fe7ff';
+
+  // 9 Causal Scenes
+  var S = [
+    {
+      t: 'من الرمال إلى البلورة الفائقة',
+      e: 'QUARTZ TO 11-NINES SILICON',
+      c: 'تبدأ المعالجات من رمال الكوارتز (SiO₂). تُختزل في أفران حرارية إلى سيليكون نقي بنسبة 99.9999999% (درجة إلكترونية 11N). ثم يُصهر عند 1425°م وتُسحب منه بلورة أحادية عملاقة (Boule) خالية تماماً من العيوب الذرية.',
+      f: '💡 <b>معلومة نادرة:</b> لو كانت نسبة نقاوة هذا السيليكون كشاطئ رمل يمتد 1000 كم، فلن تجد سوى حبة غبار واحدة غريبة في الشاطئ كله!',
+      fl: [],
+      v: ch(['سيليكون 11N|#fff3cb', 'سحب تشوخرالسكي 1425°م|#ffe4e0', 'سبيكة أحادية Boule|#d7f2ee'])
+    },
+    {
+      t: 'تقطيع الرقاقة والصقل الذري',
+      e: 'WAFER SLICING & CMP POLISHING',
+      c: 'تُقطّع سبيكة السيليكون بواسطة أسلاك ألماسية دقيقة وسريعة إلى أقراص دائرية بسُمك نحو 775 ميكروناً وقطر 300 ملم. بعد ذلك تخضع لصقل كيميائي ميكانيكي (CMP) بمحاليل نانوية حتى يصبح السطح أملس بدقة ذرية مطلقة.',
+      f: '💡 <b>معلومة نادرة:</b> لو كبّرنا قرص الرقاقة (300 ملم) ليصبح بحجم كوكب الأرض، لكان أعلى ارتفاع أو تدرج على سطحه أقل من ملليمترين اثنين!',
+      fl: [['p_slurry', TL, 3.5, 1, 17]],
+      v: ch(['قرص 300 ملم|#dbe8fa', 'منشار أسلاك الألماس|#fff3cb', 'صقل ذري CMP|#d7f2ee'])
+    },
+    {
+      t: 'الغرفة البيضاء: حرب ضد الغبار',
+      e: 'CLASS 1 CLEANROOM',
+      c: 'تُبنى المعالجات داخل غرف فائقة النقاء (Class 1) تحوي أقل من 10 جزيئات غبار في المتر المكعب. يرتدي المهندسون بدلات خاصة (Bunny Suits)؛ لأن الإنسان هو أخطر ملوّث، إذ يطرح نحو 100,000 قشرة جلد ورذاذ كل دقيقة.',
+      f: '💡 <b>معلومة نادرة:</b> حبة غبار منزلية عادية (10 ميكرون) تسقط على رقاقة تعادل سقوط صخرة جبلية ضخمة فوق مدينة؛ تدمر ملايين الترانزستورات فوراً.',
+      fl: [],
+      v: ch(['غرفة Class 1|#d7f2ee', 'بدلة الأرنب Bunny Suit|#fff3cb', 'تدفق صفائحي Laminar|#dbe8fa'])
+    },
+    {
+      t: 'الطباعة الضوئية القصوى (EUV)',
+      e: '13.5nm EUV LITHOGRAPHY',
+      c: 'تطلق آلة ASML ليزراً نبضياً يصدم 50,000 قطرة قصدير منصهر في الثانية ليولد ضوء الأشعة فوق البنفسجية القصوى (13.5 نانومتر). ينعكس الضوء عبر مرايا فائقة الدقة داخل فراغ تام ليطبع تفاصيل الدوائر على المقاوم الضوئي.',
+      f: '💡 <b>معلومة نادرة:</b> هواء الغرفة العادي يمتص أشعة EUV فوراً كالضباب الكثيف، لذلك تعمل الآلة بأكملها داخل تفريغ هوائي شبيه بالفضاء الخارجي!',
+      fl: [['p_tin', GD, 4, 0.5, 17], ['p_euv', CY, 5, 2, 17]],
+      v: ch(['أشعة 13.5 نانومتر|#ffe4e0', '50,000 قطرة قصدير/ثانية|#fff3cb', 'مرايا براج في الفراغ|#dbe8fa'])
+    },
+    {
+      t: 'الحفر بالبلازما وزرع الأيونات',
+      e: 'PLASMA ETCHING & ION IMPLANT',
+      c: 'تقوم غازات البلازما المتأينة بحفر خنادق عمودية مجهرية بالغة الدقة مكان المقاوم المكشوف (RIE). بعدها يُطلق مسرّع أيوني ذرات البورون أو الفوسفور بطاقة هائلة لزرعها داخل بلورة السيليكون وتعديل خواصها الكهربائية.',
+      f: '💡 <b>معلومة نادرة:</b> تُطلق الأيونات بجهد يصل لعشرات آلاف الفولتات كقذائف مدفعية؛ ثم يُسخن القرص لـ 1000°م لترميم البلورة المصابة!',
+      fl: [['p_ion1', '#9a5aff', 4, 1, 17], ['p_ion2', '#9a5aff', 4, 1.8, 17]],
+      v: ch(['حفر بلازمي RIE|#ffe4e0', 'قذف أيوني Ion Implantation|#d7f2ee', 'تطعيم Doping|#fff3cb'])
+    },
+    {
+      t: 'تشريح الترانزستور: المفتاح الذري',
+      e: 'HOW A TRANSISTOR WORKS (FinFET / GAA)',
+      c: 'الترانزستور صمام كهربائي نانوي: المصدر (Source) والمصرف (Drain) تفصلهما بوابة (Gate) معزولة بأكسيد الهافنيوم. عند تطبيق جهد موجب على البوابة، يُجبر حقل كهربائي الإلكترونات على عبور القناة؛ وتغلق القناة بانقطاع الجهد.',
+      f: '💡 <b>معلومة نادرة:</b> عند مقياس 3 نانومتر، يكون سُمك عازل البوابة بضع ذرات فقط! وتتسرّب الإلكترونات عبره بظاهرة «النفق الكمّي» حتى والمفتاح مغلق.',
+      fl: [['p_electrons', CY, 6, 2, 17]],
+      v: ch(['المصدر Source|#dbe8fa', 'المصرف Drain|#ffe4e0', 'عازل High-k|#fff3cb', 'نفق كمي Tunneling|#d7f2ee'])
+    },
+    {
+      t: 'شبكة الأسلاك النحاسية المعلقة',
+      e: '15+ LAYERS OF COPPER WIRING (BEOL)',
+      c: 'الترانزستورات وحدها بلا فائدة دون تشبيك. تبني المصفاة فوقها ناطحة سحاب مجهرية مكوّنة من 10 إلى 18 طبقة من الأسلاك النحاسية تفصلها عوازل Low-k وتربطها أعمدة تنغستن عمودية (Vias) لتوزيع الإشارات والطاقة.',
+      f: '💡 <b>معلومة نادرة:</b> في معالج حاسوب حديث بحجم ظفر إصبعك، تتجاوز أطوال الأسلاك النحاسية المجهرية مجتمعة أكثر من 100 كيلومتر!',
+      fl: [['p_sig1', GD, 3.5, 1, 17], ['p_sig2', RD, 3.5, 3, 17]],
+      v: ch(['طبقات نحاسية متعددة|#fff3cb', 'أعمدة تنغستن Vias|#dbe8fa', 'طول الأسلاك > 100 كم|#ffe4e0'])
+    },
+    {
+      t: 'التقطيع، الاختبار، والتغليف ثلاثي الأبعاد',
+      e: 'WAFER DICING & 3D PACKAGING',
+      c: 'تلمس إبر الفحص المجهري (ATE) آلاف نقاط الاتصال لاختبار المعالجات وتحديد المعطوب منها. ثم يقطع ليزر دقيق القرص إلى رقائق مفردة، وتُجمع الشرائح الصالحة مع ذاكرة HBM بتقنية التغليف ثلاثي الأبعاد (CoWoS).',
+      f: '💡 <b>معلومة نادرة:</b> في الرقاقات المتقدمة الجديدة، قد يفشل 30% إلى 50% من المعالجات في البداية (Yield)؛ والمعالجات ذات الأنوية المعطوبة تُباع كفئات أرخص بعد تعطيل العيب!',
+      fl: [],
+      v: ch(['نسبة النجاح Yield|#ffe4e0', 'تقطيع ليزري Dicing|#dbe8fa', 'تغليف ثلاثي الأبعاد|#fff3cb'])
+    },
+    {
+      t: 'السلسلة الكاملة: من الرمل إلى التفكير',
+      e: 'THE FULL CHAIN: SAND TO INTELLIGENCE',
+      c: 'هذه هي المعجزة كاملة: رمال كوارتز ➔ بلورة 11N ➔ قرص ذري ➔ طباعة ضوئية نانوية ➔ بلازما وتطعيم ➔ مليارات مفاتيح الترانزستور ➔ 100 كم شبكات نحاس ➔ معالج ينفذ مليارات العمليات الحسابية في كل ثانية.',
+      f: '💡 <b>معلومة نادرة:</b> شريحة هاتف بحجم عملة معدنية تحوي اليوم أكثر من 20 مليار ترانزستور، تنبض بترددات غيغاهرتزية باستهلاك بضعة واطات فقط!',
+      fl: [],
+      v: ch(['أكثر من 50 مليار ترانزستور|#fff3cb', 'تردد غيغاهرتز GHz|#ffe4e0', 'قمة الهندسة البشرية|#d7f2ee'])
+    }
+  ];
+
+  var D = 17,
+      T = S.length * D,
+      t = 0,
+      playing = true,
+      cur = -1,
+      last = performance.now(),
+      acc = [],
+      P = [],
+      lens = {},
+      dots = $('dots'),
+      sn = 1,
+      sc = [].slice.call(document.querySelectorAll('.sc'));
+
+  // Build Dots Navigation
+  S.forEach(function(_, i){
+    var d = document.createElement('span');
+    d.title = S[i].t;
+    d.onclick = function(){ jumpTo(i); };
+    dots.appendChild(d);
+  });
+
+  // Boiling line perturbation
+  setInterval(function(){
+    sn = (sn % 7) + 1;
+    var tb = $('tb');
+    if(tb) tb.setAttribute('seed', sn);
+  }, 150);
+
+  function jumpTo(i){
+    t = i * D + 0.01;
+    if(!playing){
+      playing = true;
+      $('pp').textContent = '⏸';
+    }
+  }
+
+  function go(i){
+    cur = i;
+    var m = S[i];
+    $('num').textContent = (i + 1) + ' / ' + S.length;
+    $('ttl').textContent = m.t;
+    $('subttl').textContent = m.e;
+    $('ct').textContent = m.t;
+    $('cd').textContent = m.c;
+    $('ft').innerHTML = m.f;
+    $('cs').innerHTML = m.v;
+
+    sc.forEach(function(el){ el.classList.remove('on'); });
+    void $('art').getBoundingClientRect();
+    sc[i].classList.add('on');
+
+    [].forEach.call(dots.children, function(d, j){
+      d.classList.toggle('on', j === i);
+    });
+
+    acc = m.fl.map(function(){ return 0; });
+    P.forEach(function(p){ if(p.e && p.e.parentNode) p.e.remove(); });
+    P = [];
+
+    // Screen wipe transition
+    var w = $('wipe');
+    w.classList.remove('go');
+    void w.offsetWidth;
+    w.classList.add('go');
+
+    var capBox = $('capBox');
+    if(capBox) capBox.scrollTop = 0;
+  }
+
+  function spawn(f){
+    var p = $(f[0]);
+    if(!p) return;
+    if(!lens[f[0]]) lens[f[0]] = p.getTotalLength();
+    var e = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    e.setAttribute('r', 4.5);
+    e.setAttribute('fill', f[1]);
+    $('pt').appendChild(e);
+    P.push({ e: e, p: p, L: lens[f[0]], x: 0 });
+  }
+
+  function frame(now){
+    var dt = Math.min(0.1, Math.max(0, (now - last) / 1000));
+    last = now;
+
+    if(playing){
+      t += dt;
+      if(t >= T) t = T - 0.01;
+    }
+
+    var i = Math.max(0, Math.min(S.length - 1, Math.floor(t / D))),
+        tt = t - i * D,
+        m = S[i];
+
+    if(i !== cur) go(i);
+
+    // Dynamic scene-specific mechanisms
+    if(i === 0){
+      var bouleGroup = $('bouleGroup');
+      if(bouleGroup){
+        var pullProgress = Math.min(1, tt / 14);
+        var yShift = -45 * pullProgress;
+        bouleGroup.setAttribute('transform', 'translate(0, ' + yShift + ')');
+      }
+    } else if(i === 5){
+      var swKnob = $('swKnob'),
+          swText = $('swText'),
+          oxideBarrier = $('oxideBarrier'),
+          chStateText = $('chStateText'),
+          channelPath = $('channelPath');
+
+      var isGateOn = (tt % 6) < 3.8;
+      if(swKnob && swText && oxideBarrier && channelPath){
+        if(isGateOn){
+          swKnob.setAttribute('cx', '445');
+          swText.textContent = 'جهد البوابة ON';
+          swText.setAttribute('x', '350');
+          oxideBarrier.setAttribute('fill', '#e59a24');
+          channelPath.setAttribute('fill', '#7fe7ff');
+          if(chStateText) chStateText.textContent = 'قناة التوصيل مفتوحة: التيار يتدفق = 1';
+        } else {
+          swKnob.setAttribute('cx', '355');
+          swText.textContent = 'جهد البوابة OFF';
+          swText.setAttribute('x', '385');
+          oxideBarrier.setAttribute('fill', '#c93426');
+          channelPath.setAttribute('fill', '#e8dfcd');
+          if(chStateText) chStateText.textContent = 'حاجز الجهد مغلق: لا يمر تيار = 0';
+        }
+      }
+    }
+
+    // Particle emissions
+    m.fl.forEach(function(f, k){
+      if(tt >= f[3] && tt < f[4]){
+        acc[k] += f[2] * dt;
+        while(acc[k] >= 1 && P.length < 80){
+          acc[k]--;
+          spawn(f);
+        }
+      }
+    });
+
+    // Particle translation along paths
+    for(var k = P.length - 1; k >= 0; k--){
+      var ptObj = P[k];
+      ptObj.x += dt * 115;
+      if(ptObj.x >= ptObj.L){
+        if(ptObj.e.parentNode) ptObj.e.remove();
+        P.splice(k, 1);
+        continue;
+      }
+      var q = ptObj.p.getPointAtLength(ptObj.x);
+      ptObj.e.setAttribute('cx', q.x);
+      ptObj.e.setAttribute('cy', q.y);
+    }
+
+    $('pg').style.width = ((t / T) * 100) + '%';
+    requestAnimationFrame(frame);
+  }
+
+  // Event Listeners
+  $('pp').onclick = function(){
+    playing = !playing;
+    this.textContent = playing ? '⏸' : '▶';
+  };
+
+  $('rs').onclick = function(){
+    t = 0;
+    playing = true;
+    $('pp').textContent = '⏸';
+    cur = -1;
+  };
+
+  $('prevBtn').onclick = function(){
+    var target = Math.max(0, cur - 1);
+    jumpTo(target);
+  };
+
+  $('nextBtn').onclick = function(){
+    var target = Math.min(S.length - 1, cur + 1);
+    jumpTo(target);
+  };
+
+  // Keyboard navigation
+  window.addEventListener('keydown', function(ev){
+    if(ev.key === 'ArrowLeft'){
+      var target = Math.min(S.length - 1, cur + 1);
+      jumpTo(target);
+    } else if(ev.key === 'ArrowRight'){
+      var target = Math.max(0, cur - 1);
+      jumpTo(target);
+    } else if(ev.key === ' '){
+      ev.preventDefault();
+      $('pp').click();
+    } else if(ev.key === 'Home'){
+      $('rs').click();
+    }
+  });
+
+  // Touch swipe gestures
+  var touchStartX = 0, touchStartY = 0;
+  window.addEventListener('touchstart', function(e){
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  window.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].screenX - touchStartX;
+    var dy = e.changedTouches[0].screenY - touchStartY;
+    if(Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5){
+      if(dx < 0){
+        var target = Math.min(S.length - 1, cur + 1);
+        jumpTo(target);
+      } else {
+        var target = Math.max(0, cur - 1);
+        jumpTo(target);
+      }
+    }
+  }, { passive: true });
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>رحلة النفط: من باطن الأرض إلى منتجاتك (النسخة التفاعلية المحسّنة)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Lemonada:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f5eedf;
+  --paper-dark: #e8dfcd;
+  --ink: #1f1a16;
+  --ink-soft: #3d342d;
+  --red: #d64234;
+  --red-soft: #f28a80;
+  --mus: #e8a93a;
+  --mus-light: #fff2b8;
+  --teal: #2b8c82;
+  --teal-light: #cbeae6;
+  --blue: #366ca8;
+  --blue-light: #d4e4f7;
+  --card: #fffcf4;
+  --wood: #cf9b5b;
+  --cap: clamp(170px, 36vh, 260px);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Subtle paper texture overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  opacity: 0.45;
+  mix-blend-mode: multiply;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .5 0 0 0 0 .45 0 0 0 .45 0'/%3E%3C/filter%3E%3Crect width='280' height='280' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Top HUD bar */
+.top {
+  position: absolute;
+  inset: calc(10px + env(safe-area-inset-top, 0px)) 16px auto;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#num {
+  font-family: 'Lemonada', cursive, sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  border-radius: 20px 8px 18px 8px;
+  padding: 2px 10px;
+  background: var(--mus);
+  font-size: 13.5px;
+  box-shadow: 2px 2px 0 var(--ink);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.title-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 42vw;
+}
+
+#ttl {
+  font-family: 'Lemonada', cursive, sans-serif;
+  font-weight: 700;
+  font-size: clamp(13px, 2.3vw, 21px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+#subttl {
+  font-family: 'Cairo', system-ui, sans-serif;
+  font-size: clamp(9.5px, 1.4vw, 12px);
+  font-weight: 700;
+  color: var(--red);
+  letter-spacing: 0.08em;
+  direction: ltr;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.bar {
+  flex: 1;
+  min-width: 40px;
+  height: 12px;
+  border: 2.5px solid var(--ink);
+  border-radius: 9px 5px 9px 5px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: repeating-linear-gradient(-45deg, #1f1a16 0 8px, #e8a93a 8px 16px);
+  transition: width 0.15s ease-out;
+}
+
+/* Control buttons */
+.ctrls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+button {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2.5px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 10px 5px 10px 5px;
+  padding: 3px 8px;
+  box-shadow: 2px 2.5px 0 var(--ink);
+  transition: transform 0.1s, box-shadow 0.1s, background-color 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+button:active {
+  transform: translate(1.5px, 1.5px);
+  box-shadow: 0.5px 1px 0 var(--ink);
+  background: var(--mus-light);
+}
+
+/* Navigation dots */
+.dots {
+  position: absolute;
+  top: calc(52px + env(safe-area-inset-top, 0px));
+  inset-inline: 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  z-index: 25;
+}
+
+.dots span {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 1px 1.5px 0 var(--ink);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.25s;
+}
+
+.dots span:hover {
+  transform: scale(1.2);
+  background: var(--mus);
+}
+
+.dots span.on {
+  background: var(--red);
+  transform: scale(1.35) rotate(15deg);
+  border-radius: 40% 60% 50% 50%;
+}
+
+/* Main Visual Stage */
+.stage {
+  position: absolute;
+  inset: calc(72px + env(safe-area-inset-top, 0px)) 12px calc(var(--cap) + 16px + env(safe-area-inset-bottom, 0px)) 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: pan-y pinch-zoom;
+}
+
+#art {
+  width: 100%;
+  height: 100%;
+  max-width: 1000px;
+  max-height: 100%;
+  display: block;
+  filter: drop-shadow(0 6px 12px rgba(31, 26, 22, 0.08));
+}
+
+/* Bottom Explanatory Card */
+.cap {
+  position: absolute;
+  inset: auto 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  height: var(--cap);
+  z-index: 25;
+  background: var(--card);
+  border: 3px solid var(--ink);
+  border-radius: 20px 8px 22px 8px / 8px 22px 8px 20px;
+  box-shadow: 4.5px 5.5px 0 var(--ink);
+  padding: 12px 18px;
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Washi tape visual accent */
+.cap::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 45%;
+  width: 65px;
+  height: 18px;
+  background: rgba(232, 169, 58, 0.7);
+  transform: rotate(-3.5deg);
+  border: 1px dashed rgba(31, 26, 22, 0.3);
+  pointer-events: none;
+}
+
+/* Scrollbar styling */
+.cap::-webkit-scrollbar {
+  width: 5px;
+}
+.cap::-webkit-scrollbar-thumb {
+  background: var(--mus);
+  border-radius: 4px;
+}
+
+.ct {
+  flex: 1.4 1 300px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ct h2 {
+  font-family: 'Lemonada', cursive, sans-serif;
+  font-size: clamp(15px, 2.3vw, 22px);
+  color: var(--red);
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+
+.ct p {
+  font-size: clamp(12px, 1.6vw, 15px);
+  line-height: 1.75;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.rt {
+  flex: 1 1 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+}
+
+.fct {
+  background: var(--mus-light);
+  border: 2px solid var(--ink);
+  border-radius: 8px 16px 8px 16px;
+  padding: 7px 12px;
+  font-size: clamp(11.5px, 1.45vw, 13.5px);
+  line-height: 1.65;
+  color: var(--ink);
+  box-shadow: 2.5px 3px 0 var(--ink);
+  position: relative;
+  animation: pop 0.5s 0.3s both cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.fct b {
+  color: var(--red);
+  font-weight: 800;
+}
+
+.chs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  direction: ltr;
+}
+
+.ch {
+  border: 2px solid var(--ink);
+  border-radius: 12px 6px 12px 6px;
+  padding: 2px 9px;
+  font-weight: 700;
+  font-size: clamp(10.5px, 1.35vw, 13px);
+  background: var(--bg, #fff);
+  color: var(--ink);
+  box-shadow: 1.5px 2px 0 var(--ink);
+  animation: pop 0.4s var(--d, 0s) cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: translateY(12px) rotate(-4deg) scale(0.85); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Page wipe transition */
+.wipe {
+  position: fixed;
+  inset: -5% auto -5% 0;
+  width: 120%;
+  z-index: 50;
+  pointer-events: none;
+  background: var(--paper) repeating-linear-gradient(60deg, transparent 0 14px, rgba(31, 26, 22, 0.12) 14px 17px);
+  border-inline: 5px solid var(--ink);
+  transform: translateX(-125%) rotate(-2deg);
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.3);
+}
+
+.wipe.go {
+  animation: wp 0.75s ease-in-out;
+}
+
+@keyframes wp {
+  0% { transform: translateX(-125%) rotate(-2deg); }
+  100% { transform: translateX(125%) rotate(-2deg); }
+}
+
+/* SVG Styling & Animations */
+svg text {
+  font-family: 'Cairo', system-ui, sans-serif;
+  font-weight: 700;
+  fill: var(--ink);
+  text-anchor: middle;
+  direction: ltr;
+  paint-order: stroke fill;
+  stroke: #ffffff;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sc { display: none; }
+.sc.on { display: inline; }
+.sc text { stroke-width: 3px; }
+
+.f { filter: url(#rough); }
+.sc-stroke {
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.x { animation: pop 0.5s var(--d, 0s) cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+.rs { animation: rs 1.4s var(--d, 0s) ease-out both; }
+@keyframes rs {
+  from { transform: translateY(-70px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.pl { animation: fl 6s linear infinite var(--d, 0s); }
+@keyframes fl {
+  0% { transform: translateY(0); opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(240px); opacity: 0; }
+}
+
+.fu {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fu 2.8s var(--d, 0s) ease-out both;
+}
+@keyframes fu {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+.th {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fu 9s 0.8s ease-in-out both;
+}
+
+.rg {
+  fill: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rgg 2.2s var(--d, 0s) ease-out infinite;
+}
+@keyframes rgg {
+  from { transform: scale(0.1); opacity: 1; stroke-width: 4; }
+  to { transform: scale(1.1); opacity: 0; stroke-width: 1; }
+}
+
+.rot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sp 1.5s linear infinite;
+}
+@keyframes sp {
+  to { transform: rotate(360deg); }
+}
+
+.wb {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: nd 2.2s ease-in-out infinite alternate;
+}
+@keyframes nd {
+  from { transform: rotate(-10deg); }
+  to { transform: rotate(10deg); }
+}
+
+.fl {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: fk 0.35s ease-in-out infinite alternate;
+}
+@keyframes fk {
+  to { transform: scale(0.85, 1.25); }
+}
+
+.dr {
+  stroke-dasharray: 450;
+  stroke-dashoffset: 450;
+  animation: dr 1.6s var(--d, 0s) ease-out forwards;
+}
+@keyframes dr {
+  to { stroke-dashoffset: 0; }
+}
+
+.bw {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: bw 1.8s var(--d, 0s) cubic-bezier(0.3, 1.3, 0.5, 1) both;
+}
+@keyframes bw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.into {
+  animation: into 3s 1s ease-in both;
+}
+@keyframes into {
+  to { transform: translate(200px, 0) scale(0.3); opacity: 0; }
+}
+
+.shk {
+  animation: shk 0.12s linear 12 alternate 1.6s;
+}
+@keyframes shk {
+  to { transform: translate(2px, -2px); }
+}
+
+#pt circle {
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+
+/* ========================================================
+   RESPONSIVE ENHANCEMENTS FOR MOBILE PHONES & PORTRAIT TABLETS
+   ======================================================== */
+@media (max-width: 768px), (max-aspect-ratio: 1/1) {
+  :root {
+    --cap: clamp(190px, 42vh, 310px);
+  }
+
+  .top {
+    inset: calc(6px + env(safe-area-inset-top, 0px)) 10px auto;
+    gap: 6px;
+  }
+
+  #num {
+    font-size: 11.5px;
+    padding: 1.5px 7px;
+    border-width: 2px;
+  }
+
+  .title-wrap {
+    max-width: 38vw;
+  }
+
+  #ttl {
+    font-size: clamp(11.5px, 3.2vw, 15px);
+  }
+
+  #subttl {
+    font-size: 9px;
+  }
+
+  .bar {
+    height: 9px;
+    min-width: 24px;
+    border-width: 2px;
+  }
+
+  .ctrls {
+    gap: 3.5px;
+  }
+
+  button {
+    font-size: 11.5px;
+    padding: 2px 6px;
+    border-width: 2px;
+    min-width: 26px;
+    min-height: 26px;
+    border-radius: 8px 4px 8px 4px;
+    box-shadow: 1.5px 2px 0 var(--ink);
+  }
+
+  .dots {
+    top: calc(44px + env(safe-area-inset-top, 0px));
+    gap: 5.5px;
+  }
+
+  .dots span {
+    width: 9.5px;
+    height: 9.5px;
+    border-width: 1.8px;
+  }
+
+  .dots span.on {
+    transform: scale(1.3) rotate(12deg);
+  }
+
+  .stage {
+    position: absolute;
+    inset: calc(56px + env(safe-area-inset-top, 0px)) 6px calc(var(--cap) + 10px + env(safe-area-inset-bottom, 0px)) 6px;
+  }
+
+  .cap {
+    inset: auto 8px calc(8px + env(safe-area-inset-bottom, 0px));
+    height: var(--cap);
+    padding: 10px 12px;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 8px;
+    border-width: 2.5px;
+    box-shadow: 3.5px 4px 0 var(--ink);
+  }
+
+  .cap::before {
+    top: -7px;
+    width: 48px;
+    height: 14px;
+  }
+
+  .ct {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .ct h2 {
+    font-size: clamp(14px, 3.8vw, 18px);
+    margin-bottom: 2px;
+  }
+
+  .ct p {
+    font-size: clamp(11.5px, 3.1vw, 13.5px);
+    line-height: 1.6;
+  }
+
+  .rt {
+    flex: 0 0 auto;
+    width: 100%;
+    gap: 6px;
+  }
+
+  .fct {
+    padding: 5px 9px;
+    font-size: clamp(10.5px, 2.8vw, 12.5px);
+    line-height: 1.55;
+    border-width: 1.8px;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .chs {
+    gap: 4px;
+    justify-content: flex-start;
+  }
+
+  .ch {
+    padding: 1px 7px;
+    font-size: clamp(10px, 2.6vw, 11.5px);
+    border-width: 1.8px;
+    box-shadow: 1px 1.5px 0 var(--ink);
+  }
+
+  /* SVG labels responsive clarity */
+  svg text {
+    font-size: 13.5px;
+    stroke-width: 3.5px;
+  }
+}
+
+/* ========================================================
+   LANDSCAPE MOBILE PHONE ADJUSTMENTS
+   ======================================================== */
+@media (max-height: 480px) and (orientation: landscape) {
+  :root {
+    --cap: clamp(100px, 34vh, 140px);
+  }
+
+  .top {
+    inset: 4px 12px auto;
+    gap: 6px;
+  }
+
+  .dots {
+    top: 36px;
+    gap: 5px;
+  }
+
+  .dots span {
+    width: 8px;
+    height: 8px;
+  }
+
+  .stage {
+    inset: 44px 8px calc(var(--cap) + 6px) 8px;
+  }
+
+  .cap {
+    padding: 6px 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ct h2 {
+    font-size: 13px;
+  }
+
+  .ct p {
+    font-size: 10.5px;
+    line-height: 1.4;
+  }
+
+  .fct {
+    font-size: 10px;
+    padding: 3px 7px;
+  }
+
+  .ch {
+    font-size: 9.5px;
+    padding: 1px 5px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Header HUD -->
+<header class="top">
+  <div id="num">1/10</div>
+  <div class="title-wrap">
+    <div id="ttl">ولادة النفط</div>
+    <div id="subttl">SOURCE ROCK</div>
+  </div>
+  <div class="bar"><i id="pg"></i></div>
+  <div class="ctrls">
+    <button id="prevBtn" title="المشهد السابق">⏮</button>
+    <button id="pp" title="إيقاف مؤقت / تشغيل">⏸</button>
+    <button id="nextBtn" title="المشهد التالي">⏭</button>
+    <button id="rs" title="إعادة تشغيل">↻</button>
+  </div>
+</header>
+
+<!-- Step dots -->
+<nav class="dots" id="dots"></nav>
+
+<!-- Visual Animation Canvas (SVG) -->
+<main class="stage" id="stageArea">
+  <svg id="art" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <!-- Rough sketch filter for hand-drawn comic look -->
+      <filter id="rough" x="-3%" y="-3%" width="106%" height="106%">
+        <feTurbulence id="tb" type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="1" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="3.5"/>
+      </filter>
+
+      <!-- Geological Rock Pore Pattern -->
+      <pattern id="pr" width="14" height="14" patternUnits="userSpaceOnUse">
+        <circle cx="4" cy="4" r="2" fill="#241e1a" stroke="none" opacity=".45"/>
+        <circle cx="11" cy="10" r="1.6" fill="#241e1a" stroke="none" opacity=".35"/>
+      </pattern>
+
+      <!-- Rock Grain Hatch Pattern -->
+      <pattern id="grain" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+        <path d="M0 0V10" stroke="#3b2f2a" stroke-opacity=".2" stroke-width="1.8"/>
+      </pattern>
+
+      <!-- Dome Trap Clip Path -->
+      <clipPath id="dm"><path d="M150 330Q400 70 650 330Z"/></clipPath>
+      <!-- Separator Clip Path -->
+      <clipPath id="sp"><rect x="210" y="170" width="220" height="90" rx="45"/></clipPath>
+
+      <!-- Thermal Gradient -->
+      <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#7fb6d9"/>
+        <stop offset="0.5" stop-color="#e8a93a"/>
+        <stop offset="1" stop-color="#d9443b"/>
+      </linearGradient>
+
+      <!-- Sea Surface Gradient -->
+      <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8bc4e6"/>
+        <stop offset="1" stop-color="#3c79a8"/>
+      </linearGradient>
+
+      <!-- Distillation Column Thermal Gradient -->
+      <linearGradient id="towerG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#7fb6d9"/>
+        <stop offset="20%" stop-color="#f6e29a"/>
+        <stop offset="45%" stop-color="#e8c26a"/>
+        <stop offset="70%" stop-color="#c9944a"/>
+        <stop offset="90%" stop-color="#d9443b"/>
+        <stop offset="100%" stop-color="#801a14"/>
+      </linearGradient>
+    </defs>
+
+    <!-- SLIDE 0: ولادة النفط (SOURCE ROCK) -->
+    <g class="sc sc-stroke" id="s0">
+      <g class="f">
+        <!-- Ocean Water Column -->
+        <rect y="0" width="800" height="120" fill="url(#seaG)" stroke="none"/>
+        <path d="M0 120Q50 106 100 120T200 120T300 120T400 120T500 120T600 120T700 120T800 120" fill="none" stroke="#2b5577" stroke-width="2.5"/>
+        
+        <!-- Drifting Micro-Algae / Plankton -->
+        <g fill="#4e9952" stroke="none">
+          <circle class="pl" cx="90" cy="20" r="5"/>
+          <circle class="pl" cx="190" cy="30" r="4.5" style="--d:-2s"/>
+          <circle class="pl" cx="290" cy="15" r="5" style="--d:-4s"/>
+          <circle class="pl" cx="380" cy="30" r="4" style="--d:-1s"/>
+          <circle class="pl" cx="470" cy="20" r="5.5" style="--d:-3s"/>
+          <circle class="pl" cx="560" cy="35" r="4.5" style="--d:-5s"/>
+          <circle class="pl" cx="650" cy="18" r="5" style="--d:-2.5s"/>
+        </g>
+        
+        <!-- Depositional Sedimentary Layers -->
+        <rect x="0" y="345" width="700" height="55" fill="#8c8c8c"/>
+        <rect class="rs" x="0" y="305" width="700" height="40" fill="#3b2f2a" style="--d:.5s"/>
+        <rect class="rs" x="0" y="262" width="700" height="43" fill="#cdb18a" style="--d:3.5s"/>
+        <rect class="rs" x="0" y="222" width="700" height="40" fill="#b88f66" style="--d:6.5s"/>
+        <rect class="rs" x="0" y="180" width="700" height="42" fill="#d9c4a0" style="--d:9.5s"/>
+
+        <!-- Formed Oil Droplets in Source Rock -->
+        <g fill="#1d1a1a" stroke="none">
+          <circle class="x" cx="120" cy="325" r="6" style="--d:11.5s"/>
+          <circle class="x" cx="260" cy="322" r="7.5" style="--d:12.1s"/>
+          <circle class="x" cx="400" cy="328" r="6" style="--d:12.7s"/>
+          <circle class="x" cx="540" cy="324" r="7.5" style="--d:13.3s"/>
+        </g>
+
+        <!-- Temperature & Pressure Gauge -->
+        <rect x="744" y="135" width="28" height="235" rx="14" fill="#ffffff" stroke="#1f1a16" stroke-width="2.5"/>
+        <rect class="th" x="748" y="140" width="20" height="225" rx="10" fill="url(#tg)" stroke="none"/>
+      </g>
+      <text class="x" x="250" y="70" style="--d:.5s">عوالق وطحالب تموت وتغرق في القاع</text>
+      <text class="x" x="350" y="388" style="--d:1s">صخر القاعدة القديم</text>
+      <text class="x" x="350" y="328" style="--d:4.5s;font-size:12px">صخر المصدر: طين عضوي + كيروجين</text>
+      <text class="x" x="350" y="204" style="--d:9.5s;font-size:12.5px">طبقات رسوبية متراكمة تزيد الضغط</text>
+      <text class="x" x="720" y="125" style="--d:3s">نافذة النفط 60–120°م</text>
+      <text class="x" x="720" y="390" style="--d:2s;font-size:11.5px">ملايين السنين</text>
+    </g>
+
+    <!-- SLIDE 1: الهجرة والمصيدة (MIGRATION & TRAP) -->
+    <g class="sc sc-stroke" id="s1">
+      <g class="f">
+        <rect y="100" width="800" height="300" fill="#d9c4a0" stroke="none"/>
+        <rect y="345" width="800" height="55" fill="#3b2f2a"/>
+        <!-- Anticline Dome Structure -->
+        <g clip-path="url(#dm)">
+          <rect x="150" y="200" width="500" height="140" fill="#7fb6d9" stroke="none"/>
+          <rect class="fu" x="150" y="245" width="500" height="90" fill="#1d1a1a" stroke="none" style="--d:2s"/>
+          <rect class="fu" x="150" y="195" width="500" height="55" fill="#f6e29a" stroke="none" style="--d:6.5s"/>
+          <rect x="150" y="190" width="500" height="150" fill="url(#pr)" stroke="none"/>
+        </g>
+        <!-- Cap Rock (Impermeable Shale Seal) -->
+        <path d="M130 345Q400 30 670 345" fill="none" stroke="#686e75" stroke-width="20"/>
+      </g>
+      <!-- Migration Path -->
+      <path id="p_mig" d="M110 368Q250 358 290 300T395 215" fill="none" stroke="none"/>
+      
+      <!-- Stratified Labels -->
+      <text x="400" y="235" style="font-size:13px">غاز طبيعي (الأخف كثافة)</text>
+      <text x="400" y="278" style="font-size:14px">نفط خام (في مسام الصخر)</text>
+      <text x="400" y="322" style="font-size:13px">ماء مالح سفلي (الأثقل)</text>
+      <text x="400" y="58" class="x" style="--d:1s">صخر الغطاء الكتيم (Cap Rock)</text>
+      <text x="130" y="390">صخر المصدر العميق</text>
+      <text x="700" y="250" class="x" style="--d:3s">مسام الصخر كالماء في الإسفنج</text>
+    </g>
+
+    <!-- SLIDE 2: البحث بالصوت (SEISMIC SURVEY) -->
+    <g class="sc sc-stroke" id="s2">
+      <g class="f">
+        <rect y="140" width="800" height="260" fill="#d9c4a0" stroke="none"/>
+        <path d="M0 230Q200 210 400 240T800 220M0 300Q220 290 400 310T800 290M0 360Q250 350 400 365T800 350" fill="none" stroke="#7a6249" stroke-width="2.5"/>
+        
+        <!-- Vibroseis Truck -->
+        <rect x="50" y="110" width="75" height="30" rx="4" fill="#e8a93a"/>
+        <rect x="105" y="98" width="26" height="24" rx="3" fill="#bcd3e8"/>
+        <circle cx="68" cy="144" r="9" fill="#1f1a16"/>
+        <circle cx="112" cy="144" r="9" fill="#1f1a16"/>
+        <rect x="80" y="138" width="22" height="10" fill="#d94234"/>
+        
+        <!-- Geophones Array (Sensors) -->
+        <g fill="#d94234">
+          <path d="M450 140l7-15 7 15zM490 140l7-15 7 15zM530 140l7-15 7 15zM570 140l7-15 7 15zM610 140l7-15 7 15z"/>
+        </g>
+        
+        <!-- 3D Subsurface Seismic Cube -->
+        <g class="x" style="--d:5.5s">
+          <path d="M685 220l55-22 55 22-55 22z" fill="#f0e2be" stroke="#1f1a16"/>
+          <path d="M685 220v75l55 22v-75z" fill="#cdb18a" stroke="#1f1a16"/>
+          <path d="M795 220v75l-55 22v-75z" fill="#b88f66" stroke="#1f1a16"/>
+          <ellipse cx="740" cy="285" rx="20" ry="10" fill="#1d1a1a"/>
+        </g>
+      </g>
+      
+      <!-- Acoustic Wave Reflection Path -->
+      <path id="p_w" d="M96 142L330 310L560 142" fill="none" stroke="none"/>
+      <!-- Concentric Sound Waves -->
+      <circle class="rg" cx="96" cy="142" r="80" style="stroke:#366ca8;--d:0s"/>
+      <circle class="rg" cx="96" cy="142" r="80" style="stroke:#366ca8;--d:.7s"/>
+      
+      <text x="105" y="80">شاحنة الاهتزاز Vibroseis</text>
+      <text x="530" y="105">مصفوفة الحساسات Geophones</text>
+      <text x="740" y="190" class="x" style="--d:5.5s">نموذج زلزالي ثلاثي الأبعاد 3D</text>
+      <text x="330" y="340" style="font-size:12.5px">الموجات الصوتية ترتد من حدود الطبقات</text>
+    </g>
+
+    <!-- SLIDE 3: الحفر (DRILLING) -->
+    <g class="sc sc-stroke" id="s3">
+      <g class="f">
+        <!-- Geological strata -->
+        <rect y="120" width="800" height="70" fill="#cdb18a" stroke="none"/>
+        <rect y="190" width="800" height="60" fill="#b88f66" stroke="none"/>
+        <rect y="250" width="800" height="50" fill="#8d6b4a" stroke="none"/>
+        <rect y="300" width="800" height="100" fill="#6e5a4a" stroke="none"/>
+        <rect y="320" width="800" height="60" fill="url(#pr)" stroke="none"/>
+        
+        <!-- Steel Derrick Tower -->
+        <path d="M265 120L298 32L332 120M274 100H323M282 76H316M290 54H308M274 100L323 76M323 100L274 76" fill="none" stroke-width="2.5"/>
+        <rect x="250" y="117" width="98" height="8" fill="#e8a93a"/>
+        <rect x="286" y="125" width="26" height="20" rx="3" fill="#d94234"/>
+        <!-- Mud Tank / Pit -->
+        <rect x="470" y="75" width="105" height="46" rx="4" fill="#7a5d42"/>
+        
+        <!-- Curved Wellbore -->
+        <path id="wo" d="M298 126V320Q298 345 340 345H630" fill="none" stroke="#9a9a9a" stroke-width="13"/>
+        <path id="p_well" d="M298 126V320Q298 345 340 345H630" fill="none" stroke-width="6"/>
+        
+        <!-- Rotating Drill Bit -->
+        <g id="bit">
+          <path d="M-12 -8L12 -8L0 14Z" fill="#e8a93a" stroke="#1f1a16" stroke-width="2"/>
+          <path d="M-7 -8V-16M7 -8V-16" stroke="#1f1a16" stroke-width="2"/>
+        </g>
+      </g>
+      
+      <!-- Mud flow down & cuttings flow up -->
+      <path id="p_dn" d="M298 60V320Q298 345 340 345H610" fill="none" stroke="none"/>
+      <path id="p_up" d="M312 335V135H470" fill="none" stroke="none"/>
+      
+      <text x="522" y="65">طين الحفر يضخ للأسفل</text>
+      <text x="195" y="170" style="font-size:12px">غلاف فولاذي + إسمنت حماية</text>
+      <text x="300" y="158" style="font-size:11.5px;fill:#fff;stroke:none" dy="-32">مانع الانفجار BOP</text>
+      <text x="690" y="375" style="font-size:13px">حفر أفقي داخل المكمن</text>
+      <text x="522" y="150" style="font-size:12px">فتات الصخر يصعد للأعلى ↑</text>
+    </g>
+
+    <!-- SLIDE 4: كيف يخرج النفط؟ (PRODUCTION) -->
+    <g class="sc sc-stroke" id="s4">
+      <g class="f">
+        <rect y="120" width="800" height="70" fill="#cdb18a" stroke="none"/>
+        <rect y="190" width="800" height="60" fill="#b88f66" stroke="none"/>
+        <rect y="250" width="800" height="50" fill="#8d6b4a" stroke="none"/>
+        <rect y="300" width="800" height="100" fill="#6e5a4a" stroke="none"/>
+        
+        <!-- Oil Reservoir Zone -->
+        <rect x="40" y="305" width="720" height="60" fill="#c9a45c"/>
+        <rect x="40" y="305" width="720" height="60" fill="url(#pr)" stroke="none"/>
+        <g fill="#1d1a1a" stroke="none">
+          <ellipse cx="500" cy="334" rx="28" ry="10"/>
+          <ellipse cx="380" cy="336" rx="32" ry="10"/>
+          <ellipse cx="260" cy="332" rx="26" ry="9"/>
+        </g>
+        
+        <!-- Production Well & Injection Well Pipes -->
+        <path d="M140 118V330M600 150V330" fill="none" stroke="#1f1a16" stroke-width="3"/>
+        
+        <!-- Christmas Tree Valving -->
+        <g class="tree">
+          <path d="M600 118V150M584 132H616" stroke="#1f1a16" stroke-width="3"/>
+          <circle cx="600" cy="122" r="7" fill="#d94234"/>
+        </g>
+        
+        <!-- Nodding Donkey (Pumpjack / Walking Beam) -->
+        <g class="pmp x" style="--d:6s">
+          <path d="M635 150L664 94L692 150M664 150V94" fill="none" stroke="#1f1a16" stroke-width="3"/>
+          <g class="wb">
+            <path d="M608 94H720" stroke-width="8" stroke="#1f1a16" fill="none"/>
+            <path d="M608 82Q596 94 608 106" fill="#e8a93a" stroke="#1f1a16" stroke-width="2.5"/>
+          </g>
+          <path d="M608 106V150" fill="none" stroke="#1f1a16" stroke-width="2.5"/>
+        </g>
+        
+        <!-- Water Injection Wellhead -->
+        <rect x="114" y="94" width="52" height="28" rx="4" fill="#7fb6d9"/>
+        
+        <!-- Recovery Bar Indicator -->
+        <g transform="translate(60, 372)">
+          <rect width="180" height="16" rx="8" fill="#ffffff" stroke="#1f1a16" stroke-width="2"/>
+          <rect width="75" height="16" rx="8" fill="#1d1a1a"/>
+        </g>
+      </g>
+      
+      <!-- Particle Flow Paths -->
+      <path id="p_prod" d="M600 330V150" fill="none" stroke="none"/>
+      <path id="p_inj" d="M140 125V330" fill="none" stroke="none"/>
+      <path id="p_sweep" d="M140 336H590" fill="none" stroke="none"/>
+      
+      <text x="140" y="85">حقن الماء/الغاز</text>
+      <text x="600" y="105" class="tree">ضغط طبيعي أولاً ↑</text>
+      <text x="695" y="75" class="x" style="--d:6s">مضخة رأسية لاحقاً</text>
+      <text x="150" y="396" style="font-size:12px">نستخرج غالباً 30–50% فقط من النفط</text>
+      <text x="360" y="318" style="font-size:12.5px">جبهة الماء تكنس النفط نحو بئر الإنتاج ➔</text>
+    </g>
+
+    <!-- SLIDE 5: فصل ونقل (SEPARATION & TRANSPORT) -->
+    <g class="sc sc-stroke" id="s5">
+      <g class="f">
+        <!-- Sea Water at Port -->
+        <rect y="330" width="800" height="70" fill="#7fb6d9" stroke="none"/>
+        
+        <!-- Inflow Manifold -->
+        <path d="M20 190V230M10 200H40" fill="none" stroke="#1f1a16" stroke-width="3"/>
+        <circle cx="20" cy="190" r="7" fill="#d94234"/>
+        
+        <!-- 3-Phase Horizontal Separator Vessel -->
+        <g clip-path="url(#sp)">
+          <rect x="210" y="170" width="220" height="28" fill="#f6e29a" stroke="none"/>
+          <rect x="210" y="198" width="220" height="42" fill="#1d1a1a" stroke="none"/>
+          <rect x="210" y="240" width="220" height="20" fill="#7fb6d9" stroke="none"/>
+        </g>
+        <rect x="210" y="170" width="220" height="90" rx="45" fill="none" stroke="#1f1a16" stroke-width="3.5"/>
+        
+        <!-- Gas Flare Stack with Animated Flame -->
+        <path d="M420 115V65" fill="none" stroke="#1f1a16" stroke-width="3"/>
+        <path class="fl" d="M420 65Q402 45 420 25Q438 45 420 65Z" fill="#e8742a" stroke="#d94234" stroke-width="2"/>
+        
+        <!-- Crude Oil Storage Tank -->
+        <rect x="500" y="145" width="85" height="115" rx="10" fill="#e8d9b0" stroke="#1f1a16" stroke-width="3"/>
+        <rect x="500" y="200" width="85" height="60" rx="6" fill="#1d1a1a"/>
+        
+        <!-- Supertanker Ship -->
+        <path d="M635 310H775L752 338H655Z" fill="#58636b" stroke="#1f1a16" stroke-width="3"/>
+        <path d="M665 310V282H725V310" fill="#fff8dc" stroke="#1f1a16" stroke-width="2.5"/>
+      </g>
+      
+      <!-- Pipes -->
+      <path id="p_in" d="M20 215H210" fill="none" stroke="var(--ink)" stroke-width="4"/>
+      <path id="p_gas" d="M320 170V115H420" fill="none" stroke="var(--ink)" stroke-width="4"/>
+      <path id="p_oil" d="M430 215H500" fill="none" stroke="var(--ink)" stroke-width="4"/>
+      <path id="p_oil2" d="M585 245H620V298" fill="none" stroke="var(--ink)" stroke-width="4"/>
+      
+      <text x="320" y="188" style="font-size:12px">غاز طبيعي</text>
+      <text x="320" y="222" style="font-size:13px;fill:#fff">نفط خام صافٍ</text>
+      <text x="320" y="254" style="font-size:12px">ماء مالح + رمل</text>
+      <text x="320" y="288">فاصل ثلاثي الطور Separator</text>
+      <text x="420" y="18">مشعل / محطة الغاز</text>
+      <text x="542" y="132">خزان تخزين</text>
+      <text x="705" y="272">ناقلة نفط عملاقة</text>
+      <text x="100" y="175">خليط من رأس البئر</text>
+    </g>
+
+    <!-- SLIDE 6: المصفاة: التقطير (DISTILLATION) -->
+    <g class="sc sc-stroke" id="s6">
+      <g class="f">
+        <!-- Furnace with Dynamic Flame -->
+        <rect x="35" y="265" width="95" height="90" rx="8" fill="#e0a37a" stroke="#1f1a16" stroke-width="3"/>
+        <path class="fl" d="M82 345Q65 320 82 298Q89 318 97 328Q105 314 92 296Q112 320 82 345Z" fill="#e8742a" stroke="#d94234" stroke-width="2"/>
+        
+        <!-- Distillation Column Body -->
+        <rect x="225" y="36" width="105" height="354" rx="18" fill="#eef2f5" stroke="#1f1a16" stroke-width="3.5"/>
+        <!-- Trays -->
+        <path d="M225 90H330M225 145H330M225 200H330M225 255H330M225 310H330" fill="none" stroke="#1f1a16" stroke-width="2" stroke-dasharray="6 4"/>
+        <!-- Thermal Indicator Strip -->
+        <rect x="185" y="46" width="16" height="334" rx="8" fill="url(#towerG)" stroke="#1f1a16" stroke-width="2"/>
+      </g>
+      
+      <!-- Feed pipe & Column vapor ascent -->
+      <path id="p_feed" d="M130 335H225" fill="none" stroke="var(--ink)" stroke-width="4"/>
+      <path id="p_col" d="M277 370V56" fill="none" stroke="none"/>
+      
+      <!-- Output stream conduits -->
+      <g fill="none" stroke-width="4">
+        <path id="p_o1" d="M330 56H470" stroke="#f6e29a"/>
+        <path id="p_o2" d="M330 110H470" stroke="#f3d98b"/>
+        <path id="p_o3" d="M330 164H470" stroke="#e8c26a"/>
+        <path id="p_o4" d="M330 218H470" stroke="#c9944a"/>
+        <path id="p_o5" d="M330 272H470" stroke="#8d6b4a"/>
+        <path id="p_o6" d="M330 345H470" stroke="#2a2420"/>
+      </g>
+      
+      <!-- Fraction Information Badges -->
+      <g class="f">
+        <rect class="x" x="470" y="40" width="320" height="32" rx="8" fill="#f6e29a" stroke="#1f1a16" stroke-width="2" style="--d:1.8s"/>
+        <rect class="x" x="470" y="94" width="320" height="32" rx="8" fill="#f3d98b" stroke="#1f1a16" stroke-width="2" style="--d:2.5s"/>
+        <rect class="x" x="470" y="148" width="320" height="32" rx="8" fill="#e8c26a" stroke="#1f1a16" stroke-width="2" style="--d:3.2s"/>
+        <rect class="x" x="470" y="202" width="320" height="32" rx="8" fill="#c9944a" stroke="#1f1a16" stroke-width="2" style="--d:3.9s"/>
+        <rect class="x" x="470" y="256" width="320" height="32" rx="8" fill="#8d6b4a" stroke="#1f1a16" stroke-width="2" style="--d:4.6s"/>
+        <rect class="x" x="470" y="328" width="320" height="32" rx="8" fill="#2a2420" stroke="#1f1a16" stroke-width="2" style="--d:5.3s"/>
+      </g>
+      
+      <g style="font-size:12px">
+        <text class="x" x="630" y="61" style="--d:1.8s">غاز مسال LPG · أقل من 40°م · طبخ وتدفئة</text>
+        <text class="x" x="630" y="115" style="--d:2.5s">نافثا / بنزين · 40–180°م · وقود سيارات وبلاستيك</text>
+        <text class="x" x="630" y="169" style="--d:3.2s">كيروسين · 180–250°م · وقود طائرات نفاثة</text>
+        <text class="x" x="630" y="223" style="--d:3.9s">ديزل · 250–350°م · شاحنات ومعدات ثقيلة</text>
+        <text class="x" x="630" y="277" style="--d:4.6s;fill:#fff">زيت غاز ثقيل · للتكسير وزيوت المحركات</text>
+        <text class="x" x="630" y="349" style="--d:5.3s;fill:#fff">بقايا ثقيلة فوق 350°م · أسفلت ووقود سفن</text>
+      </g>
+      
+      <text x="82" y="252">فرن التسخين</text>
+      <text x="277" y="26">برج التقطير</text>
+      <text x="170" y="215" style="font-size:12px">تدرج الحرارة</text>
+    </g>
+
+    <!-- SLIDE 7: التحويل والتحسين (CRACKING · REFORMING · TREATING) -->
+    <g class="sc sc-stroke" id="s7">
+      <g class="f">
+        <!-- Long heavy molecule chain entering cracker -->
+        <g class="into">
+          <path d="M40 130L65 110L90 130L115 110L140 130L165 110L190 130L215 110L240 130" fill="none" stroke="#1f1a16" stroke-width="3"/>
+          <g fill="#1d1a1a">
+            <circle cx="40" cy="130" r="6"/><circle cx="90" cy="130" r="6"/><circle cx="140" cy="130" r="6"/><circle cx="190" cy="130" r="6"/><circle cx="240" cy="130" r="6"/>
+            <circle cx="65" cy="110" r="6"/><circle cx="115" cy="110" r="6"/><circle cx="165" cy="110" r="6"/><circle cx="215" cy="110" r="6"/>
+          </g>
+        </g>
+        
+        <!-- Catalytic Cracking Reactor -->
+        <g class="shk">
+          <rect x="295" y="55" width="135" height="135" rx="14" fill="#e8c26a" stroke="#1f1a16" stroke-width="3"/>
+        </g>
+        
+        <!-- Shorter Cracked Molecules Exiting -->
+        <g class="x" style="--d:4.2s">
+          <path d="M470 78L490 64L510 78" fill="none" stroke="#1f1a16" stroke-width="3"/>
+          <circle cx="470" cy="78" r="6" fill="#1d1a1a"/><circle cx="490" cy="64" r="6" fill="#1d1a1a"/><circle cx="510" cy="78" r="6" fill="#1d1a1a"/>
+        </g>
+        <g class="x" style="--d:4.9s">
+          <path d="M470 122L490 108L510 122" fill="none" stroke="#1f1a16" stroke-width="3"/>
+          <circle cx="470" cy="122" r="6" fill="#1d1a1a"/><circle cx="490" cy="108" r="6" fill="#1d1a1a"/><circle cx="510" cy="122" r="6" fill="#1d1a1a"/>
+        </g>
+        <g class="x" style="--d:5.6s">
+          <path d="M470 166L490 152L510 166" fill="none" stroke="#1f1a16" stroke-width="3"/>
+          <circle cx="470" cy="166" r="6" fill="#1d1a1a"/><circle cx="490" cy="152" r="6" fill="#1d1a1a"/><circle cx="510" cy="166" r="6" fill="#1d1a1a"/>
+        </g>
+        
+        <!-- 3 Feature Process Boxes -->
+        <rect x="35" y="230" width="225" height="155" rx="12" fill="#fffcf4" stroke="#1f1a16" stroke-width="2.5"/>
+        <rect x="285" y="230" width="235" height="155" rx="12" fill="#fffcf4" stroke="#1f1a16" stroke-width="2.5"/>
+        <rect x="545" y="230" width="225" height="155" rx="12" fill="#fffcf4" stroke="#1f1a16" stroke-width="2.5"/>
+        
+        <!-- Reforming Ring Structure -->
+        <polygon class="x" style="--d:6.8s" points="195,285 183,264 159,264 147,285 159,306 183,306" fill="#f3d98b" stroke="#1f1a16" stroke-width="2.5"/>
+        <path class="x" style="--d:6.8s" d="M55 298L75 278L95 298L115 278" fill="none" stroke="#1f1a16" stroke-width="2.5"/>
+        
+        <!-- Hydrotreating (Sulfur Removal) -->
+        <g class="x" style="--d:9.2s">
+          <circle cx="325" cy="288" r="7" fill="#1d1a1a"/>
+          <circle cx="355" cy="268" r="7" fill="#1d1a1a"/>
+          <circle class="rot" cx="390" cy="288" r="9" fill="#f6d84a" stroke="#1f1a16" stroke-width="2"/>
+          <path d="M398 282L428 260" fill="none" stroke="#1f1a16" stroke-dasharray="4 4" stroke-width="2"/>
+        </g>
+        
+        <!-- Elemental Sulfur Crystals -->
+        <g class="x" style="--d:11s">
+          <path d="M565 348L595 320L625 348Z" fill="#f6d84a" stroke="#1f1a16" stroke-width="2.5"/>
+          <path d="M595 320L635 328L605 348" fill="#e8c26a" stroke="#1f1a16" stroke-width="2.5"/>
+        </g>
+      </g>
+      
+      <text x="362" y="45">محفّز كيميائي + حرارة وضغط</text>
+      <text x="362" y="125" style="font-size:12.5px">تكسير حفزي FCC / Hydrocracker</text>
+      <text x="140" y="90" style="font-size:12.5px">جزيء ثقيل طويل</text>
+      <text x="590" y="115" class="x" style="--d:4.8s;font-size:12.5px">جزيئات خفيفة ثمينة (بنزين/ديزل)</text>
+      
+      <text x="148" y="252">إصلاح Reforming</text>
+      <text x="148" y="340" style="font-size:11.5px">سلاسل ← حلقات = أوكتان أعلى ⚡</text>
+      <text x="402" y="252">معالجة Hydrotreating</text>
+      <text x="402" y="340" style="font-size:11.5px">نزع الكبريت S بالهيدروجين</text>
+      <text x="658" y="252">الكبريت المنزوع</text>
+      <text x="658" y="375" style="font-size:11.5px">حمض كبريتيك · أسمدة زراعية 🌾</text>
+    </g>
+
+    <!-- SLIDE 8: ماذا في البرميل؟ (WHAT'S IN A BARREL) -->
+    <g class="sc sc-stroke" id="s8">
+      <g class="f">
+        <!-- 42-Gallon Standard Crude Drum -->
+        <rect x="40" y="105" width="105" height="175" rx="20" fill="#2d2520" stroke="#1f1a16" stroke-width="3"/>
+        <path d="M40 148H145M40 236H145" fill="none" stroke="#e8a93a" stroke-width="3"/>
+        
+        <!-- Refined Output Product Volume Bars -->
+        <rect class="bw" x="255" y="38" width="395" height="45" rx="9" fill="#e8c26a" stroke="#1f1a16" stroke-width="2" style="--d:.8s"/>
+        <rect class="bw" x="255" y="102" width="255" height="45" rx="9" fill="#c9944a" stroke="#1f1a16" stroke-width="2" style="--d:1.6s"/>
+        <rect class="bw" x="255" y="166" width="90" height="45" rx="9" fill="#8d6b4a" stroke="#1f1a16" stroke-width="2" style="--d:2.4s"/>
+        <rect class="bw" x="255" y="230" width="18" height="45" rx="6" fill="#2a2420" stroke="#1f1a16" stroke-width="2" style="--d:3.2s"/>
+        <rect class="bw" x="255" y="294" width="155" height="45" rx="9" fill="#bcd3e8" stroke="#1f1a16" stroke-width="2" style="--d:4s"/>
+      </g>
+      
+      <text x="92" y="200" style="fill:#fff;font-size:30px">42</text>
+      <text x="92" y="295" style="font-size:14px">غالون خام</text>
+      <text x="200" y="205" style="font-size:28px">⟶</text>
+      
+      <g style="font-size:13.5px;text-anchor:start">
+        <text class="x" x="660" y="67" style="--d:1.8s">19.6 غالون · بنزين سيارات 🚗</text>
+        <text class="x" x="520" y="131" style="--d:2.6s">12.5 غالون · ديزل وتدفئة 🚚</text>
+        <text class="x" x="355" y="195" style="--d:3.4s">4.4 غالون · وقود طائرات ✈️</text>
+        <text class="x" x="282" y="259" style="--d:4.2s">0.7 غالون · وقود سفن 🚢</text>
+        <text class="x" x="420" y="323" style="--d:5s">≈ 7.5 غالون · غاز مسال · أسفلت · زيوت · شمع · فحم بترولي</text>
+      </g>
+      
+      <text x="400" y="385" style="font-size:13px">الإجمالي الناتج = 45 غالوناً تقريباً (توسع الحجم: Processing Gain)</text>
+    </g>
+
+    <!-- SLIDE 9: البتروكيماويات (PETROCHEMICALS) -->
+    <g class="sc sc-stroke" id="s9">
+      <g class="f">
+        <!-- Feedstock Tank -->
+        <rect x="20" y="155" width="100" height="65" rx="10" fill="#f3d98b" stroke="#1f1a16" stroke-width="2.5"/>
+        
+        <!-- High-Temp Steam Cracker (~850°C) -->
+        <rect x="165" y="135" width="125" height="105" rx="12" fill="#e0a37a" stroke="#1f1a16" stroke-width="3"/>
+        <path class="fl" d="M225 230Q208 206 225 186Q233 206 243 216Q251 201 233 184Q257 208 225 230Z" fill="#e8742a" stroke="#d94234" stroke-width="2"/>
+        
+        <!-- Core Monomer Building Block Boxes -->
+        <g fill="#fffcf4" stroke="#1f1a16" stroke-width="2">
+          <rect x="335" y="20" width="125" height="36" rx="8"/>
+          <rect x="335" y="100" width="125" height="36" rx="8"/>
+          <rect x="335" y="180" width="125" height="36" rx="8"/>
+          <rect x="335" y="260" width="125" height="36" rx="8"/>
+        </g>
+        
+        <!-- Cracking Split Pipelines -->
+        <g fill="none" stroke="#1f1a16" stroke-width="3">
+          <path class="dr" d="M120 188H165" style="--d:.4s"/>
+          <path class="dr" d="M290 176Q315 38 335 38" style="--d:1.2s"/>
+          <path class="dr" d="M290 188Q315 118 335 118" style="--d:1.7s"/>
+          <path class="dr" d="M290 198Q315 198 335 198" style="--d:2.2s"/>
+          <path class="dr" d="M290 208Q315 278 335 278" style="--d:2.7s"/>
+          <path class="dr" d="M460 38H495M460 118H495M460 198H495M460 278H495" style="--d:3.5s"/>
+        </g>
+      </g>
+      
+      <text x="70" y="192">نافثا / إيثان</text>
+      <text x="228" y="125" style="font-size:12px">مكسّر بالبخار Steam Cracker</text>
+      <text x="228" y="258" style="font-size:12px">≈ 850°م</text>
+      
+      <g style="font-size:13.5px">
+        <text x="398" y="44">إيثيلين</text>
+        <text x="398" y="124">بروبيلين</text>
+        <text x="398" y="204">بوتادايين</text>
+        <text x="398" y="284">مركبات بنزين BTX</text>
+      </g>
+      
+      <g style="font-size:13px;text-anchor:start">
+        <text class="x" x="505" y="34" style="--d:4.5s">🛍 أكياس تسوق · 🍼 زجاجات حليب · 🚰 أنابيب مياه PVC</text>
+        <text class="x" x="505" y="114" style="--d:5.3s">🧴 عبوات شامبو · 🚗 مصدّات سيارات · 🥤 أغطية ومستلزمات</text>
+        <text class="x" x="505" y="194" style="--d:6.1s">🛞 مطاط صناعي لإطارات السيارات والمركبات</text>
+        <text class="x" x="505" y="274" style="--d:6.9s">👕 أقمشة بوليستر · 💊 أدوية وعقاقير · 🧼 منظفات صناعية</text>
+      </g>
+      
+      <text class="x" x="400" y="360" style="--d:8.5s;font-size:14px">الفحم البترولي ← أقطاب لصهر الألمنيوم · والأسفلت ← رصف الطرق السريعة 🛣</text>
+    </g>
+
+    <!-- Particle Layer -->
+    <g id="pt"></g>
+  </svg>
+</main>
+
+<!-- Bottom Explanatory Card -->
+<footer class="cap" id="capBox">
+  <div class="ct">
+    <h2 id="ct">ولادة النفط</h2>
+    <p id="cd">قبل ملايين السنين ماتت عوالق وطحالب بحرية دقيقة وغرقت إلى القاع واختلطت بالطين. غطّتها طبقات جديدة عاماً بعد عام، فارتفعت الحرارة والضغط وتحوّلت المادة العضوية ببطء إلى نفط وغاز.</p>
+  </div>
+  <div class="rt">
+    <div class="fct" id="ft"></div>
+    <div class="chs" id="cs"></div>
+  </div>
+</footer>
+
+<!-- Page wipe overlay -->
+<div class="wipe" id="wipe"></div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+
+  function ch(arr){
+    return arr.map(function(item, idx){
+      var parts = item.split('|');
+      return '<span class="ch" style="--bg:' + (parts[1] || '#ffffff') + ';--d:' + (0.8 + idx * 0.35) + 's">' + parts[0] + '</span>';
+    }).join('');
+  }
+
+  var K = '#1d1a1a',
+      BL = '#366ca8',
+      GD = '#e8a93a',
+      BR = '#8d6b4a',
+      TN = '#d9c4a0',
+      GR = '#f6d84a';
+
+  var S = [
+    {
+      t: 'ولادة النفط',
+      e: 'SOURCE ROCK',
+      c: 'قبل ملايين السنين ماتت كائنات دقيقة وعوالق وطحالب بحرية وغرقت إلى قاع المحيطات واختلطت بالطين الرسوبي. تراكمت فوقها الطبقات مع الزمن، فازدادت درجات الحرارة والضغط وتحوّلت المادة العضوية (الكيروجين) تدريجياً إلى نفط وغاز.',
+      f: '💡 <b>معلومة نادرة:</b> معظم النفط في العالم نتج من عوالق وطحالب بحرية مجهرية وليس من جثث الديناصورات كما يُشاع.',
+      fl: [],
+      v: ch(['كيروجين Kerogen|#e8d9b0', 'نافذة النفط 60–120°م|#f7b79a', 'ملايين السنين|#cfe0f5'])
+    },
+    {
+      t: 'الهجرة والمصيدة',
+      e: 'MIGRATION · TRAP',
+      c: 'النفط والغاز أخف من الماء، لذا يهاجران ببطء للأعلى عبر المسام المجهرية للصخور المنفذة حتى يصطدما بصخر غطاء كتيم غير منفذ. هناك يتجمع النفط داخل المصيدة الجيولوجية: الغاز في القمة، يليه النفط، والماء المالح في القاع.',
+      f: '💡 <b>معلومة نادرة:</b> لا توجد بحيرات أو أنهار نفط تحت الأرض! النفط محبوس داخل مسام حبيبات الصخر الدقيقة تماماً كالماء في الإسفنج.',
+      fl: [['p_mig', K, 3.5, 0, 17]],
+      v: ch(['صخر المكمن Reservoir|#e8d9b0', 'صخر الغطاء Cap Rock|#cfd2d6', 'المصيدة Trap|#fff1a8'])
+    },
+    {
+      t: 'البحث بالصوت',
+      e: 'SEISMIC SURVEY',
+      c: 'لكشف المكامن تحت أعماق الأرض، تُرسل شاحنات اهتزازات صوتية خاصة (Vibroseis) موجات إلى باطن الأرض. ترتد هذه الموجات عند حدود الطبقات الصخرية المختلفة فتلتقطها حساسات أرضية (Geophones)، ويبني الحاسوب نموذجاً ثلاثي الأبعاد للطبقات.',
+      f: '💡 <b>معلومة نادرة:</b> المسح الزلزالي يكشف الهيكل فقط؛ والتأكد القاطع من وجود النفط لا يتم إلا بحفر بئر استكشافية حقيقية.',
+      fl: [['p_w', '#366ca8', 2.8, 0, 17]],
+      v: ch(['شاحنة Vibroseis|#fff1a8', 'حساسات Geophones|#f7b79a', 'خريطة زلزالية 3D|#bfe5df'])
+    },
+    {
+      t: 'الحفر والاستكشاف',
+      e: 'DRILLING OPERATION',
+      c: 'يدور رأس الحفر بأسنانه المصنوعة من الألماس الصناعي والتنغستن ليقضم الصخور في الأعماق. يُضخ طين الحفر باستمرار عبر الأنابيب ليبرّد الرأس ويرفع فتات الصخر إلى السطح. ثم يُغلّف البئر بأنابيب فولاذية وإسمنت لحماية المياه الجوفية ومنع الانهيار.',
+      f: '💡 <b>معلومة نادرة:</b> طين الحفر سائل هندسي بالغ الأهمية؛ يوازن بثقله ضغط المكمن العالي ويمنع انفجار البئر قبل تثبيت صمام BOP.',
+      dr: ['p_well', 8.5],
+      fl: [['p_dn', BR, 5, 0.5, 17], ['p_up', '#c9a45c', 4, 1.8, 17]],
+      v: ch(['رأس الحفر Drill Bit|#fff1a8', 'طين الحفر Mud|#e0c9a0', 'تغليف وإسمنت|#cfd2d6', 'مانع الانفجار BOP|#f7b79a'])
+    },
+    {
+      t: 'كيف يخرج النفط؟',
+      e: 'PRIMARY & SECONDARY PRODUCTION',
+      c: 'في المراحل الأولى، يدفع الضغط الجيولوجي الطبيعي للغاز والمكمن النفط للأعلى تلقائياً عبر صمامات رأس البئر. وعندما ينخفض الضغط، تُركّب مضخات رأسية، أو يُحقن الماء والغاز في آبار مجاورة لكنس ما تبقّى من النفط وإجباره على الصعود.',
+      f: '💡 <b>معلومة نادرة:</b> لا نتمكن من استخراج كل النفط الموجود في الصخر؛ غالباً ما يُستخرج بين 30% إلى 50% فقط حتى بأحدث التقنيات.',
+      fl: [['p_prod', K, 4.5, 0, 17], ['p_inj', BL, 4, 6.5, 17], ['p_sweep', BL, 5, 7.2, 17]],
+      v: ch(['ضغط طبيعي|#fff1a8', 'مضخة رأسية Pumpjack|#e8d9b0', 'حقن الماء Water Flood|#cfe0f5', 'استخلاص معزز EOR|#bfe5df'])
+    },
+    {
+      t: 'الفصل والنقل',
+      e: 'SEPARATION & TRANSPORT',
+      c: 'السائل الخارج من البئر خليط غير معالج من النفط والغاز المصاحب والماء شديد الملوحة والرواسب. يدخل فاصلًا أفقياً كبيراً فتنفصل المكونات بفعل الكثافة والجاذبية. يُضخ النفط المنقى عبر خطوط الأنابيب إلى خزانات ضخمة ثم إلى ناقلات النفط العملاقة.',
+      f: '💡 <b>معلومة نادرة:</b> في الحقول النفطية الناضجة والقديمة، قد تشكّل كمية المياه المالحة المصاحبة للنفط أكثر من 80% من إنتاج البئر الإجمالي!',
+      fl: [['p_in', K, 4, 0, 17], ['p_gas', '#f6e29a', 3, 2, 17], ['p_oil', K, 4, 2, 17], ['p_oil2', K, 4, 4.2, 17]],
+      v: ch(['حلو Sweet / حامض Sour|#fff1a8', 'كثافة API Gravity|#e8d9b0', 'خطوط أنابيب Pipeline|#cfd2d6'])
+    },
+    {
+      t: 'المصفاة: التقطير الجزئي',
+      e: 'FRACTIONAL DISTILLATION',
+      c: 'يُغسل الخام أولاً لإزالة الأملاح، ثم يُسخّن في فرن إلى نحو 350–370°م ويدخل برج التقطير التجزئي. تتصاعد الأبخرة للأعلى وتتكاثف على صوانٍ متدرجة حسب درجات الغليان: الأخف (الغاز والبنزين) في القمة، فالكيروسين والديزل، ثم البقايا الثقيلة في القاع.',
+      f: '💡 <b>معلومة نادرة:</b> الأملاح المعدنية تُنزع بدقة متناهية قبل دخول الفرن لأنها إذا احترقت تحوّلت لأحماض تأكل أجهزة المصفاة وتخرّبها.',
+      fl: [
+        ['p_feed', K, 4.5, 0, 17],
+        ['p_col', '#ffffff', 6, 1, 17],
+        ['p_o1', '#f6e29a', 2.5, 2.2, 17],
+        ['p_o2', '#f3d98b', 2.5, 2.9, 17],
+        ['p_o3', '#e8c26a', 2.5, 3.6, 17],
+        ['p_o4', '#c9944a', 2.5, 4.3, 17],
+        ['p_o5', '#8d6b4a', 2.5, 5.0, 17],
+        ['p_o6', K, 2.5, 5.7, 17]
+      ],
+      v: ch(['نازع الأملاح Desalter|#cfe0f5', 'فرن التبخير ≈350°م|#f7b79a', 'أبراج التجزئة Fractions|#fff1a8'])
+    },
+    {
+      t: 'التحويل والتحسين الكيميائي',
+      e: 'CRACKING · REFORMING · TREATING',
+      c: 'التقطير وحده غير كافٍ لتلبية احتياجات العالم. تقنية التكسير الحفزي (FCC) تقطّع السلاسل الهيدروكربونية الثقيلة إلى جزيئات خفيفة ثمينة كبنزين السيارات. وتعمل عمليات الإصلاح (Reforming) على رفع رقم الأوكتان، بينما ينزع الهيدروجين الشوائب الكبريتية.',
+      f: '💡 <b>معلومة نادرة:</b> الكبريت المنزوع من الوقود يُحوّل إلى حمض الكبريتيك وأسمدة زراعية فوسفاتية؛ وأغلب كبريت العالم الصناعي يأتي من مصافي النفط والغاز.',
+      fl: [],
+      v: ch(['التكسير الحفزي Cracking|#f7b79a', 'إصلاح الهيكل Reforming|#fff1a8', 'إزالة الكبريت Hydrotreating|#bfe5df'])
+    },
+    {
+      t: 'ماذا يوجد في البرميل الواحد؟',
+      e: "WHAT'S IN A 42-GALLON BARREL?",
+      c: 'البرميل المعياري سعة 42 غالوناً (159 لتراً) يُنتج بفضل عمليات التكسير الكيميائي ما يقارب 45 غالوناً من المنتجات الصالحة للاستخدام! يشمل ذلك حوالي 20 غالون بنزين، و12.5 غالون ديزل، و4.4 غالون وقود طائرات نفاثة، والباقي منتجات بتروكيماوية متنوعة.',
+      f: '💡 <b>معلومة نادرة:</b> زيادة الحجم من 42 إلى 45 غالوناً تُعرف بـ (Processing Gain)؛ لأن تكسير الجزيئات الكثيفة ينتج جزيئات أخف تشغل حجماً أكبر.',
+      fl: [],
+      v: ch(['غاز مسال 🍳|#fff1a8', 'أسفلت 🛣|#cfd2d6', 'زيوت محركات ⚙|#e8d9b0', 'شمع برافين 🕯|#ffffff', 'فحم بترولي|#e8d9b0'])
+    },
+    {
+      t: 'عالم البتروكيماويات المذهل',
+      e: 'PETROCHEMICALS IN EVERYDAY LIFE',
+      c: 'جزء استراتيجي من مشتقات النفط لا يُحرق وقوداً، بل يُرسل إلى مكسّرات البخار لإنتاج اللبنات الأساسية للصناعات الحديثة: الإيثيلين والبروبيلين والبوتادايين. تتحول هذه المواد إلى اللدائن والمطاط الصناعي، وألياف البوليستر في الملابس، ومكونات الأدوية والأجهزة الطبية.',
+      f: '💡 <b>معلومة نادرة:</b> الفحم البترولي المتبقي يُستخدم كأقطاب كربونية في مصاهر صهر الألمنيوم، وأثقل مخلفات البرج تُرصف بها شوارع العالم.',
+      fl: [],
+      v: ch(['بولي إيثيلين Polyethylene|#bfe5df', 'بولي بروبيلين Polypropylene|#fff1a8', 'مطاط صناعي Synthetic Rubber|#e8d9b0', 'بوليستر أقمشة|#f7b79a'])
+    }
+  ];
+
+  var D = 17,
+      T = S.length * D,
+      t = 0,
+      playing = true,
+      cur = -1,
+      last = performance.now(),
+      acc = [],
+      P = [],
+      lens = {},
+      dots = $('dots'),
+      sn = 1,
+      sc = [].slice.call(document.querySelectorAll('.sc'));
+
+  // Build dots
+  S.forEach(function(_, i){
+    var d = document.createElement('span');
+    d.title = S[i].t;
+    d.onclick = function(){ jumpTo(i); };
+    dots.appendChild(d);
+  });
+
+  // Rough texture seed perturbation
+  setInterval(function(){
+    sn = (sn % 7) + 1;
+    var tb = $('tb');
+    if(tb) tb.setAttribute('seed', sn);
+  }, 160);
+
+  function jumpTo(i){
+    t = i * D + 0.01;
+    if(!playing){
+      playing = true;
+      $('pp').textContent = '⏸';
+    }
+  }
+
+  function go(i){
+    cur = i;
+    var m = S[i];
+    $('num').textContent = (i + 1) + ' / ' + S.length;
+    $('ttl').textContent = m.t;
+    $('subttl').textContent = m.e;
+    $('ct').textContent = m.t;
+    $('cd').textContent = m.c;
+    $('ft').innerHTML = m.f;
+    $('cs').innerHTML = m.v;
+
+    sc.forEach(function(el){ el.classList.remove('on'); });
+    void $('art').getBoundingClientRect();
+    sc[i].classList.add('on');
+
+    [].forEach.call(dots.children, function(d, j){
+      d.classList.toggle('on', j === i);
+    });
+
+    acc = m.fl.map(function(){ return 0; });
+    P.forEach(function(p){ if(p.e && p.e.parentNode) p.e.remove(); });
+    P = [];
+
+    // Trigger page wipe transition
+    var w = $('wipe');
+    w.classList.remove('go');
+    void w.offsetWidth;
+    w.classList.add('go');
+
+    // Scroll caption to top on slide change
+    var capBox = $('capBox');
+    if(capBox) capBox.scrollTop = 0;
+  }
+
+  function spawn(f){
+    var p = $(f[0]);
+    if(!p) return;
+    if(!lens[f[0]]) lens[f[0]] = p.getTotalLength();
+    var e = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    e.setAttribute('r', 4.5);
+    e.setAttribute('fill', f[1]);
+    $('pt').appendChild(e);
+    P.push({ e: e, p: p, L: lens[f[0]], x: 0 });
+  }
+
+  function frame(now){
+    var dt = Math.min(0.1, Math.max(0, (now - last) / 1000));
+    last = now;
+
+    if(playing){
+      t += dt;
+      if(t >= T) t = T - 0.01;
+    }
+
+    var i = Math.max(0, Math.min(S.length - 1, Math.floor(t / D))),
+        tt = t - i * D,
+        m = S[i];
+
+    if(i !== cur) go(i);
+
+    // Particle emissions
+    m.fl.forEach(function(f, k){
+      if(tt >= f[3] && tt < f[4]){
+        acc[k] += f[2] * dt;
+        while(acc[k] >= 1 && P.length < 80){
+          acc[k]--;
+          spawn(f);
+        }
+      }
+    });
+
+    // Particle motion along paths
+    for(var k = P.length - 1; k >= 0; k--){
+      var ptObj = P[k];
+      ptObj.x += dt * 115;
+      if(ptObj.x >= ptObj.L){
+        if(ptObj.e.parentNode) ptObj.e.remove();
+        P.splice(k, 1);
+        continue;
+      }
+      var q = ptObj.p.getPointAtLength(ptObj.x);
+      ptObj.e.setAttribute('cx', q.x);
+      ptObj.e.setAttribute('cy', q.y);
+    }
+
+    // Dynamic drilling string & bit motion for slide 3
+    if(m.dr){
+      var pa = $(m.dr[0]);
+      if(pa){
+        var L = pa.getTotalLength(),
+            r = Math.min(1, tt / m.dr[1]);
+        r = r * r * (3 - 2 * r);
+        ['wo', 'p_well'].forEach(function(id){
+          var el = $(id);
+          if(el){
+            el.style.strokeDasharray = L;
+            el.style.strokeDashoffset = L * (1 - r);
+          }
+        });
+        var a = pa.getPointAtLength(L * r),
+            b = pa.getPointAtLength(Math.max(0, L * r - 3)),
+            ang = Math.atan2(a.y - b.y, a.x - b.x) * 180 / Math.PI - 90;
+        var bitEl = $('bit');
+        if(bitEl) bitEl.setAttribute('transform', 'translate(' + a.x + ',' + a.y + ') rotate(' + ang + ')');
+      }
+    }
+
+    $('pg').style.width = ((t / T) * 100) + '%';
+    requestAnimationFrame(frame);
+  }
+
+  // Controls Event Listeners
+  $('pp').onclick = function(){
+    playing = !playing;
+    this.textContent = playing ? '⏸' : '▶';
+  };
+
+  $('rs').onclick = function(){
+    t = 0;
+    playing = true;
+    $('pp').textContent = '⏸';
+    cur = -1;
+  };
+
+  $('prevBtn').onclick = function(){
+    var target = Math.max(0, cur - 1);
+    jumpTo(target);
+  };
+
+  $('nextBtn').onclick = function(){
+    var target = Math.min(S.length - 1, cur + 1);
+    jumpTo(target);
+  };
+
+  // Keyboard navigation
+  window.addEventListener('keydown', function(ev){
+    if(ev.key === 'ArrowLeft'){
+      // In RTL, left arrow goes forward
+      var target = Math.min(S.length - 1, cur + 1);
+      jumpTo(target);
+    } else if(ev.key === 'ArrowRight'){
+      // In RTL, right arrow goes backward
+      var target = Math.max(0, cur - 1);
+      jumpTo(target);
+    } else if(ev.key === ' '){
+      ev.preventDefault();
+      $('pp').click();
+    } else if(ev.key === 'Home'){
+      $('rs').click();
+    }
+  });
+
+  // Touch Swipe Gesture for Phones & Tablets
+  var touchStartX = 0, touchStartY = 0;
+  window.addEventListener('touchstart', function(e){
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  window.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].screenX - touchStartX;
+    var dy = e.changedTouches[0].screenY - touchStartY;
+    // Ensure horizontal swipe is dominant and exceeds threshold
+    if(Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5){
+      if(dx < 0){
+        // Swiped Left -> in RTL goes to Next
+        var target = Math.min(S.length - 1, cur + 1);
+        jumpTo(target);
+      } else {
+        // Swiped Right -> in RTL goes to Prev
+        var target = Math.max(0, cur - 1);
+        jumpTo(target);
+      }
+    }
+  }, { passive: true });
+
+  // Start Loop
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
+
