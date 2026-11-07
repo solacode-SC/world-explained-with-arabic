@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>The Pendulum Keeps Time</title><style>:root{--bg:#f6f1e6;--card:#efe8d8;--ink:#1c2a44;--mute:#52607a;--o:#d9572b;--t:#1a9aa8;--line:#c9bfa8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--line:#2c3656;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--line:#2c3656;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;line-height:1.45}
+main{max-width:900px;margin:0 auto;padding:28px 18px 40px}
+h1{font-size:clamp(28px,6vw,48px);text-align:center;margin:0 0 6px;letter-spacing:-.02em}
+.sub{text-align:center;color:var(--mute);font-size:clamp(15px,2.6vw,20px);margin:0 auto 18px;max-width:580px}.sub b{color:var(--o)}
+.stage{background:var(--card);border-radius:20px;padding:10px}
+canvas{width:100%;display:block;border-radius:14px}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 22px;padding:12px 8px 4px}
+label{font-size:14px;color:var(--mute);display:block}label b{color:var(--ink);float:right}
+input[type=range]{width:100%;accent-color:var(--o)}input.t{accent-color:var(--t)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;padding:6px 8px 4px}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 14px;border-radius:999px;cursor:pointer}button:hover{border-color:var(--o)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:20px;padding:20px}.card h2{margin:0 0 12px;font-size:20px;color:var(--o)}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:clamp(20px,4vw,28px);display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+.frac{display:inline-flex;flex-direction:column;align-items:center}.frac>span:first-child{border-bottom:2px solid var(--ink);padding:0 6px 2px}.frac>span:last-child{padding-top:2px}
+.ov{border-top:2px solid var(--ink);padding:0 4px}
+.o{color:var(--o)}.t{color:var(--t)}
+.note{background:var(--bg);border-radius:12px;padding:10px 14px;color:var(--mute);font-size:15px;margin-top:10px}
+.bar{height:22px;border-radius:11px;background:var(--bg);overflow:hidden;display:flex;margin:12px 0 6px}.bar i{display:block;height:100%}
+.legend{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:var(--mute)}
+.live{font-family:Georgia,serif;text-align:center;font-size:17px;margin-top:8px}
+.credit{text-align:center;color:var(--mute);font-size:12px;margin-top:20px;letter-spacing:.08em}</style></head><body><main>
+<h1>The Pendulum Keeps Time</h1><p class="sub">A swinging mass trades <b>height for speed</b>. Its period depends on length and gravity, not on mass.</p>
+<div class="stage"><canvas id="cv"></canvas><div class="ctrls"><label>Length L <b data-f="L"></b><input id="L" class="" type="range" min="0.5" max="3" step="0.1" value="1.5" data-u=" m" data-d="1"></label><label>Gravity g <b data-f="g"></b><input id="g" class="t" type="range" min="1.6" max="25" step="0.1" value="9.8" data-u=" m/s²" data-d="1"></label><label>Amplitude θ₀ <b data-f="A"></b><input id="A" class="" type="range" min="5" max="80" step="1" value="30" data-u="°" data-d="0"></label></div><div class="btns"><button id="pp">⏸ Pause</button><button id="rs">Reset</button></div></div>
+<div class="grid"><section class="card"><h2>Energy Swaps</h2><div class="legend"><span class="o">Kinetic (speed)</span><span class="t">Potential (height)</span></div><div class="bar"><i id="b1" style="background:var(--o)"></i><i id="b2" style="background:var(--t)"></i></div><div class="note">At the bottom all energy is kinetic. At the ends the bob stops and all energy is potential.</div></section><section class="card"><h2>The Period</h2><div class="formula">T = 2π <span>√</span><span class="ov"><span class="frac"><span>L</span><span>g</span></span></span></div><div class="live" id="lv"></div><div class="note" id="nt"></div></section></div>
+<div class="credit">DRAG THE SLIDERS · CONCEPT LAB</div></main>
+<script>
+var $=function(i){return document.getElementById(i)},cv=$('cv'),ctx=cv.getContext('2d'),W=800,H=400,playing=true,T=0,last=0,AS=0.55;
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function X(i){return +$(i).value}
+function lab(){document.querySelectorAll('input[type=range]').forEach(function(r){var b=document.querySelector('[data-f="'+r.id+'"]');if(b)b.textContent=(+r.value).toFixed(+r.dataset.d||0)+(r.dataset.u||'')})}
+function arrow(x1,y1,x2,y2,c,w){if(Math.hypot(x2-x1,y2-y1)<4)return;ctx.save();ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=w||2.5;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();var a=Math.atan2(y2-y1,x2-x1);ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-10*Math.cos(a-.4),y2-10*Math.sin(a-.4));ctx.lineTo(x2-10*Math.cos(a+.4),y2-10*Math.sin(a+.4));ctx.fill();ctx.restore()}
+function txt(s,x,y,c,sz,al){ctx.fillStyle=c;ctx.font='italic '+(sz||16)+'px Georgia,serif';ctx.textAlign=al||'center';ctx.fillText(s,x,y)}
+function ball(x,y,r,c1,c2){var g=ctx.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);g.addColorStop(0,c1);g.addColorStop(1,c2);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill()}
+function resize(){var r=cv.parentNode.clientWidth-20,d=window.devicePixelRatio||1;W=r;H=Math.round(r*(r<520?AS*1.5:AS));cv.style.height=H+'px';cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+var th=0,w=0,gr=[];
+function chg(){th=X('A')*Math.PI/180;w=0;gr=[]}
+function draw(dt,C){
+var L=X('L'),g=X('g'),A0=X('A')*Math.PI/180,n=Math.ceil(dt/.002),h=n?dt/n:0;
+for(var i=0;i<n;i++){w+=-g/L*Math.sin(th)*h;th+=w*h}
+var px=W*.28,py=34,len=L/3*H*.68,bx=px+len*Math.sin(th),by=py+len*Math.cos(th);
+ctx.strokeStyle=C.mute;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(px-50,py);ctx.lineTo(px+50,py);ctx.stroke();
+ctx.save();ctx.setLineDash([5,6]);ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(px,py,len,Math.PI/2-A0,Math.PI/2+A0);ctx.stroke();ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px,py+len+18);ctx.stroke();ctx.restore();
+ctx.strokeStyle=C.ink;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(bx,by);ctx.stroke();
+arrow(bx,by,bx+L*w*Math.cos(th)*25,by-L*w*Math.sin(th)*25,C.t);
+ball(bx,by,16,'#ffd27a','#e8641c');
+var gx=W*.58,gw=W*.38,gm=H/2,ks=H*.32/1.4;
+ctx.strokeStyle=C.line;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(gx,gm);ctx.lineTo(gx+gw,gm);ctx.stroke();
+ctx.save();ctx.setLineDash([4,5]);ctx.beginPath();ctx.moveTo(gx,gm-A0*ks);ctx.lineTo(gx+gw,gm-A0*ks);ctx.moveTo(gx,gm+A0*ks);ctx.lineTo(gx+gw,gm+A0*ks);ctx.stroke();ctx.restore();
+if(dt>0)gr.push([T,th]);while(gr.length&&T-gr[0][0]>6)gr.shift();
+ctx.strokeStyle=C.o;ctx.lineWidth=2.5;ctx.beginPath();gr.forEach(function(q,i){var x=gx+gw*(1-(T-q[0])/6),y=gm-q[1]*ks;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+txt('θ(t)',gx+14,gm-H*.34,C.mute,15);
+var PE=g*L*(1-Math.cos(th)),KE=.5*L*L*w*w,E=PE+KE||1;
+$('b1').style.width=KE/E*100+'%';$('b2').style.width=PE/E*100+'%';
+var T0=2*Math.PI*Math.sqrt(L/g);
+$('lv').innerHTML='T = 2π√('+L.toFixed(1)+'/'+g.toFixed(1)+') = <b>'+T0.toFixed(2)+' s</b> · f = '+(1/T0).toFixed(2)+' Hz';
+$('nt').textContent=A0>.55?'Large swing: the real period is slightly longer than the formula.':'Small swing: the period does not depend on amplitude or mass.'}
+function fr(ts){var dt=Math.min(.05,last?(ts-last)/1000:0);last=ts;if(!playing)dt=0;T+=dt;var C={o:css('--o'),t:css('--t'),ink:css('--ink'),mute:css('--mute'),card:css('--card'),line:css('--line')};ctx.clearRect(0,0,W,H);draw(dt,C);requestAnimationFrame(fr)}
+document.querySelectorAll('input[type=range]').forEach(function(r){r.addEventListener('input',function(){lab();if(window.chg)chg()})});
+$('pp').onclick=function(){playing=!playing;this.textContent=playing?'⏸ Pause':'▶ Play'};
+$('rs').onclick=function(){document.querySelectorAll('input[type=range]').forEach(function(r){r.value=r.defaultValue});lab();T=0;if(window.chg)chg()};
+window.addEventListener('resize',resize);resize();lab();if(window.chg)chg();requestAnimationFrame(fr);
+</script></body></html>

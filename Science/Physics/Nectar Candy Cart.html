@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nectar – The Swedish Candy Cart of Your Dreams</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=DM+Sans:wght@400;500;700&family=Caveat+Brush&family=Bagel+Fat+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --maroon:#7a0f2a; --red:#cf2a2e; --cream:#fdf7ee; --pink:#fbc9d6; --pink2:#f9b6c7;
+  --lav:#c3c4ff; --peach:#ffb48a; --ink:#7a0f2a; --grid:#f7d9dc;
+  --serif:'Fraunces',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root{ color-scheme:light; } }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);color:var(--ink);background:var(--maroon);
+  padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);}
+a{color:inherit}
+.page{max-width:1200px;margin:0 auto;background:var(--cream);overflow:hidden}
+.btn{display:inline-block;border:0;cursor:pointer;font:700 10px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;
+  padding:9px 14px;border-radius:3px;text-decoration:none;transition:transform .15s}
+.btn:hover{transform:translateY(-2px) rotate(-1deg)}
+.btn:focus-visible,input:focus-visible,.day:focus-visible{outline:3px solid var(--lav);outline-offset:2px}
+.btn.lav{background:#b9b9ff;color:var(--maroon)} .btn.red{background:var(--red);color:#fff} .btn.dark{background:var(--maroon);color:#fff}
+h1,h2{font-family:var(--serif);font-weight:400;line-height:1.02;letter-spacing:-.01em}
+.small{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+
+/* NAV */
+nav{position:relative;background:var(--pink);display:flex;justify-content:space-between;align-items:center;padding:18px 5% 20px;margin-bottom:14px}
+nav::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;
+  background:radial-gradient(circle at 10px 0,var(--pink) 9px,transparent 10px) 0 0/20px 14px repeat-x}
+nav .links{display:flex;gap:26px}
+nav a{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;text-decoration:none}
+.logo{font-family:'Bagel Fat One',cursive;font-size:30px;letter-spacing:.02em;color:var(--maroon);text-decoration:none;position:absolute;left:50%;transform:translateX(-50%);top:6px}
+.cartbtn{display:flex;gap:6px;align-items:center}
+
+/* HERO */
+.hero{position:relative;min-height:540px;padding:80px 5% 40px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:22px 22px;background-color:var(--cream)}
+.hero .copy{max-width:420px;position:relative;z-index:2}
+.hero .loc{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px}
+.hero h1{font-size:clamp(40px,5.6vw,66px);margin-bottom:22px}
+.hero p{font-size:12px;line-height:1.6;max-width:280px;margin-bottom:18px}
+.squig{position:absolute;left:30%;top:68%;width:120px;height:60px;z-index:1}
+.truck{position:absolute;right:4%;top:70px;width:min(52%,560px);z-index:1;transform-origin:50% 100%}
+.truck.bob{animation:bob 4s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-.6deg)}}
+.catch{position:absolute;right:2%;top:210px;font-family:'Caveat Brush',cursive;color:var(--maroon);transform:rotate(-8deg);
+  font-size:15px;line-height:1;background:var(--cream);border:1.5px solid var(--maroon);border-radius:12px;padding:8px 10px;z-index:3}
+.sticker{position:absolute;width:22px;cursor:pointer;transition:transform .3s;z-index:3}
+.sticker:hover{transform:rotate(25deg) scale(1.3)}
+
+/* SCHEDULE */
+.sched{background:var(--red);padding:30px 5% 36px}
+.ticket{position:relative;background:var(--cream);border-radius:0 0 6px 6px;padding:62px 4% 28px;text-align:center}
+.holes{position:absolute;top:-2px;left:0;right:0;height:26px;
+  background:radial-gradient(circle at 13px 4px,var(--red) 11px,transparent 12px) 0 0/28px 26px repeat-x;
+  filter:none}
+.holes::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 13px 4px,transparent 0,transparent 0) }
+.ticket-bar{position:absolute;top:-24px;left:0;right:0;height:26px;
+  background:radial-gradient(circle at 14px 14px,var(--red) 12px,transparent 13px) 0 0/28px 26px repeat-x}
+.ticket .small{font-size:9px;margin-bottom:6px}
+.ticket h2{font-size:26px;margin-bottom:22px}
+.week{position:relative;display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--maroon);max-width:100%;margin:0 auto 18px}
+.day{all:unset;box-sizing:border-box;cursor:pointer;padding:10px 8px 18px;border-right:1px solid var(--maroon);display:flex;flex-direction:column;align-items:center;gap:6px;font-size:9px;font-weight:500;text-align:center;transition:background .2s}
+.day:last-child{border-right:0}
+.day:hover{background:#fdeaea}
+.day .row{display:flex;justify-content:space-between;width:100%;text-align:left;letter-spacing:.05em;line-height:1.3}
+.day .ico{width:34px;height:34px;margin:6px 0 2px}
+.day .v{font-family:var(--serif);font-size:12px;text-decoration:underline;line-height:1.2}
+.day .t{font-size:9px;letter-spacing:.04em}
+.day.sel{background:var(--maroon);color:#fff}
+.day.sel .v{text-decoration:underline}
+.circle{position:absolute;pointer-events:none;width:calc(100%/7 + 8px);top:-6px;height:calc(100% + 12px);transition:left .35s cubic-bezier(.3,1.4,.5,1)}
+.signup{margin-top:20px;background:var(--pink);border-radius:14px;padding:16px 4%;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.signup input{border:1px solid var(--maroon);background:var(--cream);padding:5px 10px;font:500 9px var(--sans);letter-spacing:.08em;text-transform:uppercase;width:170px;color:var(--maroon)}
+.signup .btn{padding:6px 14px;font-size:9px}
+.toast{min-height:16px;font-size:11px;margin-top:8px;text-align:center;color:#fff}
+
+/* EVENTS */
+.events{display:grid;grid-template-columns:1.1fr 1fr;position:relative}
+.events .l{padding:70px 5% 70px 5%;background:var(--cream)}
+.events .r{background:repeating-linear-gradient(90deg,var(--pink2) 0 10px,var(--cream) 10px 20px);position:relative;min-height:420px}
+.events .small{font-size:9px;margin-bottom:22px}
+.events h2{font-size:clamp(34px,4.4vw,48px);margin-bottom:14px}
+.events p.d{font-size:11px;line-height:1.6;max-width:260px;margin-bottom:22px}
+.prices{display:flex;gap:10px;margin-bottom:28px;align-items:center}
+.blob{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--maroon);font-weight:700;font-size:7px;letter-spacing:.08em;transition:transform .3s}
+.blob:hover{transform:rotate(-8deg) scale(1.08)}
+.blob b{font-family:var(--serif);font-size:23px;font-weight:500;letter-spacing:0;line-height:1}
+.blob.a{width:92px;height:92px;background:var(--peach);clip-path:polygon(50% 0,60% 6%,72% 2%,78% 12%,90% 12%,92% 24%,100% 32%,96% 44%,100% 56%,94% 66%,96% 78%,84% 82%,80% 94%,68% 92%,58% 100%,48% 94%,36% 98%,28% 88%,16% 88%,12% 76%,2% 68%,6% 56%,0 46%,6% 36%,4% 24%,16% 20%,20% 8%,34% 10%,42% 2%)}
+.blob.b{width:92px;height:92px;background:var(--maroon);color:#fff;border-radius:50%;
+  -webkit-mask:radial-gradient(circle at 50% 4%,transparent 9px,#000 10px) ;mask:none;clip-path:polygon(50% 0,62% 8%,76% 4%,82% 16%,96% 18%,94% 32%,100% 44%,92% 56%,98% 68%,86% 74%,84% 88%,70% 88%,60% 100%,50% 92%,38% 100%,30% 88%,16% 88%,14% 74%,2% 68%,8% 56%,0 44%,6% 32%,4% 18%,18% 16%,24% 4%,38% 8%)}
+.blob.b b{color:#fff}
+.blob.c{width:88px;height:70px;background:var(--pink);border-radius:14px;clip-path:none;box-shadow:0 0 0 0 var(--pink)}
+.photo{position:absolute;left:12%;top:50px;width:68%;transform:rotate(1.5deg);background:var(--cream);border:6px solid var(--cream);box-shadow:0 8px 0 rgba(122,15,42,.08)}
+.photo svg{display:block;width:100%;height:auto}
+.tape{position:absolute;background:var(--red);width:60px;height:16px;opacity:.95}
+.badge{position:absolute;font-family:'Caveat Brush',cursive;color:var(--red);background:var(--peach);border:1.5px solid var(--red);border-radius:50%;padding:10px 12px;font-size:13px;text-align:center;line-height:1}
+.tag{position:absolute;right:-4%;bottom:-40px;background:var(--cream);border:1px solid var(--maroon);padding:8px 14px;font-family:'Caveat Brush',cursive;font-size:12px;transform:rotate(-4deg);line-height:1.2}
+.check{height:34px;background:conic-gradient(var(--maroon) 25%,var(--pink2) 0 50%,var(--maroon) 0 75%,var(--pink2) 0) 0 0/34px 34px;
+  background:repeating-conic-gradient(var(--maroon) 0 25%,var(--pink2) 0 50%) 0 0/34px 34px}
+
+/* CLUB */
+.club{background:var(--lav);padding:50px 7% 80px;position:relative}
+.card{position:relative;background:var(--cream);text-align:center;padding:60px 6% 70px;border-radius:30px;max-width:760px;margin:0 auto;
+  --s:26px}
+.card::before,.card::after{content:"";position:absolute;left:0;right:0;height:var(--s);
+  background:radial-gradient(circle at 50% 100%,var(--cream) 0 calc(var(--s)*.9),transparent calc(var(--s)*.9 + 1px)) 0 0/calc(var(--s)*2) var(--s) repeat-x}
+.card::before{top:calc(var(--s)*-.7)}
+.card::after{bottom:calc(var(--s)*-.7);transform:scaleY(-1)}
+.pill{display:inline-block;background:var(--pink);font-size:8px;font-weight:700;letter-spacing:.1em;padding:3px 8px;margin:12px 0 22px}
+.cardlogo{display:inline-block;border:2px solid #5b5bd6;border-radius:6px;padding:4px 10px;font-family:'Bagel Fat One';font-size:12px;color:#5b5bd6;line-height:1}
+.card h2{font-size:clamp(36px,5vw,52px);margin-bottom:12px}
+.price{font-family:var(--serif);font-size:22px;margin-bottom:14px}
+.card p{font-size:11px;line-height:1.6;max-width:360px;margin:0 auto 22px}
+.heart{position:absolute;right:-2%;top:-30px;width:84px;transform:rotate(12deg)}
+.float{position:absolute;pointer-events:none}
+footer{background:var(--maroon);color:var(--cream);text-align:center;font-size:11px;padding:22px}
+
+@media(max-width:820px){
+  nav .links:first-child a:nth-child(2),nav .links:last-child a:first-child{display:none}
+  .hero{padding-top:50px}
+  .truck{position:relative;right:auto;top:auto;width:96%;margin:24px auto 0;display:block}
+  .catch{top:auto;right:4%;bottom:40px}.squig{display:none}
+  .events{grid-template-columns:1fr}.events .r{min-height:380px}
+  .week{grid-template-columns:repeat(4,1fr)}
+  .day{border-bottom:1px solid var(--maroon)}
+  .circle{display:none}
+}
+@media(prefers-reduced-motion:reduce){.truck.bob{animation:none}*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav>
+  <div class="links"><a href="#events">Find the cart</a><a href="#events">Book an event</a></div>
+  <a class="logo" href="#">nectar</a>
+  <div class="links"><a href="#club">Candy club</a><a href="#club">Buy candy</a>
+    <a class="cartbtn" href="#" id="cartLink" aria-label="Cart">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4h3l2 12h11l2-8H7"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg><span id="cartN">0</span></a></div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="copy">
+    <div class="loc">(Based in Pittsburgh, PA)</div>
+    <h1>The Swedish Candy Cart of Your Dreams</h1>
+    <p>Your go-to cart to call for events and catering, monthly candy club deliveries, online candy fixes, and more.</p>
+    <a href="#club" class="btn lav">Join the club</a>
+  </div>
+  <svg class="squig" viewBox="0 0 120 60" fill="none" stroke="#7a0f2a" stroke-width="1.6" stroke-linecap="round"><path d="M10 30c-10-18 22-26 24-8 2 14-18 8-10-4 8-12 36 0 56 6 14 4 28 2 36-4M122 32l-12-8M122 32l-12 8" transform="scale(.95)"/></svg>
+
+  <!-- candy stickers -->
+  <svg class="sticker" style="left:13%;top:27%;width:20px" viewBox="0 0 20 24"><ellipse cx="10" cy="14" rx="7" ry="9" fill="#f7b24a"/><circle cx="6" cy="4" r="3" fill="#f7b24a"/><circle cx="14" cy="4" r="3" fill="#f7b24a"/></svg>
+  <svg class="sticker" style="left:5%;top:70%;width:18px;transform:rotate(-30deg)" viewBox="0 0 20 30"><rect x="3" y="2" width="14" height="26" rx="5" fill="#d8232e"/><rect x="3" y="2" width="14" height="6" rx="3" fill="#fff"/></svg>
+  <svg class="sticker" style="left:51%;top:90%" viewBox="0 0 20 24"><ellipse cx="10" cy="14" rx="7" ry="9" fill="#e8c43a"/><circle cx="6" cy="4" r="3" fill="#e8c43a"/><circle cx="14" cy="4" r="3" fill="#e8c43a"/></svg>
+  <svg class="sticker" style="right:5%;top:6%" viewBox="0 0 24 24"><path d="M12 8c-2-5-8-4-8 2M12 8c2-5 8-4 8 2" stroke="#2b7a3b" fill="none" stroke-width="1.5"/><circle cx="8" cy="17" r="5" fill="#d8232e"/><circle cx="17" cy="17" r="5" fill="#d8232e"/></svg>
+  <svg class="sticker" style="right:5%;top:78%;width:28px" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="#fff" stroke="#f9b6c7" stroke-width="2"/><path d="M15 15 7 8M15 15l9-2M15 15l-3 10" stroke="#f9b6c7" stroke-width="2"/></svg>
+
+  <svg class="truck bob" id="truck" viewBox="0 0 560 420" role="img" aria-label="Maroon three-wheel candy cart stocked with candy jars and flowers">
+    <defs>
+      <pattern id="aw" width="24" height="16" patternUnits="userSpaceOnUse"><rect width="24" height="16" fill="#e9a3c0"/><rect width="12" height="8" fill="#6e4fb5"/><rect x="12" y="8" width="12" height="8" fill="#6e4fb5"/></pattern>
+    </defs>
+    <ellipse cx="270" cy="395" rx="230" ry="12" fill="#00000010"/>
+    <!-- cabinet -->
+    <path d="M250 80 L520 60 L520 90 L255 110Z" fill="#fdf7ee" stroke="#c9b8a8"/>
+    <path d="M250 60 L520 40 L540 80 L255 100Z" fill="url(#aw)"/>
+    <path d="M265 40 L520 30 L560 20" stroke="#aaa" stroke-width="3" fill="none"/>
+    <rect x="260" y="105" width="255" height="190" fill="#fdf7ee" stroke="#d9c9ba" stroke-width="2"/>
+    <g stroke="#e0d3c4" stroke-width="3"><path d="M268 165h240M268 225h240"/></g>
+    <g id="jars">
+      <rect x="275" y="120" width="26" height="42" fill="#f4cfd8" stroke="#c9b8a8"/><rect x="310" y="125" width="26" height="37" fill="#9a4a50"/><rect x="345" y="120" width="28" height="42" fill="#f9e0e6" stroke="#c9b8a8"/><rect x="382" y="125" width="26" height="37" fill="#c9b7a8"/><rect x="420" y="120" width="28" height="42" fill="#ef9a6a"/>
+      <rect x="275" y="180" width="30" height="43" fill="#f8c35a"/><rect x="315" y="185" width="30" height="38" fill="#ff7aa5"/><rect x="355" y="180" width="30" height="43" fill="#f4c0cf"/><rect x="395" y="185" width="26" height="38" fill="#f6d77a"/>
+      <rect x="275" y="240" width="40" height="50" fill="#e07a5f" opacity=".9"/><rect x="325" y="240" width="40" height="50" fill="#f0c1d0"/><rect x="375" y="240" width="40" height="50" fill="#a6d3ee"/>
+    </g>
+    <circle cx="470" cy="130" r="26" fill="#ff6f91"/><circle cx="492" cy="165" r="22" fill="#ffa24a"/><circle cx="455" cy="190" r="20" fill="#ffc2d1"/><circle cx="490" cy="215" r="18" fill="#e8483d"/>
+    <rect x="260" y="295" width="255" height="30" fill="#fdf7ee" stroke="#d9c9ba"/>
+    <!-- cab -->
+    <path d="M60 300 L70 190 Q80 150 130 140 L250 130 L255 320 L60 330Z" fill="#7a0f2a"/>
+    <path d="M90 190 Q95 160 130 155 L200 150 L202 235 L88 240Z" fill="#cfe4ea"/>
+    <path d="M100 200l90-10" stroke="#fff" stroke-width="3" opacity=".6"/>
+    <rect x="95" y="268" width="55" height="26" rx="4" fill="#fdf7ee"/><text x="122" y="286" font-family="Bagel Fat One" font-size="13" text-anchor="middle" fill="#7a0f2a">nectar</text>
+    <circle cx="200" cy="270" r="12" fill="#e9a3c0"/><circle cx="76" cy="275" r="9" fill="#ffd8a0"/>
+    <path d="M50 330h200v18H50z" fill="#5c0a1f"/>
+    <!-- wheels -->
+    <g><circle cx="105" cy="350" r="34" fill="#1d1d1d"/><circle cx="105" cy="350" r="22" fill="#e7e2da"/><circle cx="105" cy="350" r="7" fill="#999"/></g>
+    <g><circle cx="410" cy="352" r="34" fill="#1d1d1d"/><circle cx="410" cy="352" r="22" fill="#e7e2da"/><circle cx="410" cy="352" r="7" fill="#999"/></g>
+    <!-- flowers -->
+    <g><circle cx="165" cy="365" r="16" fill="#ff7a8a"/><circle cx="190" cy="380" r="14" fill="#ffb347"/><circle cx="215" cy="368" r="15" fill="#f9b6c7"/><circle cx="245" cy="378" r="13" fill="#e8483d"/><circle cx="150" cy="385" r="12" fill="#ffd166"/><circle cx="230" cy="392" r="10" fill="#ff8fab"/></g>
+  </svg>
+  <div class="catch">catch me if<br>you candy!</div>
+</header>
+
+<!-- SCHEDULE -->
+<section class="sched" id="schedule">
+  <div class="ticket">
+    <div class="ticket-bar"></div>
+    <div class="small">Where to catch the cart</div>
+    <h2>THIS WEEK</h2>
+    <div class="week" id="week" role="tablist" aria-label="This week's cart locations"></div>
+    <button class="btn dark" id="findToday">Find us today</button>
+    <div id="where" aria-live="polite" class="small" style="margin-top:12px;font-size:10px"></div>
+  </div>
+  <form class="signup" id="signup" novalidate>
+    <label for="em">Psst! Get the schedule in your inbox every week!</label>
+    <input id="em" type="email" placeholder="Email address" required>
+    <button class="btn dark" type="submit">Sign up</button>
+  </form>
+  <div class="toast" id="toast"></div>
+</section>
+
+<!-- EVENTS -->
+<section class="events" id="events">
+  <div class="l">
+    <div class="small">Weddings · Birthdays · Pop-ups &amp; more</div>
+    <h2>Your event called. It wants candy!</h2>
+    <p class="d">Candy concierge–guided tastings, a mix–your–own candy bag for every guest, and a candy cart that doubles as a conversation piece.</p>
+    <div class="prices">
+      <div class="blob a"><b>$399</b>CART FEE<br>(3HRS)</div>
+      <div class="blob b"><b>$8</b>PER<br>GUEST</div>
+      <div class="blob c"><b>$99</b>PER<br>ADDED HR</div>
+    </div>
+    <a href="#" class="btn red" id="plan">Plan your event</a>
+  </div>
+  <div class="r">
+    <div class="badge" style="left:20%;top:12px;transform:rotate(-8deg)">designed to<br>delight!</div>
+    <div class="photo" id="photo">
+      <svg viewBox="0 0 400 380">
+        <rect width="400" height="380" fill="#2b2b2b"/>
+        <rect width="400" height="380" fill="#cfcfd2" opacity=".35"/>
+        <path d="M20 40 L380 20 L380 60 L20 70Z" fill="url(#aw)"/>
+        <rect x="40" y="70" width="320" height="200" fill="#fdf7ee"/>
+        <g stroke="#e0d3c4" stroke-width="4"><path d="M45 130h310M45 195h310"/></g>
+        <g fill="#f4cfd8"><rect x="60" y="85" width="30" height="40"/><rect x="100" y="90" width="30" height="35" fill="#e29a7a"/><rect x="140" y="85" width="30" height="40" fill="#f6e2e8"/><rect x="180" y="90" width="30" height="35" fill="#ff9fb8"/><rect x="220" y="85" width="30" height="40" fill="#a6d3ee"/></g>
+        <g><rect x="60" y="148" width="34" height="42" fill="#f8c35a"/><rect x="104" y="152" width="34" height="38" fill="#ff7aa5"/><rect x="148" y="148" width="34" height="42" fill="#c9b7a8"/><rect x="192" y="152" width="34" height="38" fill="#f4c0cf"/><rect x="236" y="148" width="34" height="42" fill="#a6d3ee"/></g>
+        <rect x="40" y="270" width="320" height="30" fill="#7a0f2a"/>
+        <circle cx="330" cy="130" r="26" fill="#ff8f6f"/><circle cx="345" cy="175" r="20" fill="#ffb347"/><circle cx="310" cy="210" r="18" fill="#f9b6c7"/>
+        <circle cx="90" cy="335" r="30" fill="#1d1d1d"/><circle cx="90" cy="335" r="18" fill="#ddd"/>
+        <g><circle cx="150" cy="340" r="16" fill="#ff7a8a"/><circle cx="180" cy="350" r="14" fill="#ffb347"/><circle cx="210" cy="342" r="15" fill="#f9b6c7"/></g>
+      </svg>
+      <div class="tape" style="left:-24px;top:8px;transform:rotate(-30deg)"></div>
+      <div class="tape" style="right:-26px;top:6px;transform:rotate(30deg)"></div>
+      <div class="tape" style="left:-18px;bottom:30px;transform:rotate(-20deg)"></div>
+      <div class="tag">Candy Curated By:<br><b style="font-size:14px">Your Tastebuds</b></div>
+    </div>
+    <div class="badge" style="left:6%;top:90px;width:64px;height:64px;background:#c3c4ff;border-color:#7a0f2a;color:var(--maroon);display:flex;align-items:center;justify-content:center;font-family:'Bagel Fat One';font-size:9px">nectar</div>
+  </div>
+</section>
+<div class="check" aria-hidden="true"></div>
+
+<!-- CLUB -->
+<section class="club" id="club">
+  <svg class="float" style="left:6%;top:70%;width:70px" viewBox="0 0 60 30"><ellipse cx="26" cy="15" rx="24" ry="11" fill="#e8483d"/><path d="M48 15l12-10v20z" fill="#e8483d"/><circle cx="14" cy="12" r="2" fill="#fff"/></svg>
+  <svg class="float" style="right:4%;top:48%;width:34px" viewBox="0 0 24 24"><path d="M12 8c-2-5-8-4-8 2M12 8c2-5 8-4 8 2" stroke="#2b7a3b" fill="none" stroke-width="1.5"/><circle cx="8" cy="17" r="5" fill="#d8232e"/><circle cx="17" cy="17" r="5" fill="#d8232e"/></svg>
+  <svg class="float" style="left:2%;bottom:-6px;width:70px" viewBox="0 0 60 70"><rect x="6" y="8" width="48" height="60" fill="#fdf7ee" stroke="#d97b8a" stroke-width="2"/><path d="M6 20h48M6 34h48M6 48h48" stroke="#e8a1ae" stroke-width="3"/></svg>
+  <div class="card">
+    <svg class="heart" viewBox="0 0 84 76"><path d="M42 72C8 46 0 26 14 12c11-10 24-2 28 8 4-10 17-18 28-8 14 14 6 34-28 60z" fill="#d8232e"/><text x="42" y="40" text-anchor="middle" font-family="Caveat Brush" font-size="13" fill="#fff" transform="rotate(-8 42 40)">Just a Little</text><text x="42" y="54" text-anchor="middle" font-family="Caveat Brush" font-size="13" fill="#fff" transform="rotate(-8 42 40)">Something Sweet</text></svg>
+    <svg class="float" style="left:7%;top:150px;width:26px" viewBox="0 0 24 30"><path d="M12 28c-9-2-10-12-6-18l3-8 3 4 3-4 3 8c4 6 3 16-6 18z" fill="#ff7aa5"/></svg>
+    <svg class="float" style="right:5%;top:150px;width:26px" viewBox="0 0 24 24"><path d="M12 8c-2-5-8-4-8 2M12 8c2-5 8-4 8 2" stroke="#2b7a3b" fill="none" stroke-width="1.5"/><circle cx="8" cy="17" r="5" fill="#d8232e"/><circle cx="17" cy="17" r="5" fill="#d8232e"/></svg>
+    <span class="cardlogo">nectar<br><small style="font-family:var(--sans);font-size:6px;letter-spacing:.1em">Candy Club</small></span><br>
+    <span class="pill">MONTHLY CANDY SUBSCRIPTION</span>
+    <h2>Join the Nectar Candy Club</h2>
+    <div class="price">$25/month</div>
+    <p>Candy concierge–guided tastings, a mix–your–own candy bag for every guest, and a candy cart that doubles as a conversation piece.</p>
+    <button class="btn red" id="join">Join the club</button>
+  </div>
+</section>
+<footer>© 2026 Nectar Candy Cart · Pittsburgh, PA</footer>
+</div>
+
+<script>
+(function(){
+  var DAYS=['SUN','MON','TUE','WED','THU','FRI','SAT'],MON=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  var icons=[
+    '<circle cx="17" cy="17" r="12" fill="#f7b24a"/><circle cx="17" cy="17" r="5" fill="#fff"/>',
+    '<ellipse cx="17" cy="19" rx="8" ry="11" fill="#e8c43a"/><circle cx="12" cy="8" r="4" fill="#e8c43a"/><circle cx="22" cy="8" r="4" fill="#e8c43a"/>',
+    '<rect x="5" y="9" width="24" height="16" rx="5" fill="#f08a4b"/><path d="M5 17h24" stroke="#7bc47f" stroke-width="5"/>',
+    '<circle cx="13" cy="22" r="6" fill="#d8232e"/><circle cx="23" cy="22" r="6" fill="#d8232e"/><path d="M13 16c2-8 6-10 10 0" stroke="#2b7a3b" fill="none" stroke-width="2"/>',
+    '<path d="M6 28c0-14 6-22 11-22s11 8 11 22z" fill="#f9a7c0"/>',
+    '<rect x="11" y="3" width="12" height="7" rx="2" fill="#5ea3d6"/><rect x="9" y="9" width="16" height="22" rx="7" fill="#5ea3d6"/>'];
+  var week=document.getElementById('week'),where=document.getElementById('where');
+  var now=new Date(),els=[],sel=0;
+  function pad(n){return n<10?'0'+n:''+n}
+  for(var i=0;i<7;i++){
+    var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i);
+    var b=document.createElement('button');b.className='day';b.setAttribute('role','tab');
+    var head='<span class="row"><span>'+MON[d.getMonth()]+'<br>'+pad(d.getDate())+'</span><span>('+DAYS[d.getDay()].slice(0,3)+')</span></span>';
+    b.dataset.i=i;
+    if(i===0){b.innerHTML=head+'<span class="v" style="margin:auto 0">None</span>';}
+    else b.innerHTML=head+'<svg class="ico" viewBox="0 0 34 34">'+icons[(i-1)%icons.length]+'</svg><span class="v">Rocko Candy<br>Vendor</span><span class="t">3:00–4:00pm</span>';
+    b.addEventListener('click',function(){pick(+this.dataset.i)});
+    week.appendChild(b);els.push(b);
+  }
+  var c=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  c.setAttribute('class','circle');c.setAttribute('viewBox','0 0 100 200');c.setAttribute('preserveAspectRatio','none');
+  c.innerHTML='<path d="M52 4C18 2 4 40 6 100s14 94 50 94 40-50 38-96S80 6 40 8" fill="none" stroke="#b6b3f6" stroke-width="3" vector-effect="non-scaling-stroke" stroke-linecap="round"/>';
+  week.appendChild(c);
+  function pick(i){
+    sel=i;els.forEach(function(e,k){e.classList.toggle('sel',k===i);e.setAttribute('aria-selected',k===i)});
+    c.style.left='calc('+(i*100/7)+'% - 4px)';c.style.display=i===0?'none':'';
+    where.textContent=i===0?'No cart today — see you tomorrow!':els[i].querySelector('.v').textContent.replace(/\s+/g,' ')+' · 3:00–4:00pm';
+  }
+  pick(1);els[0].classList.add('sel');els[1].classList.remove('sel');
+  els[0].classList.remove('sel');els[1].classList.add('sel');
+  document.getElementById('findToday').addEventListener('click',function(){pick(0)});
+
+  var toast=document.getElementById('toast');
+  document.getElementById('signup').addEventListener('submit',function(e){
+    e.preventDefault();var v=document.getElementById('em');
+    if(!/^\S+@\S+\.\S+$/.test(v.value)){toast.textContent='Enter a valid email address.';v.focus();return}
+    toast.textContent='Thanks! The schedule will land in your inbox every week.';v.value='';
+  });
+  var n=0;
+  document.getElementById('join').addEventListener('click',function(){n++;document.getElementById('cartN').textContent=n;this.textContent='Added to cart ✓'});
+  document.getElementById('cartLink').addEventListener('click',function(e){e.preventDefault()});
+  document.getElementById('plan').addEventListener('click',function(e){e.preventDefault();this.textContent='We’ll be in touch!'});
+  var ph=document.getElementById('photo');
+  document.querySelector('.events .r').addEventListener('mousemove',function(e){
+    var r=this.getBoundingClientRect();var x=(e.clientX-r.left)/r.width-.5;
+    ph.style.transform='rotate('+(1.5+x*4)+'deg)';
+  });
+})();
+</script>
+</body>
+</html>

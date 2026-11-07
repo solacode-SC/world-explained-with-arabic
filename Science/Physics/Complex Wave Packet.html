@@ -1,0 +1,758 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Complex Wave Packet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+  /* Layout: one tall infographic. A live 3D plot with a readout beside it, then three labelled views of the
+     same wave, then the two ingredients with controls, then a short "try this" list. Colour is the code:
+     blue = real part, red = imaginary part, teal = phase, violet = envelope. */
+  :root {
+    --bg: #f3f4f8;
+    --card: #ffffff;
+    --ink: #161a26;
+    --muted: #596074;
+    --line: #dde0ea;
+    --re: #2a56d6;
+    --im: #d9432b;
+    --ph: #0c8f7e;
+    --env: #6a4fd0;
+    --f-disp: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+    --f-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+    --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    --f-math: "STIX Two Text", "Cambria Math", "Times New Roman", serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0c0f16; --card: #141926; --ink: #eaedf6; --muted: #9aa2b8; --line: #252c3d;
+      --re: #7ea3ff; --im: #ff8d73; --ph: #4fd1bb; --env: #aa9bff;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c0f16; --card: #141926; --ink: #eaedf6; --muted: #9aa2b8; --line: #252c3d;
+    --re: #7ea3ff; --im: #ff8d73; --ph: #4fd1bb; --env: #aa9bff;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding-block: clamp(20px, 4vw, 48px) clamp(28px, 5vw, 64px);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 1rem/1.6 var(--f-body);
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 1080px; margin-inline: auto; display: grid; gap: clamp(32px, 6vw, 64px); }
+  .wrap > * { min-width: 0; }
+  i, .m { font-family: var(--f-math); }
+  :focus-visible { outline: 2px solid var(--env); outline-offset: 3px; }
+
+  /* Header */
+  .head { display: grid; gap: 14px; max-width: 46rem; }
+  .kicker { margin: 0; font: 500 .75rem/1.2 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  h1 { margin: 0; font: 800 clamp(2.1rem, 6.4vw, 3.6rem)/1.02 var(--f-disp); letter-spacing: -.025em; text-wrap: balance; }
+  .lede { margin: 0; font-size: clamp(1.02rem, 2.2vw, 1.18rem); color: var(--muted); max-width: 40rem; text-wrap: pretty; }
+
+  /* Panels */
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+
+  /* Hero */
+  .hero { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 860px) { .hero { grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); } }
+  .stagebox { display: grid; grid-template-rows: minmax(0, 1fr) auto; overflow: hidden; }
+  .cvwrap { position: relative; aspect-ratio: 1 / .92; min-height: 310px; }
+  @media (min-width: 860px) { .cvwrap { aspect-ratio: 1 / .86; } }
+  #scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent; }
+  #scene:active { cursor: grabbing; }
+  #scene:focus-visible { outline-offset: -4px; }
+  .hint { position: absolute; top: 12px; left: 14px; margin: 0; font: 500 .72rem/1.3 var(--f-mono); color: var(--muted); letter-spacing: .02em; transition: opacity .6s ease; pointer-events: none; }
+  .hint.gone { opacity: 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 20px; padding: 12px 16px 14px; border-top: 1px solid var(--line); font-size: .84rem; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .sw { width: 11px; height: 11px; flex: none; display: inline-block; }
+  .sw.re { background: var(--re); } .sw.im { background: var(--im); } .sw.ph { background: var(--ph); } .sw.env { background: var(--env); } .sw.ink { background: var(--ink); }
+
+  .read { padding: 18px 18px 16px; display: grid; gap: 16px; align-content: start; }
+  .read h2 { margin: 0; font: 500 .75rem/1.2 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .eq { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .3em; font: 400 clamp(1.55rem, 4vw, 2.05rem)/1.25 var(--f-math); font-variant-numeric: tabular-nums; }
+  .eq .re { width: 2.45em; text-align: right; color: var(--re); }
+  .eq .im { color: var(--im); }
+  .eq .imn { display: inline-block; width: 1.75em; }
+  .stats { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .stats div { border-top: 1px solid var(--line); padding-top: 8px; min-width: 0; }
+  .stats dt { font: 500 .68rem/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .stats dd { margin: 4px 0 0; font: 600 1.2rem/1.2 var(--f-body); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .scrub-l { margin: 0; font: 500 .72rem/1.2 var(--f-mono); color: var(--muted); }
+  .track { position: relative; height: 54px; margin: 0 18px; cursor: ew-resize; touch-action: none; }
+  .rail { position: absolute; left: 0; right: 0; top: 14px; height: 4px; background: var(--line); border-radius: 2px; }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ink); border-radius: 2px; }
+  .mark { position: absolute; left: 50%; top: 7px; width: 2px; height: 18px; background: var(--muted); transform: translateX(-50%); }
+  .thumb { position: absolute; top: 16px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); border: 3px solid var(--card); box-shadow: 0 0 0 1px var(--ink); transform: translate(-50%, -50%); }
+  .lab { position: absolute; top: 32px; font: 400 .72rem/1 var(--f-mono); color: var(--muted); }
+  .lab.l { left: 0; transform: translateX(-50%); } .lab.m { left: 50%; transform: translateX(-50%); } .lab.r { right: 0; transform: translateX(50%); }
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  button { font: 500 .88rem/1 var(--f-body); padding: 10px 16px; border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 6px; cursor: pointer; }
+  button:hover { border-color: var(--muted); }
+  button[aria-pressed="true"] { background: var(--ink); color: var(--card); border-color: var(--ink); }
+
+  /* Sections */
+  .sec { display: grid; gap: 22px; }
+  .sec-h { display: grid; gap: 8px; max-width: 40rem; }
+  h2.t { margin: 0; font: 700 clamp(1.5rem, 3.6vw, 2.1rem)/1.1 var(--f-disp); letter-spacing: -.015em; text-wrap: balance; }
+  .sec-h p { margin: 0; color: var(--muted); text-wrap: pretty; }
+
+  .views { display: grid; gap: 24px 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+  figure { margin: 0; display: grid; gap: 14px; align-content: start; min-width: 0; }
+  .plotbox { aspect-ratio: 5 / 4; overflow: hidden; }
+  .plotbox.wide { aspect-ratio: 16 / 9; border: 0; border-radius: 0; background: transparent; }
+  .plotbox canvas { display: block; width: 100%; height: 100%; }
+  figcaption { display: grid; gap: 8px; }
+  h3 { margin: 0; display: flex; align-items: center; gap: 10px; font: 700 1.08rem/1.25 var(--f-disp); letter-spacing: -.005em; }
+  figcaption p { margin: 0; font-size: .95rem; text-wrap: pretty; }
+  .fx { font: 400 1.05rem/1.4 var(--f-math); color: var(--muted); overflow-wrap: anywhere; }
+  .fx sup { font-size: .68em; line-height: 0; }
+
+  .recipe { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); align-items: stretch; }
+  @media (min-width: 760px) { .recipe { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 18px; } }
+  .times { align-self: center; justify-self: center; font: 600 2rem/1 var(--f-disp); color: var(--muted); }
+  .ing { padding: 16px; display: grid; gap: 14px; align-content: start; }
+  .ctl { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .ctl label { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font: 500 .8rem/1.2 var(--f-mono); color: var(--muted); }
+  .ctl output { color: var(--ink); font-variant-numeric: tabular-nums; }
+  input[type="range"] { width: 100%; margin: 0; height: 28px; }
+  #sw { accent-color: var(--env); } #sk { accent-color: var(--ink); }
+  .after { margin: 0; max-width: 40rem; color: var(--muted); }
+
+  .try { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; max-width: 42rem; }
+  .try li { display: grid; grid-template-columns: 12px minmax(0, 1fr); gap: 14px; align-items: start; }
+  .try li::before { content: ""; width: 10px; height: 10px; margin-top: .5em; background: var(--env); }
+  .try p { margin: 0; text-wrap: pretty; }
+  .note { margin: 0; padding-top: 16px; border-top: 1px solid var(--line); font: 400 .78rem/1.5 var(--f-mono); color: var(--muted); max-width: 46rem; }
+
+  @media (prefers-reduced-motion: reduce) { .hint { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <p class="kicker">Complex numbers in motion</p>
+    <h1>Anatomy of a wave packet</h1>
+    <p class="lede">A wave packet is a point that spins around a centre while its distance from that centre swells, then fades. Turn the diagram and the same object becomes a circle, a cosine and a sine.</p>
+  </header>
+
+  <section class="hero" aria-label="Interactive wave packet">
+    <div class="panel stagebox">
+      <div class="cvwrap">
+        <canvas id="scene" tabindex="0" role="img"
+          aria-label="Three-dimensional plot of a complex wave packet. A black helix runs along the time axis, with its real part projected on the floor, its imaginary part on the back wall and its phase portrait on the left wall. Drag to turn the view, tap to pause."></canvas>
+        <p class="hint" id="hint">Drag to turn the view</p>
+      </div>
+      <div class="legend">
+        <span><i class="sw ink"></i>The wave itself</span>
+        <span><i class="sw re"></i>Floor: real part</span>
+        <span><i class="sw im"></i>Back wall: imaginary part</span>
+        <span><i class="sw ph"></i>Left wall: phase portrait</span>
+      </div>
+    </div>
+
+    <div class="panel read">
+      <h2>Right now</h2>
+      <p class="eq" aria-live="off"><span><i>f</i>(<i>t</i>) =</span><span class="re" id="vre">−0.58</span><span id="vsg" class="im">−</span><span class="im"><span class="imn" id="vim">0.09</span><i>i</i></span></p>
+      <dl class="stats">
+        <div><dt>Time</dt><dd><span id="tnum">1.52</span> T</dd></div>
+        <div><dt>Size |<i>f</i>|</dt><dd id="smag">0.59</dd></div>
+        <div><dt>Angle</dt><dd id="sang">189°</dd></div>
+      </dl>
+      <div>
+        <p class="scrub-l">Drag to scrub through time</p>
+        <div class="track" id="track" role="slider" tabindex="0" aria-label="Time" aria-valuemin="0" aria-valuemax="6" aria-valuenow="1.52" aria-valuetext="1.52 T">
+          <span class="rail" id="rail"><span class="fill" id="fill"></span></span>
+          <span class="mark"></span>
+          <span class="thumb" id="thumb"></span>
+          <span class="lab l">0</span><span class="lab m">t₀</span><span class="lab r">6 T</span>
+        </div>
+      </div>
+      <div class="btns">
+        <button type="button" id="play" aria-pressed="false">Pause</button>
+        <button type="button" id="reset">Reset view</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-views">
+    <div class="sec-h">
+      <h2 class="t" id="h-views">One object, three views</h2>
+      <p>Each wall shows the shadow of the helix. Nothing is added or lost, only the direction you look from changes.</p>
+    </div>
+    <div class="views">
+      <figure>
+        <div class="panel plotbox"><canvas id="p-re" role="img" aria-label="Real part of f against time: a cosine under a bell-shaped envelope, with a moving dot."></canvas></div>
+        <figcaption>
+          <h3><i class="sw re"></i>From above: the real part</h3>
+          <p class="fx"><i>Re f</i> = <i>e</i><sup>−γ(<i>t</i>−<i>t</i>₀)²</sup> cos(ω<i>t</i>)</p>
+          <p>Squash the helix onto the floor and a cosine appears. It grows, peaks at <i>t</i>₀ and dies away, like a note struck once.</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <div class="panel plotbox"><canvas id="p-im" role="img" aria-label="Imaginary part of f against time: a sine under the same envelope, with a moving dot."></canvas></div>
+        <figcaption>
+          <h3><i class="sw im"></i>From the side: the imaginary part</h3>
+          <p class="fx"><i>Im f</i> = <i>e</i><sup>−γ(<i>t</i>−<i>t</i>₀)²</sup> sin(ω<i>t</i>)</p>
+          <p>The same wave delayed by a quarter lap. When the cosine sits at a peak, the sine is crossing zero.</p>
+        </figcaption>
+      </figure>
+      <figure>
+        <div class="panel plotbox"><canvas id="p-ph" role="img" aria-label="Phase portrait: the point of f spiralling around the origin in the complex plane."></canvas></div>
+        <figcaption>
+          <h3><i class="sw ph"></i>From the end: the phase portrait</h3>
+          <p class="fx"><i>f</i> = <i>Re f</i> + <i>i</i> <i>Im f</i></p>
+          <p>Look straight down the time axis and the helix becomes a spiral. The point circles the origin, drifting outward, then back in.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-ing">
+    <div class="sec-h">
+      <h2 class="t" id="h-ing">Two ingredients</h2>
+      <p>Multiply a slow bell by a fast spin and you get the packet. Move the sliders and watch every plot above change.</p>
+    </div>
+    <div class="recipe">
+      <div class="panel ing">
+        <div class="plotbox wide"><canvas id="p-env" role="img" aria-label="The bell-shaped envelope with its width marked and a moving dot."></canvas></div>
+        <div>
+          <h3><i class="sw env"></i>The envelope</h3>
+          <p class="fx"><i>e</i><sup>−γ(<i>t</i>−<i>t</i>₀)²</sup></p>
+          <p style="margin:8px 0 0;font-size:.95rem">A bell curve centred on <i>t</i>₀. It decides when the packet is loud and when it has faded.</p>
+        </div>
+        <div class="ctl">
+          <label for="sw">Width <output id="swo" for="sw">σ = 1.43 T</output></label>
+          <input type="range" id="sw" min="0.6" max="2.2" step="0.01" value="1.43">
+        </div>
+      </div>
+      <div class="times" aria-hidden="true">×</div>
+      <div class="panel ing">
+        <div class="plotbox wide"><canvas id="p-osc" role="img" aria-label="A point circling the unit circle, with its shadows on the horizontal and vertical axes."></canvas></div>
+        <div>
+          <h3><i class="sw ink"></i>The spin</h3>
+          <p class="fx"><i>e</i><sup><i>i</i>ω<i>t</i></sup> = cos ω<i>t</i> + <i>i</i> sin ω<i>t</i></p>
+          <p style="margin:8px 0 0;font-size:.95rem">A point lapping the unit circle. Its shadows on the two axes are the cosine and the sine.</p>
+        </div>
+        <div class="ctl">
+          <label for="sk">Spin rate <output id="sko" for="sk">1.00 laps per T</output></label>
+          <input type="range" id="sk" min="0.5" max="2" step="0.05" value="1">
+        </div>
+      </div>
+    </div>
+    <p class="after">Multiply the two and the point spirals outward while the bell rises, then back inward as it falls. That path is the helix in the main diagram.</p>
+  </section>
+
+  <section class="sec" aria-labelledby="h-try">
+    <div class="sec-h"><h2 class="t" id="h-try">Try this</h2></div>
+    <ul class="try">
+      <li><p>Drag the main diagram until the helix looks like a plain circle. You are now looking straight down the time axis.</p></li>
+      <li><p>Shrink the width. The packet fades sooner, so fewer loops are visible. A packet that lasts only a few laps cannot have a perfectly sharp pitch, and that trade-off is the heart of the uncertainty principle.</p></li>
+      <li><p>Double the spin rate. The loops tighten while the envelope stays exactly where it was.</p></li>
+    </ul>
+    <p class="note">T is one lap at a spin rate of 1 lap per T. Time runs from 0 to 6 T and the packet is centred at <i>t</i>₀ = 3 T.</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var TAU = Math.PI * 2, TMAX = 6, T0 = 3, N = 1200, START_T = 1.5245;
+  var SIGMA = 1.43, K = 1, GAMMA = 1 / (2 * SIGMA * SIGMA), OMEGA = TAU * K;
+  var SPEED = TMAX / 20;
+
+  // World geometry: x = time, y = Im, z = Re
+  var A = 1, XS = 0.75, HALF = 1.35, XA = -2.55, XB = 2.7;
+  var X0 = (0 - T0) * XS;
+  var FX = [-2.75, 3.0], FY = [-1.2, 1.9], FZ = [-1.75, 1.5];
+  var DEF = { yaw: 0.45, pitch: 0.43 };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var cv = $('scene'), ctx = cv.getContext('2d');
+  var hint = $('hint'), track = $('track'), rail = $('rail'), fillEl = $('fill'), thumb = $('thumb');
+  var vre = $('vre'), vsg = $('vsg'), vim = $('vim'), tnum = $('tnum'), smag = $('smag'), sang = $('sang');
+  var playBtn = $('play'), resetBtn = $('reset');
+  var sw = $('sw'), sk = $('sk'), swo = $('swo'), sko = $('sko');
+
+  // Colours come from the page tokens so both themes work
+  var C = {};
+  function readColors() {
+    var cs = getComputedStyle(document.documentElement);
+    function g(n) { return cs.getPropertyValue(n).trim(); }
+    C = { ink: g('--ink'), muted: g('--muted'), line: g('--line'), card: g('--card'),
+          re: g('--re'), im: g('--im'), ph: g('--ph'), env: g('--env') };
+    dirty = true;
+  }
+  var MATH = '"STIX Two Text","Cambria Math","Times New Roman",serif';
+  var MONO = '"IBM Plex Mono",ui-monospace,Menlo,monospace';
+
+  // Maths
+  function env(t) { var d = t - T0; return Math.exp(-GAMMA * d * d); }
+  function reF(t) { return env(t) * Math.cos(OMEGA * t); }
+  function imF(t) { return env(t) * Math.sin(OMEGA * t); }
+  function wx(t) { return (t - T0) * XS; }
+
+  var helix = new Float32Array((N + 1) * 3), wall = new Float32Array((N + 1) * 3),
+      floor = new Float32Array((N + 1) * 3), left = new Float32Array((N + 1) * 3);
+  function put(a, i, x, y, z) { a[3 * i] = x; a[3 * i + 1] = y; a[3 * i + 2] = z; }
+  function rebuild() {
+    GAMMA = 1 / (2 * SIGMA * SIGMA); OMEGA = TAU * K;
+    for (var i = 0; i <= N; i++) {
+      var t = i / N * TMAX, re = reF(t), im = imF(t), x = wx(t);
+      put(helix, i, x, im * A, re * A);
+      put(wall, i, x, im * A, HALF);
+      put(floor, i, x, -HALF, re * A);
+      put(left, i, XA, im * A, re * A);
+    }
+    dirty = true;
+  }
+  function at(t) {
+    var re = reF(t), im = imF(t), x = wx(t);
+    return { h: [x, im * A, re * A], w: [x, im * A, HALF], f: [x, -HALF, re * A], l: [XA, im * A, re * A] };
+  }
+
+  // State
+  var tc = START_T, dirty = true, W = 300, H = 300, dpr = 1;
+  var view = { yaw: DEF.yaw, pitch: DEF.pitch }, goal = { yaw: DEF.yaw, pitch: DEF.pitch };
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var playing = !reduce, scrubbing = false, dragging = false;
+
+  // Camera
+  var cT, sT, cP, sP, S, OX, OY, U, LBL;
+  var P = [0, 0];
+  function setView() {
+    cT = Math.cos(view.yaw); sT = Math.sin(view.yaw); cP = Math.cos(view.pitch); sP = Math.sin(view.pitch);
+    var minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+    for (var a = 0; a < 2; a++) for (var b = 0; b < 2; b++) for (var c = 0; c < 2; c++) {
+      var x = FX[a], y = FY[b], z = FZ[c];
+      var x1 = x * cT + z * sT, z1 = -x * sT + z * cT, y2 = y * cP + z1 * sP;
+      if (x1 < minX) minX = x1; if (x1 > maxX) maxX = x1;
+      if (y2 < minY) minY = y2; if (y2 > maxY) maxY = y2;
+    }
+    var pad = Math.min(W, H) * 0.025;
+    S = Math.min((W - 2 * pad) / (maxX - minX), (H - 2 * pad) / (maxY - minY));
+    OX = W / 2 - S * (minX + maxX) / 2;
+    OY = H / 2 + S * (minY + maxY) / 2;
+    U = Math.max(0.8, Math.min(1.6, S / 60));
+    LBL = Math.max(12, Math.min(21, S * 0.2));
+  }
+  function proj(x, y, z) {
+    var x1 = x * cT + z * sT, z1 = -x * sT + z * cT, y2 = y * cP + z1 * sP;
+    P[0] = OX + S * x1; P[1] = OY - S * y2; return P;
+  }
+  function sp(p) { var q = proj(p[0], p[1], p[2]); return [q[0], q[1]]; }
+  function depth(x, y, z) { var z1 = -x * sT + z * cT; return z1 * cP - y * sP; }
+
+  // Hero drawing helpers
+  function line3(a, b, color, alpha, lw, dash) {
+    var p = proj(a[0], a[1], a[2]), x0 = p[0], y0 = p[1], q = proj(b[0], b[1], b[2]);
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(q[0], q[1]);
+    ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.lineWidth = lw;
+    ctx.setLineDash(dash || []); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  }
+  function quad(pts, ga, color) {
+    ctx.beginPath();
+    for (var i = 0; i < pts.length; i++) {
+      var p = proj(pts[i][0], pts[i][1], pts[i][2]);
+      if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]);
+    }
+    ctx.closePath();
+    ctx.globalAlpha = 0.1 * ga; ctx.fillStyle = color; ctx.fill();
+    ctx.globalAlpha = 0.6 * ga; ctx.strokeStyle = color; ctx.lineWidth = 1.2 * U; ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  function trace(arr, cur, k, o) {
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    var p = proj(cur[0], cur[1], cur[2]), cx = p[0], cy = p[1], i;
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    for (i = k + 1; i <= N; i++) { p = proj(arr[3 * i], arr[3 * i + 1], arr[3 * i + 2]); ctx.lineTo(p[0], p[1]); }
+    ctx.globalAlpha = o.fa * o.ga; ctx.strokeStyle = o.c; ctx.lineWidth = o.fw * U; ctx.stroke();
+    ctx.beginPath();
+    for (i = 0; i <= k; i++) {
+      p = proj(arr[3 * i], arr[3 * i + 1], arr[3 * i + 2]);
+      if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]);
+    }
+    ctx.lineTo(cx, cy);
+    ctx.globalAlpha = o.pa * o.ga; ctx.strokeStyle = o.c; ctx.lineWidth = o.pw * U; ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  function marker(a, b, size, color, ga) {
+    var p = sp(a), q = sp(b), dx = q[0] - p[0], dy = q[1] - p[1], m = Math.hypot(dx, dy) || 1;
+    dx /= m; dy /= m;
+    var nx = -dy, ny = dx, s = size * U;
+    ctx.globalAlpha = ga; ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(p[0] + dx * s * 0.55, p[1] + dy * s * 0.55);
+    ctx.lineTo(p[0] - dx * s * 0.7 + nx * s * 0.42, p[1] - dy * s * 0.7 + ny * s * 0.42);
+    ctx.lineTo(p[0] - dx * s * 0.7 - nx * s * 0.42, p[1] - dy * s * 0.7 - ny * s * 0.42);
+    ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+  }
+  function drawParts(parts, x, y) {
+    var cx = x;
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i], size = 24 * p.sz;
+      ctx.font = 'italic ' + size + 'px ' + MATH;
+      ctx.fillText(p.t, cx, y + (p.dy || 0) * 24);
+      cx += ctx.measureText(p.t).width;
+    }
+  }
+  function skewText(parts, x, y, z, u, v, color) {
+    var o = proj(x, y, z), ox = o[0], oy = o[1];
+    var pu = proj(x + u[0], y + u[1], z + u[2]), ux = pu[0] - ox, uy = pu[1] - oy;
+    var pv = proj(x + v[0], y + v[1], z + v[2]), vx = pv[0] - ox, vy = pv[1] - oy;
+    var K2 = 100, a = ux / K2, b = uy / K2, c = -vx / K2, d = -vy / K2;
+    var det = a * d - b * c, nrm = det / ((Math.hypot(a, b) * Math.hypot(c, d)) || 1);
+    if (nrm < 0.14) return;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, (nrm - 0.14) / 0.3);
+    ctx.transform(a, b, c, d, ox, oy);
+    ctx.fillStyle = color; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    drawParts(parts, 0, 0);
+    ctx.restore();
+  }
+  function tag(text, x, y, z, dx, dy, align, color) {
+    var p = proj(x, y, z), px = p[0] + dx, py = p[1] + dy;
+    ctx.font = 'italic ' + LBL + 'px ' + MATH;
+    ctx.textAlign = align || 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = C.card; ctx.strokeText(text, px, py);
+    ctx.fillStyle = color || C.ink; ctx.fillText(text, px, py);
+  }
+
+  var EXP = { t: '−γ(t−t₀)²', sz: 0.62, dy: -0.4 };
+  var PLANE = {
+    wall: function (a0, a1, k, ga) {
+      quad([[XA, -HALF, HALF], [XB, -HALF, HALF], [XB, HALF, HALF], [XA, HALF, HALF]], ga, C.im);
+      line3([XA, 0, HALF], [XB, 0, HALF], C.im, 0.45 * ga, 1 * U);
+      trace(wall, a0.w, k, { c: C.im, pa: 0.95, pw: 1.8, fa: 0.3, fw: 1.4, ga: ga });
+      marker(a0.w, a1.w, 13, C.im, ga);
+      skewText([{ t: 'Im f = e', sz: 1 }, EXP, { t: ' sin(ωt)', sz: 1 }], -0.9, HALF + 0.16, HALF, [1, 0, 0], [0, 1, 0], C.im);
+    },
+    floor: function (a0, a1, k, ga) {
+      quad([[XA, -HALF, -HALF], [XB, -HALF, -HALF], [XB, -HALF, HALF], [XA, -HALF, HALF]], ga, C.re);
+      line3([XA, -HALF, 0], [XB, -HALF, 0], C.re, 0.45 * ga, 1 * U);
+      trace(floor, a0.f, k, { c: C.re, pa: 0.95, pw: 1.8, fa: 0.3, fw: 1.4, ga: ga });
+      marker(a0.f, a1.f, 13, C.re, ga);
+      skewText([{ t: 'Re f = e', sz: 1 }, EXP, { t: ' cos(ωt)', sz: 1 }], XA + 0.25, -HALF, -HALF - 0.3, [1, 0, 0], [0, 0, 1], C.re);
+    },
+    left: function (a0, a1, k, ga) {
+      quad([[XA, -HALF, -HALF], [XA, HALF, -HALF], [XA, HALF, HALF], [XA, -HALF, HALF]], ga, C.ph);
+      ctx.lineWidth = 1 * U; ctx.strokeStyle = C.ph; ctx.globalAlpha = 0.32 * ga;
+      for (var r = 0.25; r <= 1.001; r += 0.25) {
+        ctx.beginPath();
+        for (var j = 0; j <= 64; j++) {
+          var ang = j / 64 * TAU, p = proj(XA, r * A * Math.sin(ang), r * A * Math.cos(ang));
+          if (j) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]);
+        }
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      line3([XA, -HALF, 0], [XA, HALF, 0], C.ph, 0.5 * ga, 1 * U);
+      line3([XA, 0, -HALF], [XA, 0, HALF], C.ph, 0.5 * ga, 1 * U);
+      trace(left, a0.l, k, { c: C.ph, pa: 0.95, pw: 1.8, fa: 0.3, fw: 1.4, ga: ga });
+      marker(a0.l, a1.l, 13, C.ph, ga);
+      skewText([{ t: 'phase portrait', sz: 0.85 }], XA, HALF + 0.14, -HALF + 0.05, [0, 0, 1], [0, 1, 0], C.ph);
+    }
+  };
+
+  function drawAxes() {
+    var lw = 1.3 * U;
+    line3([XA, 0, 0], [XB + 0.1, 0, 0], C.ink, 0.9, lw);
+    line3([X0, -0.75, 0], [X0, 1.15, 0], C.ink, 0.9, lw);
+    line3([X0, 0, -0.75], [X0, 0, 1.15], C.ink, 0.9, lw);
+    var p = sp([XB + 0.1, 0, 0]), q = sp([XB + 0.3, 0, 0]);
+    var dx = q[0] - p[0], dy = q[1] - p[1], m = Math.hypot(dx, dy) || 1; dx /= m; dy /= m;
+    var s = 9 * U, nx = -dy, ny = dx;
+    ctx.fillStyle = C.ink; ctx.globalAlpha = 0.9; ctx.beginPath();
+    ctx.moveTo(p[0] + dx * s, p[1] + dy * s);
+    ctx.lineTo(p[0] + nx * s * 0.4, p[1] + ny * s * 0.4);
+    ctx.lineTo(p[0] - nx * s * 0.4, p[1] - ny * s * 0.4);
+    ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+  }
+
+  function drawHero() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    setView();
+    var k = Math.min(N - 1, Math.floor(tc / TMAX * N));
+    var a0 = at(tc), a1 = at(tc + 0.03);
+    var dc = depth(0.1, 0, 0);
+    var planes = [
+      { id: 'wall', d: depth(0, 0, HALF) }, { id: 'floor', d: depth(0.1, -HALF, 0) }, { id: 'left', d: depth(XA, 0, 0) }
+    ];
+    var far = planes.filter(function (p) { return p.d >= dc; }).sort(function (p, q) { return q.d - p.d; });
+    var near = planes.filter(function (p) { return p.d < dc; }).sort(function (p, q) { return q.d - p.d; });
+    far.forEach(function (p) { PLANE[p.id](a0, a1, k, 1); });
+    var d = [4 * U, 4 * U];
+    line3(a0.h, a0.w, C.muted, 0.85, 1 * U, d);
+    line3(a0.h, a0.f, C.muted, 0.85, 1 * U, d);
+    line3(a0.h, a0.l, C.muted, 0.85, 1 * U, d);
+    drawAxes();
+    trace(helix, a0.h, k, { c: C.ink, pa: 1, pw: 2.5, fa: 0.42, fw: 2, ga: 1 });
+    marker(a0.h, a1.h, 17, C.ink, 1);
+    near.forEach(function (p) { PLANE[p.id](a0, a1, k, 0.8); });
+    tag('Im', X0, 1.2, 0, -6, -4, 'right', C.im);
+    tag('Re', X0, 0, 1.2, 6, -6, 'left', C.re);
+    tag('t', XB + 0.38, 0, 0, 4, 6, 'left', C.ink);
+    tag('t₀', 0, 0, 0, 8, LBL + 8, 'left', C.ink);
+  }
+
+  // Small plots
+  var minis = [];
+  function addMini(id, fn) {
+    var c = $(id), o = { c: c, x: c.getContext('2d'), w: 10, h: 10, d: 1, fn: fn };
+    minis.push(o);
+    function size() {
+      var r = c.getBoundingClientRect();
+      o.w = Math.max(40, r.width); o.h = Math.max(40, r.height);
+      o.d = Math.min(window.devicePixelRatio || 1, 2.5);
+      c.width = Math.round(o.w * o.d); c.height = Math.round(o.h * o.d); dirty = true;
+    }
+    if (window.ResizeObserver) new ResizeObserver(size).observe(c);
+    size();
+  }
+  function path(g, fn, X, Y, t0, t1, n) {
+    g.beginPath();
+    for (var i = 0; i <= n; i++) {
+      var t = t0 + (t1 - t0) * i / n, x = X(t), y = Y(fn(t));
+      if (i) g.lineTo(x, y); else g.moveTo(x, y);
+    }
+  }
+  function dot(g, x, y, r, color) {
+    g.beginPath(); g.arc(x, y, r, 0, TAU); g.fillStyle = color; g.fill();
+    g.lineWidth = 2; g.strokeStyle = C.card; g.stroke();
+  }
+  function label(g, text, x, y, color, align) {
+    g.font = '500 11px ' + MONO; g.textAlign = align || 'left'; g.fillStyle = color; g.fillText(text, x, y);
+  }
+  function waveDraw(kind) {
+    var fn = kind === 're' ? reF : imF;
+    return function (g, w, h) {
+      var color = kind === 're' ? C.re : C.im, pad = 12, mid = h / 2, amp = h / 2 - 16;
+      function X(t) { return pad + t / TMAX * (w - 2 * pad); }
+      function Y(v) { return mid - v * amp; }
+      g.lineWidth = 1; g.strokeStyle = C.line; g.beginPath(); g.moveTo(pad, mid); g.lineTo(w - pad, mid); g.stroke();
+      g.setLineDash([3, 4]); g.strokeStyle = C.muted; g.globalAlpha = 0.6; g.lineWidth = 1.2;
+      path(g, env, X, Y, 0, TMAX, 200); g.stroke();
+      path(g, function (t) { return -env(t); }, X, Y, 0, TMAX, 200); g.stroke();
+      g.setLineDash([]); g.globalAlpha = 1;
+      g.lineJoin = 'round'; g.lineCap = 'round';
+      g.strokeStyle = color; g.globalAlpha = 0.25; g.lineWidth = 1.6; path(g, fn, X, Y, 0, TMAX, 420); g.stroke();
+      g.globalAlpha = 1; g.lineWidth = 2.4; path(g, fn, X, Y, 0, tc, Math.max(2, Math.round(420 * tc / TMAX))); g.stroke();
+      g.strokeStyle = C.muted; g.globalAlpha = 0.5; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(X(tc), 8); g.lineTo(X(tc), h - 8); g.stroke(); g.globalAlpha = 1;
+      dot(g, X(tc), Y(fn(tc)), 4.6, color);
+      label(g, kind === 're' ? 'Re f' : 'Im f', pad, 14, color);
+      label(g, 't', w - pad, h - 6, C.muted, 'right');
+    };
+  }
+  function phaseDraw(g, w, h) {
+    var R = Math.min(w, h) / 2 - 16, cx = w / 2, cy = h / 2;
+    function X(t) { return cx + reF(t) * R; }
+    function Y(t) { return cy - imF(t) * R; }
+    g.lineWidth = 1; g.strokeStyle = C.line;
+    g.beginPath(); g.moveTo(cx - R - 6, cy); g.lineTo(cx + R + 6, cy); g.moveTo(cx, cy - R - 6); g.lineTo(cx, cy + R + 6); g.stroke();
+    g.setLineDash([3, 4]); g.strokeStyle = C.muted; g.globalAlpha = 0.6;
+    [0.5, 1].forEach(function (r) { g.beginPath(); g.arc(cx, cy, R * r, 0, TAU); g.stroke(); });
+    g.setLineDash([]); g.globalAlpha = 1;
+    function sp2(t0, t1, n) { g.beginPath(); for (var i = 0; i <= n; i++) { var t = t0 + (t1 - t0) * i / n; if (i) g.lineTo(X(t), Y(t)); else g.moveTo(X(t), Y(t)); } }
+    g.lineJoin = 'round'; g.lineCap = 'round';
+    g.strokeStyle = C.ph; g.globalAlpha = 0.25; g.lineWidth = 1.6; sp2(0, TMAX, 900); g.stroke();
+    g.globalAlpha = 1; g.lineWidth = 2.2; sp2(0, tc, Math.max(2, Math.round(900 * tc / TMAX))); g.stroke();
+    g.strokeStyle = C.ink; g.lineWidth = 1.4; g.globalAlpha = 0.8;
+    g.beginPath(); g.moveTo(cx, cy); g.lineTo(X(tc), Y(tc)); g.stroke(); g.globalAlpha = 1;
+    dot(g, X(tc), Y(tc), 4.8, C.ph);
+    label(g, 'Re', cx + R + 4, cy - 6, C.re, 'right');
+    label(g, 'Im', cx + 6, cy - R + 2, C.im);
+  }
+  function envDraw(g, w, h) {
+    var pad = 14, base = h - 24, top = 18;
+    function X(t) { return pad + t / TMAX * (w - 2 * pad); }
+    function Y(v) { return base - v * (base - top); }
+    var x0 = X(T0 - SIGMA), x1 = X(T0 + SIGMA);
+    g.fillStyle = C.env; g.globalAlpha = 0.12; g.fillRect(Math.max(pad, x0), top, Math.min(w - pad, x1) - Math.max(pad, x0), base - top); g.globalAlpha = 1;
+    g.strokeStyle = C.line; g.lineWidth = 1; g.beginPath(); g.moveTo(pad, base); g.lineTo(w - pad, base); g.stroke();
+    path(g, env, X, Y, 0, TMAX, 240); g.lineTo(X(TMAX), base); g.lineTo(X(0), base); g.closePath();
+    g.fillStyle = C.env; g.globalAlpha = 0.2; g.fill(); g.globalAlpha = 1;
+    g.lineJoin = 'round'; g.strokeStyle = C.env; g.lineWidth = 2.4; path(g, env, X, Y, 0, TMAX, 240); g.stroke();
+    g.setLineDash([3, 4]); g.strokeStyle = C.muted; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(X(T0), top - 4); g.lineTo(X(T0), base); g.stroke(); g.setLineDash([]);
+    var yb = Y(Math.exp(-0.5));
+    g.strokeStyle = C.ink; g.lineWidth = 1.4; g.beginPath();
+    g.moveTo(x0, yb); g.lineTo(x1, yb); g.moveTo(x0, yb - 4); g.lineTo(x0, yb + 4); g.moveTo(x1, yb - 4); g.lineTo(x1, yb + 4); g.stroke();
+    label(g, 'width', X(T0), yb - 7, C.ink, 'center');
+    label(g, 't₀', X(T0), h - 7, C.muted, 'center');
+    label(g, '|f|', pad, 14, C.env);
+    dot(g, X(tc), Y(env(tc)), 4.8, C.env);
+  }
+  function oscDraw(g, w, h) {
+    var R = Math.min(h / 2 - 18, w / 2 - 36), cx = w / 2, cy = h / 2, ang = OMEGA * tc;
+    var px = cx + R * Math.cos(ang), py = cy - R * Math.sin(ang);
+    g.lineWidth = 1; g.strokeStyle = C.line;
+    g.beginPath(); g.moveTo(cx - R - 8, cy); g.lineTo(cx + R + 8, cy); g.moveTo(cx, cy - R - 8); g.lineTo(cx, cy + R + 8); g.stroke();
+    g.strokeStyle = C.muted; g.globalAlpha = 0.65; g.setLineDash([3, 4]); g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+    g.strokeStyle = C.ink; g.globalAlpha = 0.3; g.lineWidth = 3; g.lineCap = 'round';
+    g.beginPath(); g.arc(cx, cy, R, -ang, -ang + 1.1, false); g.stroke(); g.globalAlpha = 1;
+    g.setLineDash([3, 3]); g.lineWidth = 1.4;
+    g.strokeStyle = C.re; g.beginPath(); g.moveTo(px, py); g.lineTo(px, cy); g.stroke();
+    g.strokeStyle = C.im; g.beginPath(); g.moveTo(px, py); g.lineTo(cx, py); g.stroke(); g.setLineDash([]);
+    g.strokeStyle = C.ink; g.lineWidth = 1.8; g.beginPath(); g.moveTo(cx, cy); g.lineTo(px, py); g.stroke();
+    dot(g, px, py, 5, C.ink);
+    dot(g, px, cy, 4, C.re);
+    dot(g, cx, py, 4, C.im);
+    label(g, 'cos', px, cy + (py < cy ? 16 : -9), C.re, 'center');
+    label(g, 'sin', cx + (px < cx ? 10 : -10), py - 7, C.im, px < cx ? 'left' : 'right');
+  }
+  addMini('p-re', waveDraw('re'));
+  addMini('p-im', waveDraw('im'));
+  addMini('p-ph', phaseDraw);
+  addMini('p-env', envDraw);
+  addMini('p-osc', oscDraw);
+
+  // Readout
+  function fmt(v) { var s = Math.abs(v).toFixed(2); return (v < 0 && s !== '0.00' ? '−' : '') + s; }
+  function setText(el, s) { if (el.textContent !== s) el.textContent = s; }
+  function updateReadout() {
+    var re = reF(tc), im = imF(tc), mag = env(tc), ims = Math.abs(im).toFixed(2);
+    var a = (((OMEGA * tc) % TAU) + TAU) % TAU / TAU * 360;
+    setText(vre, fmt(re));
+    setText(vsg, (im < 0 && ims !== '0.00') ? '−' : '+');
+    setText(vim, ims);
+    setText(smag, mag.toFixed(2));
+    setText(sang, Math.round(a) % 360 + '°');
+    var ts = tc.toFixed(2), pct = (tc / TMAX * 100) + '%';
+    setText(tnum, ts);
+    thumb.style.left = pct; fillEl.style.width = pct;
+    track.setAttribute('aria-valuenow', ts); track.setAttribute('aria-valuetext', ts + ' T');
+  }
+
+  // Sizing
+  function resize() {
+    var r = cv.getBoundingClientRect();
+    W = Math.max(50, r.width); H = Math.max(50, r.height);
+    dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); dirty = true;
+  }
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(cv);
+  window.addEventListener('resize', resize);
+
+  // Theme changes
+  readColors();
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', readColors);
+  }
+  new MutationObserver(readColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+
+  rebuild(); resize();
+  if (document.fonts) {
+    document.fonts.load('italic 20px "STIX Two Text"').then(function () { dirty = true; }, function () {});
+    document.fonts.ready.then(function () { readColors(); dirty = true; });
+  }
+
+  // Controls
+  function setPlaying(v) { playing = v; playBtn.textContent = v ? 'Pause' : 'Play'; playBtn.setAttribute('aria-pressed', v ? 'false' : 'true'); }
+  setPlaying(playing);
+  playBtn.addEventListener('click', function () { setPlaying(!playing); hideHint(); });
+  function hideHint() { hint.classList.add('gone'); }
+  function resetView() {
+    goal.pitch = DEF.pitch;
+    goal.yaw = DEF.yaw + TAU * Math.round((view.yaw - DEF.yaw) / TAU);
+    dirty = true;
+  }
+  resetBtn.addEventListener('click', function () { resetView(); hideHint(); });
+  sw.addEventListener('input', function () {
+    SIGMA = parseFloat(sw.value); swo.textContent = 'σ = ' + SIGMA.toFixed(2) + ' T'; rebuild();
+  });
+  sk.addEventListener('input', function () {
+    K = parseFloat(sk.value); sko.textContent = K.toFixed(2) + ' laps per T'; rebuild();
+  });
+
+  // Turn the view
+  var lx = 0, ly = 0, moved = 0, lastTap = 0, tapTimer = 0;
+  cv.addEventListener('pointerdown', function (e) {
+    cv.setPointerCapture(e.pointerId);
+    dragging = true; moved = 0; lx = e.clientX; ly = e.clientY;
+    goal.yaw = view.yaw; goal.pitch = view.pitch;
+  });
+  cv.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - lx, dy = e.clientY - ly; lx = e.clientX; ly = e.clientY;
+    moved += Math.abs(dx) + Math.abs(dy);
+    if (moved > 5) hideHint();
+    view.yaw -= dx * 0.009;
+    view.pitch = Math.max(-1.35, Math.min(1.35, view.pitch + dy * 0.007));
+    goal.yaw = view.yaw; goal.pitch = view.pitch; dirty = true;
+  });
+  cv.addEventListener('pointerup', function () {
+    if (!dragging) return;
+    dragging = false;
+    if (moved < 6) {
+      var now = performance.now();
+      if (now - lastTap < 320) { clearTimeout(tapTimer); lastTap = 0; resetView(); hideHint(); }
+      else { lastTap = now; tapTimer = setTimeout(function () { setPlaying(!playing); hideHint(); }, 320); }
+    }
+  });
+  cv.addEventListener('pointercancel', function () { dragging = false; });
+  cv.addEventListener('keydown', function (e) {
+    var st = 0.09, used = true;
+    if (e.key === 'ArrowLeft') view.yaw += st;
+    else if (e.key === 'ArrowRight') view.yaw -= st;
+    else if (e.key === 'ArrowUp') view.pitch = Math.max(-1.35, view.pitch - st);
+    else if (e.key === 'ArrowDown') view.pitch = Math.min(1.35, view.pitch + st);
+    else if (e.key === ' ' || e.key === 'Enter') setPlaying(!playing);
+    else if (e.key === 'r' || e.key === 'R') resetView();
+    else used = false;
+    if (used) { e.preventDefault(); goal.yaw = view.yaw; goal.pitch = view.pitch; hideHint(); dirty = true; }
+  });
+
+  // Scrub time
+  function setFromX(x) {
+    var r = rail.getBoundingClientRect();
+    tc = Math.max(0, Math.min(1, (x - r.left) / r.width)) * TMAX; dirty = true;
+  }
+  track.addEventListener('pointerdown', function (e) { scrubbing = true; track.setPointerCapture(e.pointerId); setFromX(e.clientX); hideHint(); });
+  track.addEventListener('pointermove', function (e) { if (scrubbing) setFromX(e.clientX); });
+  track.addEventListener('pointerup', function () { scrubbing = false; });
+  track.addEventListener('pointercancel', function () { scrubbing = false; });
+  track.addEventListener('keydown', function (e) {
+    var st = e.shiftKey ? 0.5 : 0.05, used = true;
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') tc = Math.max(0, tc - st);
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') tc = Math.min(TMAX, tc + st);
+    else if (e.key === 'Home') tc = 0;
+    else if (e.key === 'End') tc = TMAX;
+    else used = false;
+    if (used) { e.preventDefault(); dirty = true; }
+  });
+
+  // Loop
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (playing && !scrubbing) { tc += dt * SPEED; if (tc >= TMAX) tc -= TMAX; dirty = true; }
+    if (!dragging) {
+      var dy = goal.yaw - view.yaw, dp = goal.pitch - view.pitch;
+      if (Math.abs(dy) > 1e-4 || Math.abs(dp) > 1e-4) { view.yaw += dy * 0.14; view.pitch += dp * 0.14; dirty = true; }
+    }
+    if (dirty) {
+      dirty = false;
+      drawHero();
+      for (var i = 0; i < minis.length; i++) {
+        var o = minis[i];
+        o.x.setTransform(o.d, 0, 0, o.d, 0, 0); o.x.clearRect(0, 0, o.w, o.h); o.fn(o.x, o.w, o.h);
+      }
+      updateReadout();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

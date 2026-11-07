@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Binary Orbits Reveal Mass</title>
+<style>
+:root{--bg:#f6f1e6;--card:#efe8d8;--ink:#1c2a44;--mute:#52607a;--o:#d9572b;--t:#1a9aa8;--line:#c9bfa8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--line:#2c3656;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--line:#2c3656;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;line-height:1.45}
+main{max-width:900px;margin:0 auto;padding:28px 18px 40px}
+h1{font-size:clamp(28px,6vw,48px);text-align:center;margin:0 0 6px;letter-spacing:-.02em}
+.sub{text-align:center;color:var(--mute);font-size:clamp(15px,2.6vw,20px);margin:0 auto 18px;max-width:560px}
+.sub b{color:var(--o)}
+.stage{background:var(--card);border-radius:20px;padding:10px;position:relative}
+canvas{width:100%;display:block;border-radius:14px}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 22px;padding:12px 8px 4px}
+label{font-size:14px;color:var(--mute);display:block}
+label b{color:var(--ink);float:right}
+input[type=range]{width:100%;accent-color:var(--o)}
+#m2{accent-color:var(--t)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;padding:6px 8px 4px}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 14px;border-radius:999px;cursor:pointer}
+button:hover{border-color:var(--o)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:20px;padding:20px}
+.card h2{margin:0 0 12px;font-size:20px;color:var(--o)}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:clamp(20px,4vw,28px);display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+.frac{display:inline-flex;flex-direction:column;align-items:center}
+.frac>span:first-child{border-bottom:2px solid var(--ink);padding:0 6px 2px}
+.frac>span:last-child{padding-top:2px}
+.o{color:var(--o)}.t{color:var(--t)}
+.note{background:var(--bg);border-radius:12px;padding:10px 14px;color:var(--mute);font-size:15px;margin-top:10px}
+.bar{height:22px;border-radius:11px;background:var(--bg);overflow:hidden;display:flex;margin:12px 0 6px}
+.bar i{display:block;height:100%;transition:width .2s}
+.legend{display:flex;justify-content:space-between;font-size:14px;color:var(--mute)}
+.live{font-family:Georgia,serif;text-align:center;font-size:17px;margin-top:8px}
+.credit{text-align:center;color:var(--mute);font-size:12px;margin-top:20px;letter-spacing:.08em}
+</style>
+</head>
+<body>
+<main>
+<h1>Binary Orbits Reveal Mass</h1>
+<p class="sub">Two stars orbit a shared centre of mass. <b>Their motion</b> reveals the mass of each star.</p>
+
+<div class="stage">
+<canvas id="cv" width="860" height="440"></canvas>
+<div class="ctrls">
+<label>Mass M₁ <b id="v1"></b><input id="m1" type="range" min="0.5" max="6" step="0.1" value="3"></label>
+<label>Mass M₂ <b id="v2"></b><input id="m2" type="range" min="0.5" max="6" step="0.1" value="1.2"></label>
+<label>Separation a <b id="va"></b><input id="sa" type="range" min="1" max="10" step="0.1" value="4"></label>
+<label>Eccentricity e <b id="ve"></b><input id="se" type="range" min="0" max="0.7" step="0.01" value="0.3"></label>
+</div>
+<div class="btns"><button id="pp">⏸ Pause</button><button id="tr">Trails: on</button><button id="rs">Reset</button></div>
+</div>
+
+<div class="grid">
+<section class="card">
+<h2>The Mass Ratio</h2>
+<div class="legend"><span class="o">M₁ — smaller orbit a₁</span><span class="t">M₂ — larger orbit a₂</span></div>
+<div class="bar"><i id="b1" style="background:var(--o)"></i><i id="b2" style="background:var(--t)"></i></div>
+<div class="formula">
+<span class="frac"><span>M<sub>1</sub></span><span>M<sub>2</sub></span></span> =
+<span class="frac"><span class="t">a<sub>2</sub></span><span class="o">a<sub>1</sub></span></span>
+</div>
+<div class="live" id="lr"></div>
+<div class="note">The more massive star moves in the smaller orbit. The barycentre sits closer to it.</div>
+</section>
+
+<section class="card">
+<h2>Kepler’s Third Law</h2>
+<div class="formula">
+M<sub>1</sub> + M<sub>2</sub> =
+<span class="frac"><span>4π²a³</span><span>GP²</span></span>
+</div>
+<div class="formula" style="font-size:22px">a = <span class="o">a<sub>1</sub></span> + <span class="t">a<sub>2</sub></span></div>
+<div class="live" id="lk"></div>
+<div class="note">Measure a and P to find the total mass. In solar units: M = a³ / P² (a in AU, P in years).</div>
+</section>
+</div>
+<div class="credit">DRAG THE SLIDERS · WATCH THE BARYCENTRE MOVE</div>
+</main>
+
+<script>
+(function(){
+var cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+var $=function(i){return document.getElementById(i)};
+var S={m1:3,m2:1.2,a:4,e:.3},playing=true,trails=true,phase=0,last=0,trail1=[],trail2=[];
+var W=860,H=440;
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function resize(){var r=cv.parentNode.clientWidth-20,d=window.devicePixelRatio||1;W=r;H=Math.round(r*(r<520?.8:.5));
+cv.style.height=H+'px';cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+function kep(M,e){var E=M;for(var i=0;i<8;i++)E-=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));return E}
+function read(){S.m1=+$('m1').value;S.m2=+$('m2').value;S.a=+$('sa').value;S.e=+$('se').value;
+$('v1').textContent=S.m1.toFixed(1)+' M☉';$('v2').textContent=S.m2.toFixed(1)+' M☉';
+$('va').textContent=S.a.toFixed(1)+' AU';$('ve').textContent=S.e.toFixed(2);trail1=[];trail2=[]}
+['m1','m2','sa','se'].forEach(function(i){$(i).addEventListener('input',read)});
+$('pp').onclick=function(){playing=!playing;this.textContent=playing?'⏸ Pause':'▶ Play'};
+$('tr').onclick=function(){trails=!trails;this.textContent='Trails: '+(trails?'on':'off');trail1=[];trail2=[]};
+$('rs').onclick=function(){$('m1').value=3;$('m2').value=1.2;$('sa').value=4;$('se').value=.3;phase=0;read()};
+
+function star(x,y,r,c1,c2,t){var g=ctx.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r*1.9);
+g.addColorStop(0,'#fff');g.addColorStop(.25,c1);g.addColorStop(.55,c2);g.addColorStop(1,'rgba(0,0,0,0)');
+ctx.globalAlpha=.55;ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r*1.9,0,7);ctx.fill();ctx.globalAlpha=1;
+var h=ctx.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);h.addColorStop(0,c1);h.addColorStop(1,c2);
+ctx.fillStyle=h;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill()}
+function arrow(x1,y1,x2,y2,c){ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+var a=Math.atan2(y2-y1,x2-x1);[[x2,y2,a],[x1,y1,a+Math.PI]].forEach(function(p){ctx.beginPath();ctx.moveTo(p[0],p[1]);
+ctx.lineTo(p[0]-9*Math.cos(p[2]-.4),p[1]-9*Math.sin(p[2]-.4));ctx.lineTo(p[0]-9*Math.cos(p[2]+.4),p[1]-9*Math.sin(p[2]+.4));ctx.fill()})}
+
+function frame(ts){
+var dt=last?(ts-last)/1000:0;last=ts;
+var M=S.m1+S.m2,P=Math.sqrt(Math.pow(S.a,3)/M);
+var secs=Math.min(30,Math.max(3,P*3));
+if(playing)phase=(phase+dt/secs)%1;
+var O=css('--o'),T=css('--t'),ink=css('--ink'),mute=css('--mute');
+ctx.clearRect(0,0,W,H);
+var e=S.e,a=S.a,cx=W/2,cy=H/2;
+var sc=Math.min(W*.44/(a*(1+e)*Math.max(S.m1,S.m2)/M*1.02+.001),W*.4/(a*(1+e)*Math.max(S.m1,S.m2)/M+.001));
+sc=Math.min(W*.46/(a*(1+e)),H*.38/(a*Math.sqrt(1-e*e)))*0.98;
+var f1=S.m2/M,f2=S.m1/M; // star1 = -f1*rel, star2 = +f2*rel
+function ell(f,sign,col){ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.6;ctx.setLineDash([6,5]);ctx.beginPath();
+for(var i=0;i<=120;i++){var E=i/120*6.2832,rx=a*(Math.cos(E)-e),ry=a*Math.sqrt(1-e*e)*Math.sin(E);
+var x=cx+sign*f*rx*sc,y=cy+sign*f*ry*sc;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();ctx.restore()}
+ell(f1,-1,O);ell(f2,1,T);
+var E=kep(phase*6.2832,e),rx=a*(Math.cos(E)-e),ry=a*Math.sqrt(1-e*e)*Math.sin(E);
+var x1=cx-f1*rx*sc,y1=cy-f1*ry*sc,x2=cx+f2*rx*sc,y2=cy+f2*ry*sc;
+if(playing&&trails){trail1.push([x1,y1]);trail2.push([x2,y2]);if(trail1.length>70){trail1.shift();trail2.shift()}}
+[[trail1,O],[trail2,T]].forEach(function(t){for(var i=1;i<t[0].length;i++){ctx.strokeStyle=t[1];ctx.globalAlpha=i/t[0].length*.8;ctx.lineWidth=3;
+ctx.beginPath();ctx.moveTo(t[0][i-1][0],t[0][i-1][1]);ctx.lineTo(t[0][i][0],t[0][i][1]);ctx.stroke()}ctx.globalAlpha=1});
+// a1, a2 arrows
+arrow(x1,y1,cx,cy,O);arrow(cx,cy,x2,y2,T);
+ctx.font='italic 600 16px Georgia,serif';ctx.textAlign='center';
+ctx.fillStyle=O;ctx.fillText('a₁',(x1+cx)/2,(y1+cy)/2-10);ctx.fillStyle=T;ctx.fillText('a₂',(x2+cx)/2,(y2+cy)/2-10);
+// barycentre
+ctx.fillStyle=ink;ctx.beginPath();ctx.arc(cx,cy,5,0,7);ctx.fill();
+ctx.font='13px Georgia,serif';ctx.fillStyle=mute;ctx.fillText('Barycentre',cx,cy+22);
+// stars
+var r1=10+9*Math.cbrt(S.m1),r2=10+9*Math.cbrt(S.m2);
+star(x1,y1,r1,'#ffd27a','#e8641c');star(x2,y2,r2,'#8ff3f7','#13808f');
+ctx.font='italic 17px Georgia,serif';ctx.fillStyle=ink;
+ctx.fillText('M₁',x1,y1+r1+20);ctx.fillText('M₂',x2,y2+r2+20);
+// period label
+ctx.fillStyle=mute;ctx.font='italic 15px Georgia,serif';ctx.textAlign='left';
+ctx.fillText('P = '+P.toFixed(2)+' yr  (one loop ≈ '+secs.toFixed(0)+' s here)',12,H-12);
+// panels
+var t1=S.m1/M*100;
+$('b1').style.width=(100-t1)*0+ (f2*100)+'%';$('b2').style.width=(f1*100)+'%';
+var r=Math.sqrt(rx*rx+ry*ry),A1=f1*a,A2=f2*a;
+$('lr').innerHTML='M₁/M₂ = '+(S.m1/S.m2).toFixed(2)+' &nbsp;=&nbsp; a₂/a₁ = '+A2.toFixed(2)+' / '+A1.toFixed(2)+' = '+(A2/A1).toFixed(2);
+$('lk').innerHTML='a = '+A1.toFixed(2)+' + '+A2.toFixed(2)+' = '+a.toFixed(1)+' AU<br>M = '+a.toFixed(1)+'³ / '+P.toFixed(2)+'² = <b>'+(Math.pow(a,3)/(P*P)).toFixed(2)+' M☉</b>';
+requestAnimationFrame(frame)}
+window.addEventListener('resize',resize);
+resize();read();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

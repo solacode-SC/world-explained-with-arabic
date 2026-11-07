@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Projectile Motion Splits in Two</title><style>:root{--bg:#f6f1e6;--card:#efe8d8;--ink:#1c2a44;--mute:#52607a;--o:#d9572b;--t:#1a9aa8;--line:#c9bfa8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--line:#2c3656;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--line:#2c3656;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;line-height:1.45}
+main{max-width:900px;margin:0 auto;padding:28px 18px 40px}
+h1{font-size:clamp(28px,6vw,48px);text-align:center;margin:0 0 6px;letter-spacing:-.02em}
+.sub{text-align:center;color:var(--mute);font-size:clamp(15px,2.6vw,20px);margin:0 auto 18px;max-width:580px}.sub b{color:var(--o)}
+.stage{background:var(--card);border-radius:20px;padding:10px}
+canvas{width:100%;display:block;border-radius:14px}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 22px;padding:12px 8px 4px}
+label{font-size:14px;color:var(--mute);display:block}label b{color:var(--ink);float:right}
+input[type=range]{width:100%;accent-color:var(--o)}input.t{accent-color:var(--t)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;padding:6px 8px 4px}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 14px;border-radius:999px;cursor:pointer}button:hover{border-color:var(--o)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:20px;padding:20px}.card h2{margin:0 0 12px;font-size:20px;color:var(--o)}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:clamp(20px,4vw,28px);display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+.frac{display:inline-flex;flex-direction:column;align-items:center}.frac>span:first-child{border-bottom:2px solid var(--ink);padding:0 6px 2px}.frac>span:last-child{padding-top:2px}
+.ov{border-top:2px solid var(--ink);padding:0 4px}
+.o{color:var(--o)}.t{color:var(--t)}
+.note{background:var(--bg);border-radius:12px;padding:10px 14px;color:var(--mute);font-size:15px;margin-top:10px}
+.bar{height:22px;border-radius:11px;background:var(--bg);overflow:hidden;display:flex;margin:12px 0 6px}.bar i{display:block;height:100%}
+.legend{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:var(--mute)}
+.live{font-family:Georgia,serif;text-align:center;font-size:17px;margin-top:8px}
+.credit{text-align:center;color:var(--mute);font-size:12px;margin-top:20px;letter-spacing:.08em}</style></head><body><main>
+<h1>Projectile Motion Splits in Two</h1><p class="sub">A launched object moves <b>sideways at constant speed</b> while gravity pulls it down.</p>
+<div class="stage"><canvas id="cv"></canvas><div class="ctrls"><label>Launch speed v₀ <b data-f="v"></b><input id="v" class="" type="range" min="5" max="40" step="1" value="22" data-u=" m/s" data-d="0"></label><label>Angle θ <b data-f="an"></b><input id="an" class="t" type="range" min="5" max="85" step="1" value="45" data-u="°" data-d="0"></label><label>Gravity g <b data-f="g"></b><input id="g" class="" type="range" min="1.6" max="25" step="0.1" value="9.8" data-u=" m/s²" data-d="1"></label></div><div class="btns"><button id="pp">⏸ Pause</button><button id="rs">Reset</button></div></div>
+<div class="grid"><section class="card"><h2>Two Independent Motions</h2><div class="legend"><span class="t">→ vₓ never changes</span><span class="o">↑ vᵧ changes by −g·t</span></div><div class="note">The teal ticks on the ground are equally spaced in time and in distance: sideways speed is constant. The vertical part falls like a dropped ball.</div><div class="live" id="lv"></div></section><section class="card"><h2>The Equations</h2><div class="formula">x = v<sub>0</sub>cosθ · t</div><div class="formula">y = v<sub>0</sub>sinθ · t − ½gt²</div><div class="formula" style="font-size:22px">R = <span class="frac"><span>v<sub>0</sub>² sin 2θ</span><span>g</span></span></div><div class="note">On level ground, 45° gives the longest range.</div></section></div>
+<div class="credit">DRAG THE SLIDERS · CONCEPT LAB</div></main>
+<script>
+var $=function(i){return document.getElementById(i)},cv=$('cv'),ctx=cv.getContext('2d'),W=800,H=400,playing=true,T=0,last=0,AS=0.5;
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function X(i){return +$(i).value}
+function lab(){document.querySelectorAll('input[type=range]').forEach(function(r){var b=document.querySelector('[data-f="'+r.id+'"]');if(b)b.textContent=(+r.value).toFixed(+r.dataset.d||0)+(r.dataset.u||'')})}
+function arrow(x1,y1,x2,y2,c,w){if(Math.hypot(x2-x1,y2-y1)<4)return;ctx.save();ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=w||2.5;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();var a=Math.atan2(y2-y1,x2-x1);ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-10*Math.cos(a-.4),y2-10*Math.sin(a-.4));ctx.lineTo(x2-10*Math.cos(a+.4),y2-10*Math.sin(a+.4));ctx.fill();ctx.restore()}
+function txt(s,x,y,c,sz,al){ctx.fillStyle=c;ctx.font='italic '+(sz||16)+'px Georgia,serif';ctx.textAlign=al||'center';ctx.fillText(s,x,y)}
+function ball(x,y,r,c1,c2){var g=ctx.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);g.addColorStop(0,c1);g.addColorStop(1,c2);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill()}
+function resize(){var r=cv.parentNode.clientWidth-20,d=window.devicePixelRatio||1;W=r;H=Math.round(r*(r<520?AS*1.5:AS));cv.style.height=H+'px';cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+function draw(dt,C){
+var v=X('v'),a=X('an')*Math.PI/180,g=X('g'),vx=v*Math.cos(a),vy=v*Math.sin(a),Tf=2*vy/g,R=vx*Tf,Hm=vy*vy/(2*g),sc=Math.min((W-90)/R,(H-90)/Hm,60),x0=40,gy=H-30;
+ctx.fillStyle=C.line;ctx.globalAlpha=.5;ctx.fillRect(0,gy,W,H-gy);ctx.globalAlpha=1;
+ctx.strokeStyle=C.mute;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();
+ctx.save();ctx.setLineDash([6,6]);ctx.lineWidth=1.5;ctx.beginPath();
+for(var i=0;i<=60;i++){var q=Tf*i/60,x=x0+vx*q*sc,y=gy-(vy*q-.5*g*q*q)*sc;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke();ctx.restore();
+var t=Math.min((T/3.5)%1.4,1)*Tf;
+for(var k=0;k<=12;k++){var q=Tf*k/12;if(q>t+1e-6)break;var x=x0+vx*q*sc,y=gy-(vy*q-.5*g*q*q)*sc;
+ctx.strokeStyle=C.t;ctx.globalAlpha=.35;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,gy);ctx.stroke();ctx.globalAlpha=1;
+ctx.fillStyle=C.t;ctx.beginPath();ctx.arc(x,gy,3.5,0,7);ctx.fill();ctx.fillStyle=C.mute;ctx.beginPath();ctx.arc(x,y,3.5,0,7);ctx.fill()}
+ctx.strokeStyle=C.mute;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x0,gy,34,-a,0);ctx.stroke();txt('θ',x0+46,gy-8,C.mute,15);
+var bx=x0+vx*t*sc,by=gy-(vy*t-.5*g*t*t)*sc,cv_=vy-g*t,k3=3;
+arrow(bx,by,bx+vx*k3,by,C.t);arrow(bx,by,bx,by-cv_*k3,C.o);arrow(bx,by,bx+vx*k3,by-cv_*k3,C.ink,2);
+ball(bx,by,10,'#ffd27a','#e8641c');
+$('lv').innerHTML='t = '+t.toFixed(2)+' s · vᵧ = '+cv_.toFixed(1)+' m/s<br>R = '+R.toFixed(1)+' m · H = '+Hm.toFixed(1)+' m · T = '+Tf.toFixed(2)+' s'}
+function fr(ts){var dt=Math.min(.05,last?(ts-last)/1000:0);last=ts;if(!playing)dt=0;T+=dt;var C={o:css('--o'),t:css('--t'),ink:css('--ink'),mute:css('--mute'),card:css('--card'),line:css('--line')};ctx.clearRect(0,0,W,H);draw(dt,C);requestAnimationFrame(fr)}
+document.querySelectorAll('input[type=range]').forEach(function(r){r.addEventListener('input',function(){lab();if(window.chg)chg()})});
+$('pp').onclick=function(){playing=!playing;this.textContent=playing?'⏸ Pause':'▶ Play'};
+$('rs').onclick=function(){document.querySelectorAll('input[type=range]').forEach(function(r){r.value=r.defaultValue});lab();T=0;if(window.chg)chg()};
+window.addEventListener('resize',resize);resize();lab();if(window.chg)chg();requestAnimationFrame(fr);
+</script></body></html>

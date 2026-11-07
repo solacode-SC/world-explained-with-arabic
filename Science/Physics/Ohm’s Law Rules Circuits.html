@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Ohm’s Law Rules Circuits</title><style>:root{--bg:#f6f1e6;--card:#efe8d8;--ink:#1c2a44;--mute:#52607a;--o:#d9572b;--t:#1a9aa8;--line:#c9bfa8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--line:#2c3656;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--line:#2c3656;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;line-height:1.45}
+main{max-width:900px;margin:0 auto;padding:28px 18px 40px}
+h1{font-size:clamp(28px,6vw,48px);text-align:center;margin:0 0 6px;letter-spacing:-.02em}
+.sub{text-align:center;color:var(--mute);font-size:clamp(15px,2.6vw,20px);margin:0 auto 18px;max-width:580px}.sub b{color:var(--o)}
+.stage{background:var(--card);border-radius:20px;padding:10px}
+canvas{width:100%;display:block;border-radius:14px}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 22px;padding:12px 8px 4px}
+label{font-size:14px;color:var(--mute);display:block}label b{color:var(--ink);float:right}
+input[type=range]{width:100%;accent-color:var(--o)}input.t{accent-color:var(--t)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;padding:6px 8px 4px}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:7px 14px;border-radius:999px;cursor:pointer}button:hover{border-color:var(--o)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border-radius:20px;padding:20px}.card h2{margin:0 0 12px;font-size:20px;color:var(--o)}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:clamp(20px,4vw,28px);display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+.frac{display:inline-flex;flex-direction:column;align-items:center}.frac>span:first-child{border-bottom:2px solid var(--ink);padding:0 6px 2px}.frac>span:last-child{padding-top:2px}
+.ov{border-top:2px solid var(--ink);padding:0 4px}
+.o{color:var(--o)}.t{color:var(--t)}
+.note{background:var(--bg);border-radius:12px;padding:10px 14px;color:var(--mute);font-size:15px;margin-top:10px}
+.bar{height:22px;border-radius:11px;background:var(--bg);overflow:hidden;display:flex;margin:12px 0 6px}.bar i{display:block;height:100%}
+.legend{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:var(--mute)}
+.live{font-family:Georgia,serif;text-align:center;font-size:17px;margin-top:8px}
+.credit{text-align:center;color:var(--mute);font-size:12px;margin-top:20px;letter-spacing:.08em}</style></head><body><main>
+<h1>Ohm’s Law Rules Circuits</h1><p class="sub">Voltage pushes charge through resistors. <b>More resistance means less current.</b></p>
+<div class="stage"><canvas id="cv"></canvas><div class="ctrls"><label>Voltage V <b data-f="V"></b><input id="V" class="" type="range" min="1" max="24" step="1" value="12" data-u=" V" data-d="0"></label><label>Resistor R₁ <b data-f="r1"></b><input id="r1" class="" type="range" min="10" max="100" step="5" value="40" data-u=" Ω" data-d="0"></label><label>Resistor R₂ <b data-f="r2"></b><input id="r2" class="t" type="range" min="10" max="100" step="5" value="20" data-u=" Ω" data-d="0"></label></div><div class="btns"><button id="pp">⏸ Pause</button><button id="rs">Reset</button></div></div>
+<div class="grid"><section class="card"><h2>Voltage Divides</h2><div class="legend"><span class="o">V₁ across R₁</span><span class="t">V₂ across R₂</span></div><div class="bar"><i id="b1" style="background:var(--o)"></i><i id="b2" style="background:var(--t)"></i></div><div class="note">In series the same current flows through both. The bigger resistor takes the bigger share of the voltage and glows hotter.</div></section><section class="card"><h2>Ohm’s Law</h2><div class="formula">V = I · R</div><div class="formula" style="font-size:22px">R = <span class="o">R₁</span> + <span class="t">R₂</span></div><div class="live" id="lk"></div></section></div>
+<div class="credit">DRAG THE SLIDERS · CONCEPT LAB</div></main>
+<script>
+var $=function(i){return document.getElementById(i)},cv=$('cv'),ctx=cv.getContext('2d'),W=800,H=400,playing=true,T=0,last=0,AS=0.5;
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function X(i){return +$(i).value}
+function lab(){document.querySelectorAll('input[type=range]').forEach(function(r){var b=document.querySelector('[data-f="'+r.id+'"]');if(b)b.textContent=(+r.value).toFixed(+r.dataset.d||0)+(r.dataset.u||'')})}
+function arrow(x1,y1,x2,y2,c,w){if(Math.hypot(x2-x1,y2-y1)<4)return;ctx.save();ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=w||2.5;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();var a=Math.atan2(y2-y1,x2-x1);ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-10*Math.cos(a-.4),y2-10*Math.sin(a-.4));ctx.lineTo(x2-10*Math.cos(a+.4),y2-10*Math.sin(a+.4));ctx.fill();ctx.restore()}
+function txt(s,x,y,c,sz,al){ctx.fillStyle=c;ctx.font='italic '+(sz||16)+'px Georgia,serif';ctx.textAlign=al||'center';ctx.fillText(s,x,y)}
+function ball(x,y,r,c1,c2){var g=ctx.createRadialGradient(x-r*.3,y-r*.3,r*.1,x,y,r);g.addColorStop(0,c1);g.addColorStop(1,c2);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill()}
+function resize(){var r=cv.parentNode.clientWidth-20,d=window.devicePixelRatio||1;W=r;H=Math.round(r*(r<520?AS*1.5:AS));cv.style.height=H+'px';cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+var s=0;
+function pos(u,x0,y0,x1,y1){var w=x1-x0,h=y1-y0,d=(((u%1)+1)%1)*2*(w+h);if(d<w)return[x0+d,y0];d-=w;if(d<h)return[x1,y0+d];d-=h;if(d<w)return[x1-d,y1];d-=w;return[x0,y1-d]}
+function zig(cx,y,w,col){ctx.strokeStyle=col;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(cx-w/2,y);for(var i=0;i<8;i++)ctx.lineTo(cx-w/2+w*(i+.5)/8,y+(i%2?12:-12));ctx.lineTo(cx+w/2,y);ctx.stroke()}
+function glow(cx,y,r,col,al){var g=ctx.createRadialGradient(cx,y,0,cx,y,r);g.addColorStop(0,col);g.addColorStop(1,'rgba(0,0,0,0)');ctx.globalAlpha=al;ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,y,r,0,7);ctx.fill();ctx.globalAlpha=1}
+function draw(dt,C){
+var V=X('V'),R1=X('r1'),R2=X('r2'),I=V/(R1+R2),x0=W*.14,x1=W*.86,y0=H*.22,y1=H*.78,cx=W/2,cy=H/2,rw=W*.2;
+s+=dt*(.02+.3*I);
+glow(cx,y0,rw*.7,C.o,Math.min(.8,I*I*R1/12));glow(cx,y1,rw*.7,C.t,Math.min(.8,I*I*R2/12));
+ctx.strokeStyle=C.mute;ctx.lineWidth=3;ctx.strokeRect(x0,y0,x1-x0,y1-y0);
+ctx.fillStyle=C.card;ctx.fillRect(cx-rw/2,y0-4,rw,8);ctx.fillRect(cx-rw/2,y1-4,rw,8);ctx.fillRect(x0-4,cy-14,8,28);
+zig(cx,y0,rw,C.o);zig(cx,y1,rw,C.t);
+ctx.strokeStyle=C.ink;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x0-20,cy-8);ctx.lineTo(x0+20,cy-8);ctx.stroke();ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(x0-11,cy+8);ctx.lineTo(x0+11,cy+8);ctx.stroke();
+txt('+',x0-30,cy-4,C.ink,20);txt('−',x0-30,cy+16,C.ink,20);
+for(var i=0;i<36;i++){var p=pos(s+i/36,x0,y0,x1,y1);if(Math.abs(p[0]-cx)<rw/2&&(Math.abs(p[1]-y0)<2||Math.abs(p[1]-y1)<2))p[1]+=Math.sin(T*25+i*7)*6;
+ctx.fillStyle='#f2c230';ctx.strokeStyle=C.ink;ctx.lineWidth=1;ctx.beginPath();ctx.arc(p[0],p[1],4,0,7);ctx.fill();ctx.stroke()}
+txt('R₁ = '+R1+' Ω',cx,y0-30,C.o,16);txt('V₁ = '+(I*R1).toFixed(1)+' V',cx,y0+38,C.o,14);
+txt('R₂ = '+R2+' Ω',cx,y1+42,C.t,16);txt('V₂ = '+(I*R2).toFixed(1)+' V',cx,y1-30,C.t,14);
+txt('Battery '+V+' V',x0+16,cy+5,C.ink,16,'left');txt('I = '+I.toFixed(3)+' A  →',x0,y0-14,C.ink,16,'left');
+$('b1').style.width=R1/(R1+R2)*100+'%';$('b2').style.width=R2/(R1+R2)*100+'%';
+$('lk').innerHTML='I = '+V+' / ('+R1+' + '+R2+') = <b>'+I.toFixed(3)+' A</b><br>P = V·I = '+(V*I).toFixed(2)+' W'}
+function fr(ts){var dt=Math.min(.05,last?(ts-last)/1000:0);last=ts;if(!playing)dt=0;T+=dt;var C={o:css('--o'),t:css('--t'),ink:css('--ink'),mute:css('--mute'),card:css('--card'),line:css('--line')};ctx.clearRect(0,0,W,H);draw(dt,C);requestAnimationFrame(fr)}
+document.querySelectorAll('input[type=range]').forEach(function(r){r.addEventListener('input',function(){lab();if(window.chg)chg()})});
+$('pp').onclick=function(){playing=!playing;this.textContent=playing?'⏸ Pause':'▶ Play'};
+$('rs').onclick=function(){document.querySelectorAll('input[type=range]').forEach(function(r){r.value=r.defaultValue});lab();T=0;if(window.chg)chg()};
+window.addEventListener('resize',resize);resize();lab();if(window.chg)chg();requestAnimationFrame(fr);
+</script></body></html>
