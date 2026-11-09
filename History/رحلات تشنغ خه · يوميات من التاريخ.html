@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>رحلات تشنغ خه · يوميات من التاريخ</title>
+<link href="https://fonts.googleapis.com/css2?family=Playpen+Sans+Arabic:wght@400;600&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#22190f;--orange:#c8662a;--red:#c8372d;--teal:#1c6e7d;--paper:#f5ead0;--gold:#e6c27a;--hand:'Playpen Sans Arabic','Mada','Segoe UI',Tahoma,sans-serif;--ruq:'Aref Ruqaa','Amiri','Traditional Arabic',serif}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:#050d12}
+body{font-family:var(--hand);color:var(--ink)}
+#desk{position:fixed;inset:0;overflow:hidden;background:radial-gradient(ellipse at 75% 20%,#17475a 0,#0b2431 46%,#040a0f 100%)}
+#desk::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(92deg,rgba(0,0,0,.2) 0 2px,transparent 2px 11px,rgba(120,200,220,.035) 11px 13px)}
+#cam{position:absolute;left:0;top:0;width:760px;height:1060px;transform-origin:0 0;animation:cam 180s ease-in-out both}
+.book{position:absolute;inset:0;perspective:2400px;opacity:0;animation:bk 3.5s ease-out 9s both}
+@keyframes bk{from{opacity:0;translate:0 40px}to{opacity:1;translate:0 0}}
+.cover{position:absolute;left:-40px;top:-28px;width:836px;height:1116px;background:#8c1f1c;border-radius:16px;box-shadow:0 34px 70px rgba(0,0,0,.75);background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.05) 0 2px,transparent 2px 6px)}
+.cover::after{content:"";position:absolute;inset:10px;border:2px dashed rgba(230,194,122,.6);border-radius:10px}
+.prev{position:absolute;left:-30px;top:-14px;width:70px;height:1090px;background:repeating-linear-gradient(transparent 0 33px,rgba(110,140,170,.35) 33px 34px),#efe3c6;border-radius:8px 0 0 8px;box-shadow:inset -10px 0 12px rgba(0,0,0,.2)}
+.roll{position:absolute;right:30px;top:-100px;width:96px;height:96px;border-radius:50%;border:14px solid #d8d2bf;background:#0b2431;box-shadow:0 6px 14px rgba(0,0,0,.6)}
+.compass{position:absolute;right:170px;top:-88px;width:74px;height:74px;border-radius:50%;background:radial-gradient(circle,#f3e2a6 0 54%,#b88a2c 56%);box-shadow:0 6px 12px rgba(0,0,0,.6)}
+.compass::before{content:"";position:absolute;left:50%;top:9px;width:4px;height:56px;margin-left:-2px;background:linear-gradient(#c8372d 50%,#222 50%);animation:sw 4.5s ease-in-out infinite alternate}
+@keyframes sw{from{rotate:-40deg}to{rotate:28deg}}
+.ribbon{position:absolute;left:150px;top:1050px;width:20px;height:100px;background:linear-gradient(#c8372d 92%,#e6c27a 92%);box-shadow:0 4px 8px rgba(0,0,0,.4)}
+.page,.face{position:absolute;inset:0;border-radius:4px 8px 8px 4px;background-color:var(--paper);
+background-image:linear-gradient(90deg,rgba(0,0,0,.14),transparent 6%),repeating-linear-gradient(transparent 0 33px,rgba(110,140,170,.45) 33px 34px),radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.5),transparent 60%);
+box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 0 90px rgba(150,100,40,.3)}
+.leaf{position:absolute;inset:0;transform-origin:0 50%;transform-style:preserve-3d;animation:flip 6s ease-in-out 86s both}
+@keyframes flip{to{transform:rotateY(-180deg)}}
+.face{backface-visibility:hidden}.back{transform:rotateY(180deg);background-image:linear-gradient(270deg,rgba(0,0,0,.14),transparent 6%),repeating-linear-gradient(transparent 0 33px,rgba(110,140,170,.35) 33px 34px)}
+.en{position:absolute;right:40px;width:392px}
+.dt{font-weight:600;font-size:25px;line-height:34px;white-space:nowrap}
+.dt span{display:inline-block;padding:0 8px;background:linear-gradient(transparent 62%,rgba(28,110,125,.3) 62%)}
+.ln{position:relative;width:max-content;font-size:19px;line-height:34px;white-space:nowrap}
+.ln::after{content:"";position:absolute;top:12px;right:-3px;width:7px;height:7px;border-radius:50% 50% 50% 0;rotate:-45deg;background:#0b2431;opacity:0;animation:nib var(--d) linear var(--t) both}
+@keyframes nib{0%{opacity:0;right:-3px}1%{opacity:1}99%{opacity:1}100%{opacity:0;right:calc(100% - 4px)}}
+.nt{display:inline-block;font-family:var(--ruq);font-size:24px;line-height:32px;color:var(--orange);border-bottom:3px double var(--orange);white-space:nowrap}
+.dd{position:absolute;left:24px;width:300px;height:240px}
+.dd svg{width:100%;height:100%;overflow:visible}
+.dd path{fill:none;stroke:var(--ink);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:dr var(--d,2s) ease-in-out var(--t,0s) both}
+.dd path.o{stroke:var(--orange)}
+.dd path.f,.dd path.s,.dd path.v{fill-opacity:0;animation:dr var(--d,2s) ease-in-out var(--t,0s) both,ff 1.6s ease-out calc(var(--t,0s) + var(--d,2s)) both}
+.dd path.f{fill:rgba(196,146,70,.34)}.dd path.s{fill:rgba(40,130,150,.2);stroke:rgba(40,100,120,.45);stroke-width:2}.dd path.v{fill:rgba(200,55,45,.6)}
+.dd path.r{stroke:var(--red);stroke-width:3.2;animation-timing-function:linear}
+@keyframes dr{to{stroke-dashoffset:0}}@keyframes ff{to{fill-opacity:1}}
+.ship{position:absolute;left:0;top:0;width:28px;height:28px;offset-rotate:0deg;opacity:0;animation:sail var(--d) linear var(--t) both;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+@keyframes sail{0%{offset-distance:0%;opacity:0}2%{opacity:1}100%{offset-distance:100%;opacity:1}}
+.tx{position:absolute;transform:translateX(-50%);white-space:nowrap;font-family:var(--ruq);color:var(--ink)}.tx.o{color:var(--teal);font-weight:700}
+.st{position:absolute;left:24px;width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid #fffdf5;box-shadow:0 2px 6px rgba(0,0,0,.35);display:grid;place-items:center;font-size:26px}
+.tag{position:absolute;left:84px;font-size:16px;line-height:24px;padding:3px 12px;border:1.5px dashed var(--orange);border-radius:12px;background:rgba(255,255,255,.55);color:var(--ink);white-space:nowrap}
+.tape{position:absolute;width:150px;height:38px;background:repeating-linear-gradient(135deg,rgba(255,255,255,.55) 0 8px,rgba(200,55,45,.4) 8px 16px);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.stamp{position:absolute;width:76px;height:76px;border:3.5px solid var(--red);border-radius:8px;display:grid;place-items:center;text-align:center;font-family:var(--ruq);font-size:17px;line-height:20px;color:var(--red);mix-blend-mode:multiply}
+.hd{position:absolute;top:26px;right:40px;left:40px;height:64px;display:flex;gap:52px;align-items:flex-start}
+.vd{width:38px;text-align:center;font-size:14px;line-height:16px}
+.vc{width:36px;height:36px;margin-bottom:2px;border:2.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-family:var(--ruq);font-size:21px;background:rgba(200,55,45,.18)}
+.hl{position:absolute;top:30px;left:40px;font-family:var(--ruq);font-size:22px;color:var(--orange)}
+.hln{position:absolute;top:44px;right:60px;left:200px;border-top:2px dashed rgba(34,25,15,.35)}
+.rv{clip-path:inset(0 0 0 100%);animation:rv var(--d,3s) linear var(--t,0s) both}
+@keyframes rv{to{clip-path:inset(0 0 0 0)}}
+.pop{opacity:0;animation:pop .8s cubic-bezier(.3,1.6,.5,1) var(--t,0s) both}
+@keyframes pop{from{opacity:0;transform:scale(.3) rotate(-14deg)}to{opacity:1;transform:scale(1) rotate(var(--r,0deg))}}
+.fd{opacity:0;animation:fd 2s ease-out var(--t,0s) both}
+@keyframes fd{to{opacity:1}}
+.paused *,.paused::before{animation-play-state:paused !important}
+.rst *{animation:none !important}
+.glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 80% 18%,rgba(255,110,70,.3),transparent 52%);mix-blend-mode:screen;animation:fl 3.1s ease-in-out infinite alternate}
+@keyframes fl{from{opacity:.5}to{opacity:1}}
+.rays{position:absolute;inset:-20%;pointer-events:none;background:repeating-linear-gradient(68deg,transparent 0 90px,rgba(255,200,150,.06) 90px 150px);mask-image:radial-gradient(circle at 80% 15%,#000,transparent 70%);animation:dr2 26s ease-in-out infinite alternate}
+@keyframes dr2{to{translate:-80px 30px}}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(2,6,10,.84) 100%)}
+.dust i{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(255,225,170,.65);animation:fy var(--s) linear infinite}
+@keyframes fy{from{transform:translate(0,40px);opacity:0}20%{opacity:.9}to{transform:translate(-70px,-120vh);opacity:0}}
+.card{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:14px;background:radial-gradient(circle,rgba(8,30,42,.9),#03080c);color:var(--gold);overflow:hidden}
+.card h1{position:relative;font-family:var(--ruq);font-size:clamp(50px,11vw,120px);font-weight:700;line-height:1.1;text-shadow:0 0 30px rgba(230,150,70,.5)}
+.card p{position:relative;font-size:clamp(16px,2.6vw,28px);padding:0 16px}
+.wv{position:absolute;left:0;bottom:0;width:200%;height:30%;animation:wv 14s linear infinite}
+.wv path{fill:rgba(28,110,125,.45)}.wv.b{height:22%;animation-duration:9s;animation-direction:reverse}.wv.b path{fill:rgba(60,160,170,.35)}
+@keyframes wv{to{translate:-50% 0}}
+#intro{opacity:0;pointer-events:none;animation:intro 12s ease-in-out both}
+@keyframes intro{0%{opacity:0}8%,68%{opacity:1}100%{opacity:0}}
+#outro{opacity:0;pointer-events:none;animation:fd 3s ease-out 170s both}
+#bar{position:absolute;left:0;bottom:0;height:4px;width:100%;transform-origin:right;background:var(--gold);transform:scaleX(0);animation:pr 180s linear both}
+@keyframes pr{to{transform:scaleX(1)}}
+#ctl{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));translate:-50% 0;display:flex;gap:10px;z-index:5}
+#ctl button{font:inherit;font-size:20px;width:46px;height:46px;border-radius:50%;border:1px solid rgba(230,194,122,.6);background:rgba(4,12,18,.75);color:var(--gold);cursor:pointer}
+#ctl button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.dust,.rays{display:none}}
+</style>
+</head>
+<body>
+<div id="desk">
+  <div id="cam"><div class="book">
+    <div class="cover"></div><div class="prev"></div><div class="roll"></div><div class="compass"></div><div class="ribbon"></div>
+    <div class="page" id="pgB"></div>
+    <div class="leaf"><div class="face" id="pgA"></div><div class="face back"></div></div>
+  </div></div>
+  <div class="rays"></div><div class="glow"></div><div class="dust" id="dust"></div><div class="vig"></div>
+  <div class="card" id="intro"><svg class="wv" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 60Q150 0 300 60T600 60T900 60T1200 60V120H0Z"/></svg><svg class="wv b" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 70Q150 20 300 70T600 70T900 70T1200 70V120H0Z"/></svg><h1>رحلات تشنغ خه</h1><p>من نانجينغ إلى المحيط الهندي وشرق أفريقيا · 1405–1433م</p></div>
+  <div class="card" id="outro"><svg class="wv" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0 60Q150 0 300 60T600 60T900 60T1200 60V120H0Z"/></svg><h1>البحر لا ينسى</h1><p>سبع رحلات ربطت الصين بالهند والجزيرة العربية وأفريقيا</p></div>
+  <div id="bar"></div>
+  <div id="ctl"><button id="pp" aria-label="إيقاف مؤقت">❚❚</button><button id="rp" aria-label="إعادة من البداية">↻</button></div>
+</div>
+<script>
+const $=(h,p)=>{const d=document.createElement('div');d.innerHTML=h;const e=d.firstElementChild;p.appendChild(e);return e};
+const st=(t,d)=>`--t:${t}s;--d:${d}s`;
+const RA='M270 42Q276 80 250 110Q240 150 226 176Q196 170 198 140Q150 178 112 192Q82 178 70 150';
+const RB='M256 125Q200 92 146 62Q112 90 82 110Q66 140 62 172Q74 190 80 205';
+const D={
+mtn:['o:M0 225Q40 215 80 225T160 225T240 225T300 225','f:M10 200L80 90L120 150L160 70L230 200Z','M68 110L80 90L92 110','o:M230 60a24 24 0 1 0 .1 0','o:M230 24V12M264 60H278M196 60H182M254 36L262 28','o:M40 40a16 16 0 1 0 8 28a13 13 0 1 1 -8 -28z','f:M240 200V150H272V200Z','M232 150L256 134L280 150M236 172H276','M210 190a7 7 0 1 0 .1 0','M210 197V216M200 206H220M210 216L203 230M210 216L217 230'],
+ship:['o:M270 42a20 20 0 1 0 .1 0','M30 170Q60 206 150 206Q240 206 272 170Z','M24 170H278','M90 170V60M150 170V34M210 170V72','v:M92 62H140V152H92Z','M92 90H140M92 116H140M92 140H140','v:M152 38H206V152H152Z','M152 68H206M152 98H206M152 128H206','v:M212 76H258V152H212Z','M212 102H258M212 128H258','o:M150 34L186 26L150 18','M272 172L288 204','M10 224Q50 212 90 224T170 224T250 224T300 224','M228 40Q238 30 248 40Q258 30 268 40'],
+mapA:['s:M4 4H296V236H4Z','f:M20 100Q60 105 95 110Q102 150 70 215Q40 160 20 100Z','f:M214 90Q246 100 242 130Q226 160 204 140Q198 110 214 90Z','f:M232 10Q300 16 292 72Q272 42 232 10Z','f:M170 150L214 184L204 196L162 166Z','f:M214 196H266L262 207H210Z','r:'+RA,'M276 42a5 5 0 1 0 .1 0','M204 140a5 5 0 1 0 .1 0','M76 150a5 5 0 1 0 .1 0'],
+mapB:['s:M4 4H296V236H4Z','f:M30 24Q150 18 164 62Q120 94 72 104Q40 94 30 24Z','f:M10 122Q60 112 82 152Q72 202 42 236Q10 200 10 122Z','f:M252 92Q300 110 288 160Q272 202 256 216Q236 160 252 92Z','r:'+RB,'M262 125a5 5 0 1 0 .1 0','M152 62a5 5 0 1 0 .1 0','M88 110a5 5 0 1 0 .1 0','M68 172a5 5 0 1 0 .1 0','M86 205a5 5 0 1 0 .1 0'],
+giraffe:['M70 140Q70 115 105 112Q150 108 170 125Q175 150 160 158H85Q70 156 70 140Z','M165 125L205 50M180 128L215 56','M205 50Q225 40 238 52Q232 62 215 60Z','M208 46L204 34M214 44L216 32','M90 158V218M110 158V218M140 158V218M160 158V218','M70 135Q55 140 58 165','o:M95 130a7 6 0 1 0 .1 0','o:M125 128a7 6 0 1 0 .1 0','o:M146 142a6 5 0 1 0 .1 0','o:M112 148a6 5 0 1 0 .1 0','o:M192 96a5 5 0 1 0 .1 0','o:M200 76a5 5 0 1 0 .1 0','M250 150Q230 170 245 200Q250 216 270 216Q290 216 292 200Q300 170 280 150Z','M255 150V140H275V150','o:M246 186H292','o:M248 170Q270 160 290 170','o:M30 220H230'],
+comp:['M40 120a60 60 0 1 0 120 0a60 60 0 1 0 -120 0','M88 120a12 12 0 1 0 24 0a12 12 0 1 0 -24 0','v:M100 50L108 112L100 120L92 112Z','M100 190L92 128L100 120L108 128Z','M30 120L92 112L100 120L92 128Z','M170 120L108 128L100 120L108 112Z','M58 78L94 112M142 78L106 112M58 162L94 128M142 162L106 128','f:M190 90H280V204H190Z','M190 90Q184 147 190 204','M205 112H265M205 128H255','M215 168h40l-6 10h-28zM235 168V146l14 16z','o:M250 204V220L255 215L260 220V204','o:M0 234Q40 224 80 234T160 234T240 234T300 234']};
+const TX={mtn:[[135,66,'يونان',20,1]],mapA:[[258,20,'نانجينغ',15,1],[170,128,'ملقا',15,1],[240,226,'جاوة',15,1],[112,214,'سيلان',15,1],[50,118,'كاليكوت',15,1]],mapB:[[150,38,'هرمز',15,1],[120,112,'عدن',15,1],[40,170,'مقديشو',15,1],[48,214,'مالندي',15,1],[268,128,'كاليكوت',15,1]],giraffe:[[262,126,'خزف',16,1],[150,16,'زرافة!',22,1]],comp:[[235,68,'ما هوان',18,1],[100,32,'الشمال',15,1]]};
+const A=[
+{t:14,top:102,dt:'1371م',L:['وُلد ما خه في يونان لأسرة مسلمة،','وصار لاحقاً الأدميرال تشنغ خه.'],n:'من الجبال إلى البحر!',k:'mtn',s:'🏔️',g:'خادم مقرّب للإمبراطور يونغلي'},
+{t:38,top:408,dt:'1405م',L:['خرج من نانجينغ أسطول ضخم يُقدَّر','بنحو 300 سفينة و27 ألف رجل.'],n:'مدينة عائمة!',k:'ship',s:'⚓',g:'سفن الكنوز بأشرعة حمراء'},
+{t:62,top:714,dt:'1405–1411م',L:['في الرحلات الثلاث الأولى مرّ الأسطول','بتشامبا وجاوة وملقا ثم سيلان وكاليكوت.'],n:'طريق الحرير البحري.',k:'mapA',ship:RA,s:'🧭',g:'ملقا محطة رئيسية في الطريق'}];
+const B=[
+{t:96,top:102,dt:'1413–1419م',L:['بلغت الرحلات التالية هرمز وعدن وجدة،','ثم مقديشو ومالندي في شرق أفريقيا.'],n:'قارة جديدة على الخريطة!',k:'mapB',ship:RB,s:'🌍',g:'نحو 30 بلداً وكياناً (تقديرات)'},
+{t:122,top:408,dt:'1414م',L:['حملت السفن الحرير والخزف ذهاباً،','وعادت بالعاج والتوابل وحتى زرافة!'],n:'ظنّوها «القيلين» الأسطوري!',k:'giraffe',s:'🦒',g:'زرافة من شرق أفريقيا إلى الصين'},
+{t:148,top:714,dt:'1431–1433م',L:['انتهت الرحلة السابعة وتوقف الأسطول،','وانشغلت الصين بحدودها. وبقي كتاب','«ما هوان» شاهداً على تلك الرحلات.'],n:'البحر لا ينسى.',k:'comp',s:'📖',g:'7 رحلات خلال 28 عاماً'}];
+const SHIP='<svg viewBox="0 0 28 28"><path d="M3 20h22l-4 7H7z" fill="#5a3a1c"/><path d="M14 20V2l10 14z" fill="#c8372d"/><path d="M14 20V6L5 17z" fill="#e8c36a"/></svg>';
+function build(pg,E,V,stamp){
+ $(`<div class="tape fd" style="left:300px;top:-16px;rotate:-3deg;${st(E[0].t-4,2)}"></div>`,pg);
+ $(`<div class="hln rv" style="${st(E[0].t-3,3)}"></div>`,pg);
+ $(`<div class="hl rv" style="${st(E[0].t-3,2.5)}">سجل الرحلات السبع</div>`,pg);
+ const hd=$('<div class="hd"></div>',pg);
+ V.forEach(([n,y,t])=>$(`<div class="vd pop" style="${st(t,.8)}"><div class="vc">${n}</div>${y}</div>`,hd));
+ E.forEach(e=>{
+  const en=$(`<div class="en" style="top:${e.top}px"></div>`,pg);
+  $(`<div class="dt"><span class="rv" style="${st(e.t,1.8)}">${e.dt}</span></div>`,en);
+  let c=e.t+2.4;
+  e.L.forEach(l=>{$(`<div class="ln" style="${st(c,3.8)}"><span class="rv" style="${st(c,3.8)}">${l}</span></div>`,en);c+=4.4});
+  $(`<div class="nt rv" style="${st(c+.4,2.6)}">${e.n}</div>`,en);
+  const dd=$(`<div class="dd" style="top:${e.top}px"></div>`,pg);
+  let s='<svg viewBox="0 0 300 240">',rs=0;
+  D[e.k].forEach((p,i)=>{const m=p.match(/^([ofsvr]):(.*)$/),cl=m?m[1]:'',d=m?m[2]:p,ts=e.t+3+i*1.1;if(cl=='r')rs=ts;s+=`<path pathLength="1" class="${cl}" d="${d}" style="${st(ts,cl=='r'?11:2)}"/>`});
+  dd.innerHTML=s+'</svg>';
+  if(e.ship)$(`<div class="ship" style="offset-path:path('${e.ship}');${st(rs,11)}">${SHIP}</div>`,dd);
+  (TX[e.k]||[]).forEach(([x,y,t,z,o],i)=>$(`<div class="tx ${o?'o':''} rv" style="left:${x/3}%;top:${y/2.4}%;font-size:${z}px;${st(e.t+14+i*1.2,1.6)}">${t}</div>`,dd));
+  $(`<div class="st pop" style="top:${e.top+252}px;--r:-7deg;${st(e.t+20,.8)}">${e.s}</div>`,pg);
+  $(`<div class="tag rv" style="top:${e.top+262}px;${st(e.t+21,2.2)}">${e.g}</div>`,pg);
+ });
+ $(`<div class="stamp pop" style="left:600px;top:940px;--r:-9deg;${st(stamp[1],.7)}">${stamp[0]}</div>`,pg);
+}
+build(document.getElementById('pgA'),A,[['١','1405',44],['٢','1407',66],['٣','1409',70]],['ختم<br>الإمبراطور',80]);
+build(document.getElementById('pgB'),B,[['٤','1413',100],['٥','1417',106],['٦','1421',152],['٧','1431',158]],['انتهى<br>السجل',172]);
+const dust=document.getElementById('dust');
+for(let i=0;i<40;i++){const d=document.createElement('i');d.style.cssText=`left:${Math.random()*100}%;top:${50+Math.random()*50}%;--s:${14+Math.random()*18}s;animation-delay:-${Math.random()*24}s`;dust.appendChild(d)}
+const kf=document.createElement('style');document.head.appendChild(kf);
+function cam(){
+ const vw=innerWidth,vh=innerHeight,s0=Math.min(vw*.9/760,vh*.88/1060),fs=Math.min(vw*.95/740,vh*.82/330);
+ const at=(cx,cy,s)=>`translate(${vw/2-cx*s}px,${vh/2-cy*s}px) scale(${s})`;
+ const ov=at(380,530,s0),f=e=>at(380,e.top+130,fs),p=x=>(x/1.8).toFixed(2)+'%';
+ const F=[[16,36,A[0]],[40,60,A[1]],[64,84,A[2]],[98,120,B[0]],[124,146,B[1]],[150,170,B[2]]];
+ let k=`0%,${p(9)}{transform:${ov}}`;F.forEach(([a,b,e])=>k+=`${p(a)},${p(b)}{transform:${f(e)}}`);
+ k+=`${p(87)},${p(93)}{transform:${at(380,530,s0*1.05)}}${p(177)},100%{transform:${ov}}`;
+ kf.textContent=`@keyframes cam{${k}}`;
+}
+cam();addEventListener('resize',cam);
+const d=document.getElementById('desk'),pp=document.getElementById('pp');
+pp.onclick=()=>{const q=d.classList.toggle('paused');pp.textContent=q?'▶':'❚❚';pp.setAttribute('aria-label',q?'متابعة':'إيقاف مؤقت')};
+document.getElementById('rp').onclick=()=>{d.classList.remove('paused');pp.textContent='❚❚';d.classList.add('rst');void d.offsetWidth;d.classList.remove('rst')};
+</script>
+</body>
+</html>
