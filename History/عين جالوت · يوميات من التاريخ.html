@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>عين جالوت · يوميات من التاريخ</title>
+<link href="https://fonts.googleapis.com/css2?family=Playpen+Sans+Arabic:wght@400;600&family=Aref+Ruqaa:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2a2118;--orange:#d97a1f;--paper:#f6ecd4;--gold:#e6c27a;--hand:'Playpen Sans Arabic','Mada','Segoe UI',Tahoma,sans-serif;--ruq:'Aref Ruqaa','Amiri','Traditional Arabic',serif}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:#140d08}
+body{font-family:var(--hand);color:var(--ink)}
+#desk{position:fixed;inset:0;overflow:hidden;background:radial-gradient(ellipse at 70% 25%,#6b4527 0,#3a2413 45%,#140d08 100%)}
+#desk::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(95deg,rgba(0,0,0,.14) 0 2px,transparent 2px 9px,rgba(255,200,120,.04) 9px 11px)}
+#cam{position:absolute;left:0;top:0;width:760px;height:1060px;transform-origin:0 0;animation:cam 120s ease-in-out both}
+.book{position:absolute;inset:0;opacity:0;animation:bk 3s ease-out 8s both}
+@keyframes bk{from{opacity:0;translate:0 30px}to{opacity:1;translate:0 0}}
+.cover{position:absolute;left:-34px;top:-26px;width:828px;height:1112px;background:#a8691f;border-radius:16px;box-shadow:0 30px 60px rgba(0,0,0,.6);background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.06) 0 2px,transparent 2px 5px)}
+.cover::after{content:"";position:absolute;inset:10px;border:2px dashed rgba(255,230,180,.45);border-radius:10px}
+.prev{position:absolute;left:-26px;top:-12px;width:60px;height:1086px;background:#efe3c6;border-radius:8px 0 0 8px;box-shadow:inset -8px 0 10px rgba(0,0,0,.18)}
+.page{position:absolute;inset:0;border-radius:6px;background-color:var(--paper);
+background-image:linear-gradient(90deg,rgba(0,0,0,.12),transparent 6%),repeating-linear-gradient(transparent 0 33px,rgba(110,140,170,.45) 33px 34px),radial-gradient(ellipse at 30% 20%,rgba(255,255,255,.5),transparent 60%);
+box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 0 90px rgba(150,100,40,.28)}
+.en{position:absolute;right:48px;width:400px;direction:rtl}
+.dt{font-weight:600;font-size:24px;line-height:34px;white-space:nowrap}
+.ln{font-size:19px;line-height:34px;white-space:nowrap}
+.nt{display:inline-block;font-family:var(--ruq);font-size:23px;line-height:32px;color:var(--orange);border-bottom:3px double var(--orange);white-space:nowrap}
+.dd{position:absolute;left:36px;width:240px;height:170px}
+.dd svg{width:100%;height:100%;overflow:visible}
+.dd path{fill:none;stroke:var(--ink);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1}
+.dd path.o{stroke:var(--orange)}
+.bt{position:absolute;left:44px;top:28px;width:200px;text-align:center;font-family:var(--ruq);font-size:27px;line-height:34px;color:var(--ink)}
+.st{position:absolute;width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #fffdf5;box-shadow:0 2px 6px rgba(0,0,0,.35);display:grid;place-items:center;font-size:25px}
+.tape{position:absolute;width:150px;height:38px;background:repeating-linear-gradient(135deg,rgba(255,255,255,.55) 0 8px,rgba(217,122,31,.35) 8px 16px);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.roll{position:absolute;right:30px;top:-96px;width:96px;height:96px;border-radius:50%;border:14px solid #d8d2bf;background:#3a2413;box-shadow:0 6px 14px rgba(0,0,0,.5)}
+.rv,.dd path,.pop,.fd{animation-play-state:running}
+.rv{clip-path:inset(0 0 0 100%);animation:rv var(--d,3s) linear var(--t,0s) both}
+@keyframes rv{to{clip-path:inset(0 0 0 0)}}
+.dd path{animation:dr var(--d,2s) ease-in-out var(--t,0s) both}
+@keyframes dr{to{stroke-dashoffset:0}}
+.pop{opacity:0;animation:pop .7s cubic-bezier(.3,1.6,.5,1) var(--t,0s) both}
+@keyframes pop{from{opacity:0;transform:scale(.3) rotate(-14deg)}to{opacity:1;transform:scale(1) rotate(var(--r,0deg))}}
+.fd{opacity:0;animation:fd 2s ease-out var(--t,0s) both}
+@keyframes fd{to{opacity:1}}
+.paused *,.paused::before{animation-play-state:paused !important}
+.rst *{animation:none !important}
+.glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 78% 22%,rgba(255,170,70,.32),transparent 55%);mix-blend-mode:screen;animation:fl 3.7s ease-in-out infinite alternate}
+@keyframes fl{from{opacity:.55}to{opacity:1}}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(8,4,0,.78) 100%)}
+.dust i{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(255,220,150,.6);animation:fy var(--s) linear infinite}
+@keyframes fy{from{transform:translate(0,40px);opacity:0}20%{opacity:.9}to{transform:translate(60px,-120vh);opacity:0}}
+.card{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:14px;background:radial-gradient(circle,rgba(20,10,4,.88),#0b0602);color:var(--gold)}
+.card h1{font-family:var(--ruq);font-size:clamp(54px,12vw,130px);font-weight:700;line-height:1.1;text-shadow:0 0 30px rgba(230,170,70,.5)}
+.card p{font-family:var(--hand);font-size:clamp(18px,3vw,30px);letter-spacing:.02em}
+#intro{opacity:0;pointer-events:none;animation:intro 11s ease-in-out both}
+@keyframes intro{0%{opacity:0}8%,70%{opacity:1}100%{opacity:0}}
+#outro{opacity:0;pointer-events:none;animation:fd 3s ease-out 111s both}
+#bar{position:absolute;left:0;bottom:0;height:4px;width:100%;transform-origin:right;background:var(--gold);transform:scaleX(0);animation:pr 120s linear both}
+@keyframes pr{to{transform:scaleX(1)}}
+#ctl{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));translate:-50% 0;display:flex;gap:10px;z-index:5}
+#ctl button{font:inherit;font-size:20px;width:46px;height:46px;border-radius:50%;border:1px solid rgba(230,194,122,.6);background:rgba(20,10,4,.7);color:var(--gold);cursor:pointer}
+#ctl button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.dust{display:none}}
+</style>
+</head>
+<body>
+<div id="desk">
+  <div id="cam"><div class="book">
+    <div class="cover"></div><div class="prev"></div>
+    <div class="roll"></div>
+    <div class="page" id="pg"></div>
+  </div></div>
+  <div class="glow"></div><div class="dust" id="dust"></div><div class="vig"></div>
+  <div class="card" id="intro"><h1>عين جالوت</h1><p>3 سبتمبر 1260م · يوميات من التاريخ</p></div>
+  <div class="card" id="outro"><h1>وقفة التاريخ</h1><p>عند عين جالوت توقّف زحف المغول نحو مصر</p></div>
+  <div id="bar"></div>
+  <div id="ctl"><button id="pp" aria-label="إيقاف مؤقت">❚❚</button><button id="rp" aria-label="إعادة من البداية">↻</button></div>
+</div>
+<script>
+const $=(h,p)=>{const d=document.createElement('div');d.innerHTML=h;const e=d.firstElementChild;p.appendChild(e);return e};
+const st=(t,d)=>`--t:${t}s;--d:${d}s`;
+const D={
+city:[['M20 150H220'],['M35 150V100H175V150'],['M70 100Q105 45 140 100'],['M105 62V40M99 40H111'],['M190 150V70M184 70H196M190 70V58'],['M60 125h20v25H60zM110 120h22v30h-22z'],['M150 38q10-18 28-6q16-8 20 8q-24 10-48-2z','o']],
+camel:[['M30 120Q28 135 40 138H132Q142 134 140 122'],['M30 120Q45 92 62 110Q75 82 90 110Q130 105 140 122'],['M42 138V165M62 138V165M118 138V165M132 138V165'],['M30 120Q20 100 12 92Q6 86 16 84'],['M185 165V90','o'],['M185 90l34 10l-34 14','o'],['M205 40a14 14 0 1 0 .1 0z','o']],
+bubble:[['M20 20H220Q232 20 232 32V110Q232 122 220 122H90L60 150L66 122H32Q20 122 20 110V32Q20 20 32 20Z'],['M34 112H218','o'],['M205 36l4 9 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z','o']],
+castle:[['M50 150V90H70V105H90V90H110V105H130V90H150V150Z'],['M90 150V128Q100 114 110 128V150'],['M100 90V50','o'],['M100 50l28 8l-28 10','o'],['M190 50a22 22 0 1 0 14 38a18 18 0 1 1 -14-38z','o'],['M30 40l4 9 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z','o']]
+};
+const E=[
+{t:12,top:102,dt:'1258م',L:['سقطت بغداد، وتقدم المغول غرباً.','الخوف يملأ المدن.'],n:'بداية العاصفة!',k:'city'},
+{t:35,top:340,dt:'1260م · الصيف',L:['قطز وبيبرس يجمعان الجيش في مصر','ويتجهان إلى الشام.'],n:'الاتحاد قبل المعركة.',k:'camel'},
+{t:58,top:578,dt:'3 سبتمبر 1260م',L:['عند عين جالوت قرب الناصرة، هزم','المماليك الجيش المغولي بقيادة كتبغا،','وأوقفوا زحف المغول نحو مصر.'],n:'نقطة التحول!',k:'bubble',b:'وقفة التاريخ'},
+{t:85,top:816,dt:'ما بعد المعركة',L:['دخل المماليك دمشق، وبقيت مصر والشام','في حماية دولة قوية، وصارت القاهرة','مركز العالم الإسلامي.'],n:'التاريخ يُكتب بالصبر.',k:'castle'}
+];
+const pg=document.getElementById('pg');
+$(`<div class="tape fd" style="left:300px;top:-16px;rotate:-3deg;${st(9,2)}"></div>`,pg);
+$(`<div class="tape fd" style="left:-48px;top:420px;rotate:90deg;width:110px;${st(10,2)}"></div>`,pg);
+E.forEach(e=>{
+ const en=$(`<div class="en" style="top:${e.top}px"></div>`,pg);
+ $(`<div class="dt rv" style="${st(e.t,1.8)}">${e.dt}</div>`,en);
+ let c=e.t+2.4;
+ e.L.forEach(l=>{$(`<div class="ln rv" style="${st(c,3.6)}">${l}</div>`,en);c+=4.2});
+ $(`<div class="nt rv" style="${st(c,2.4)}">${e.n}</div>`,en);
+ const dd=$(`<div class="dd" style="top:${e.top}px"></div>`,pg);
+ let s='<svg viewBox="0 0 240 170">';
+ D[e.k].forEach((p,i)=>{s+=`<path pathLength="1" class="${p[1]||''}" d="${p[0]}" style="${st(e.t+2.5+i*1.1,2.2)}"/>`});
+ dd.innerHTML=s+'</svg>';
+ if(e.b)$(`<div class="bt rv" style="${st(e.t+10,2.6)}">${e.b}</div>`,dd);
+});
+[['📜',270,190,32],['🐎',270,430,55],['🛡️',270,690,80],['🏰',270,912,104],['⭐',640,40,100],['🐪',70,1000,106]].forEach(([g,x,y,t],i)=>
+ $(`<div class="st pop" style="left:${x}px;top:${y}px;--r:${i%2?8:-8}deg;${st(t,.7)}">${g}</div>`,pg));
+// camera
+const dust=document.getElementById('dust');
+for(let i=0;i<26;i++){const d=document.createElement('i');d.style.cssText=`left:${Math.random()*100}%;top:${50+Math.random()*50}%;--s:${14+Math.random()*16}s;animation-delay:-${Math.random()*20}s`;dust.appendChild(d)}
+const kf=document.createElement('style');document.head.appendChild(kf);
+function cam(){
+ const vw=innerWidth,vh=innerHeight,s0=Math.min(vw*.9/760,vh*.88/1060);
+ const fs=Math.min(vw*.95/730,vh*.8/260);
+ const at=(cx,cy,s)=>`translate(${vw/2-cx*s}px,${vh/2-cy*s}px) scale(${s})`;
+ const ov=at(380,530,s0),f=i=>at(380,E[i].top+95,fs),p=x=>(x/1.2).toFixed(2)+'%';
+ kf.textContent=`@keyframes cam{0%,8%{transform:${ov}}${p(15)}{transform:${f(0)}}${p(34)}{transform:${f(0)}}${p(38)}{transform:${f(1)}}${p(56)}{transform:${f(1)}}${p(60)}{transform:${f(2)}}${p(83)}{transform:${f(2)}}${p(88)}{transform:${f(3)}}${p(106)}{transform:${f(3)}}${p(116)}{transform:${ov}}100%{transform:${ov}}}`;
+}
+cam();addEventListener('resize',cam);
+// controls
+const d=document.getElementById('desk'),pp=document.getElementById('pp');
+pp.onclick=()=>{const p=d.classList.toggle('paused');pp.textContent=p?'▶':'❚❚';pp.setAttribute('aria-label',p?'متابعة':'إيقاف مؤقت')};
+document.getElementById('rp').onclick=()=>{d.classList.remove('paused');pp.textContent='❚❚';d.classList.add('rst');void d.offsetWidth;d.classList.remove('rst')};
+</script>
+</body>
+</html>
