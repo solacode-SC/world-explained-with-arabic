@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Single, Double and Triple Integrals</title>
+<style>
+:root{--bg:#f6f1e6;--card:#efe8d8;--ink:#1c2a44;--mute:#52607a;--o:#d9572b;--t:#1a9aa8;--v:#7c5cc4;--line:#c9bfa8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--v:#b79cff;--line:#2c3656;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--v:#b79cff;--line:#2c3656;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;padding:10px 12px}
+h1{font-size:clamp(20px,3.6vw,34px);text-align:center;margin:0;letter-spacing:-.02em;line-height:1.15}
+.sub{text-align:center;color:var(--mute);font-size:clamp(12px,1.7vw,16px);margin:2px 0 8px}.sub b{color:var(--o)}
+.row{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.p{background:var(--card);border-radius:16px;padding:8px 12px;display:flex;flex-direction:column;min-height:0;min-width:0}
+.hd{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}
+.hd h2{margin:0;font-size:clamp(14px,1.9vw,18px)}
+.fm{font-family:Georgia,"Times New Roman",serif;font-size:clamp(16px,2.4vw,24px)}
+.ds{font-size:12px;color:var(--mute);width:100%}
+.cv{position:relative;flex:1;min-height:0}.cv canvas{position:absolute;inset:0;width:100%;height:100%}
+.val{font-family:Georgia,serif;font-size:clamp(12px,1.5vw,15px);color:var(--mute);text-align:center}.val b{color:var(--ink)}
+.bar{display:flex;align-items:center;gap:12px;padding-top:8px;font-size:14px;color:var(--mute)}
+.bar label{flex:1;display:flex;align-items:center;gap:10px}.bar label b{color:var(--ink);min-width:2ch}
+input[type=range]{flex:1;accent-color:var(--o)}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 14px;border-radius:999px;cursor:pointer}
+@media(max-width:700px){.row{grid-template-columns:1fr;grid-template-rows:repeat(3,minmax(0,1fr));gap:6px}.ds{display:none}.p{padding:6px 10px}}
+@media(max-height:520px){.sub{display:none}}
+</style></head><body>
+<h1>Single, Double &amp; Triple Integrals</h1>
+<p class="sub">Each integral adds up tiny pieces. <b>One more dimension each time:</b> strips, columns, cubes.</p>
+<div class="row" id="row"></div>
+<div class="bar"><label>Slices n <b id="nv">1</b><input id="n" type="range" min="1" max="16" step="1" value="1"></label><button id="au">Auto: on</button></div>
+<script>
+var $=function(i){return document.getElementById(i)};
+var PN=[{c:'o',h:'Single ∫',f:'∫<sub>a</sub><sup>b</sup> f(x) dx',d:'A line cut into strips gives the area under a curve.'},
+{c:'t',h:'Double ∬',f:'∬<sub>R</sub> f(x,y) dA',d:'A flat region cut into cells gives the volume under a surface.'},
+{c:'v',h:'Triple ∭',f:'∭<sub>E</sub> dV',d:'A solid cut into cubes gives its volume (or mass).'}];
+$('row').innerHTML=PN.map(function(p,i){return '<section class="p"><div class="hd"><h2 style="color:var(--'+p.c+')">'+p.h+'</h2><span class="fm">'+p.f+'</span><span class="ds">'+p.d+'</span></div><div class="cv"><canvas id="c'+i+'"></canvas></div><div class="val" id="v'+i+'"></div></section>'}).join('');
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+var cvs=[0,1,2].map(function(i){return $('c'+i)}),cx=cvs.map(function(c){return c.getContext('2d')}),sz=[[300,300],[300,300],[300,300]];
+var ro=new ResizeObserver(function(){cvs.forEach(function(c,i){var b=c.parentNode.getBoundingClientRect(),d=window.devicePixelRatio||1;sz[i]=[b.width,b.height];c.width=Math.max(1,b.width*d);c.height=Math.max(1,b.height*d);cx[i].setTransform(d,0,0,d,0,0)})});
+cvs.forEach(function(c){ro.observe(c.parentNode)});
+function txt(c,s,x,y,col,sz_,al){c.fillStyle=col;c.font='italic '+(sz_||14)+'px Georgia,serif';c.textAlign=al||'center';c.fillText(s,x,y)}
+var f1=function(x){return 1.1+.6*Math.sin(1.8*x)},f2=function(x,y){return .6+.35*Math.sin(2.4*x+.5)*Math.cos(2.4*y)};
+var E1=0,E2=0,i,j;for(i=0;i<2000;i++)E1+=f1((i+.5)*3/2000)*3/2000;for(i=0;i<200;i++)for(j=0;j<200;j++)E2+=f2((i+.5)/200,(j+.5)/200)/40000;
+var E3=4*Math.PI/3;
+function d1(c,w,h,n,p,C){
+var l=22,r=10,t=14,b=22,X=function(x){return l+x/3*(w-l-r)},Y=function(y){return h-b-y/2*(h-t-b)},dx=3/n,s=0,hi=Math.floor(p*n);
+c.lineWidth=1;
+for(var i=0;i<n;i++){var v=f1((i+.5)*dx);s+=v*dx;c.fillStyle=C.o;c.globalAlpha=i==hi?.85:.3;c.fillRect(X(i*dx),Y(v),X(dx)-X(0),Y(0)-Y(v));c.globalAlpha=1;c.strokeStyle=C.o;c.strokeRect(X(i*dx),Y(v),X(dx)-X(0),Y(0)-Y(v))}
+c.strokeStyle=C.ink;c.lineWidth=2.5;c.beginPath();for(i=0;i<=80;i++){var x=3*i/80;i?c.lineTo(X(x),Y(f1(x))):c.moveTo(X(x),Y(f1(x)))}c.stroke();
+c.strokeStyle=C.mute;c.lineWidth=1.5;c.beginPath();c.moveTo(l,t-4);c.lineTo(l,Y(0));c.lineTo(w-r+4,Y(0));c.stroke();
+txt(c,'a',X(0),h-6,C.mute);txt(c,'b',X(3),h-6,C.mute);txt(c,'x',w-r,Y(0)-6,C.mute);txt(c,'y',l-10,t+4,C.mute);
+if(n<=12){txt(c,'dx',X((hi+.5)*dx),Y(0)+15,C.o,13);txt(c,'f(xᵢ)',X((hi+.5)*dx),Y(f1((hi+.5)*dx))-6,C.ink,13)}
+return s}
+function d2(c,w,h,n,p,C){
+var S=Math.min(w*.53,h*.6),zs=S*.5,ox=w/2,oy=h*.06+zs*.95,hi=Math.floor(p*n),d=1/n,s=0;
+var P=function(x,y,z){return[ox+(x-y)*.866*S,oy+(x+y)*.5*S-z*zs]};
+function q(pts,col,sh){c.beginPath();pts.forEach(function(a,i){i?c.lineTo(a[0],a[1]):c.moveTo(a[0],a[1])});c.closePath();c.fillStyle=col;c.fill();if(sh){c.fillStyle='rgba(0,0,0,'+sh+')';c.fill()}c.strokeStyle=C.card;c.lineWidth=.6;c.stroke()}
+q([P(0,0,0),P(1,0,0),P(1,1,0),P(0,1,0)],C.line,0);
+for(var k=0;k<=2*n-2;k++)for(var i=0;i<n;i++){var j=k-i;if(j<0||j>=n)continue;
+var x0=i*d,y0=j*d,x1=x0+d,y1=y0+d,z=f2(x0+d/2,y0+d/2),col=i==hi?C.o:C.t;s+=z*d*d;
+q([P(x0,y1,0),P(x1,y1,0),P(x1,y1,z),P(x0,y1,z)],col,.3);q([P(x1,y0,0),P(x1,y1,0),P(x1,y1,z),P(x1,y0,z)],col,.16);q([P(x0,y0,z),P(x1,y0,z),P(x1,y1,z),P(x0,y1,z)],col,0)}
+txt(c,'x',P(1,0,0)[0]+14,P(1,0,0)[1]+6,C.mute);txt(c,'y',P(0,1,0)[0]-14,P(0,1,0)[1]+6,C.mute);txt(c,'z',P(0,0,0)[0],oy-zs-6,C.mute);
+return s}
+var vox={n:0,a:null,cnt:0};
+function build(n){var a=new Uint8Array(n*n*n),cnt=0;for(var i=0;i<n;i++)for(var j=0;j<n;j++)for(var k=0;k<n;k++){var x=-1+(i+.5)*2/n,y=-1+(j+.5)*2/n,z=-1+(k+.5)*2/n;if(x*x+y*y+z*z<=1){a[i*n*n+j*n+k]=1;cnt++}}vox={n:n,a:a,cnt:cnt}}
+function d3(c,w,h,n,p,C){
+if(vox.n!=n)build(n);
+var S=Math.min(w*.26,h*.225),d=2/n,hi=Math.floor(p*n),a=vox.a;
+var P=function(x,y,z){return[w/2+(x-y)*.866*S,h/2+((x+y)*.5-z)*S]};
+var In=function(i,j,k){return i>=0&&j>=0&&k>=0&&i<n&&j<n&&k<n&&a[i*n*n+j*n+k]};
+function q(pts,col,sh){c.beginPath();pts.forEach(function(a,i){i?c.lineTo(a[0],a[1]):c.moveTo(a[0],a[1])});c.closePath();c.fillStyle=col;c.fill();if(sh){c.fillStyle='rgba(0,0,0,'+sh+')';c.fill()}c.strokeStyle=C.card;c.lineWidth=.5;c.stroke()}
+for(var s=0;s<=3*n-3;s++)for(var i=0;i<n;i++)for(var j=0;j<n;j++){var k=s-i-j;if(k<0||k>=n||!a[i*n*n+j*n+k])continue;
+var x0=-1+i*d,y0=-1+j*d,z0=-1+k*d,x1=x0+d,y1=y0+d,z1=z0+d,col=k==hi?'#e0a82e':C.v;
+if(!In(i,j+1,k))q([P(x0,y1,z0),P(x1,y1,z0),P(x1,y1,z1),P(x0,y1,z1)],col,.3);
+if(!In(i+1,j,k))q([P(x1,y0,z0),P(x1,y1,z0),P(x1,y1,z1),P(x1,y0,z1)],col,.16);
+if(!In(i,j,k+1))q([P(x0,y0,z1),P(x1,y0,z1),P(x1,y1,z1),P(x0,y1,z1)],col,0)}
+return vox.cnt*d*d*d}
+var T=0,last=0,auto=true,fns=[d1,d2,d3],EX=[E1,E2,E3],UN=['strips','cells','cubes'],SG=['Σ f(xᵢ)Δx','ΣΣ f Δx Δy','Σ ΔV'];
+$('au').onclick=function(){auto=!auto;this.textContent='Auto: '+(auto?'on':'off')};
+$('n').addEventListener('input',function(){auto=false;$('au').textContent='Auto: off'});
+function fr(ts){var dt=Math.min(.05,last?(ts-last)/1000:0);last=ts;T+=dt;
+if(auto)$('n').value=1+Math.round(7.5*(1-Math.cos(T*.35)));
+var n=+$('n').value,p=(T*.5)%1;$('nv').textContent=n;
+var C={o:css('--o'),t:css('--t'),v:css('--v'),ink:css('--ink'),mute:css('--mute'),card:css('--card'),line:css('--line')};
+for(var i=0;i<3;i++){cx[i].clearRect(0,0,sz[i][0],sz[i][1]);var s=fns[i](cx[i],sz[i][0],sz[i][1],n,p,C),pc=Math.pow(n,i+1);
+$('v'+i).innerHTML=(i==2?vox.cnt:pc)+' '+UN[i]+' · '+SG[i]+' = <b>'+s.toFixed(2)+'</b> → exact '+EX[i].toFixed(2)}
+requestAnimationFrame(fr)}
+requestAnimationFrame(fr);
+</script></body></html>

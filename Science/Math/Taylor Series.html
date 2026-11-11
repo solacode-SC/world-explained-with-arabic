@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Taylor Series: Polynomials That Mimic Functions</title><style>:root{--bg:#f6f1e6;--card:#efe8d8;--ink:#1c2a44;--mute:#52607a;--o:#d9572b;--t:#1a9aa8;--v:#7c5cc4;--line:#c9bfa8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--v:#b79cff;--line:#2c3656;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--v:#b79cff;--line:#2c3656;color-scheme:dark}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;padding:10px 12px}
+h1{font-size:clamp(20px,3.6vw,34px);text-align:center;margin:0;letter-spacing:-.02em;line-height:1.15}
+.sub{text-align:center;color:var(--mute);font-size:clamp(12px,1.7vw,16px);margin:2px 0 8px}.sub b{color:var(--o)}
+.row{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:10px}
+.p{background:var(--card);border-radius:16px;padding:8px 12px;display:flex;flex-direction:column;min-height:0;min-width:0}
+.hd{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.hd h2{margin:0;font-size:clamp(14px,1.9vw,18px)}
+.fm{font-family:Georgia,"Times New Roman",serif;font-size:clamp(15px,2.2vw,22px)}
+.ds{font-size:12px;color:var(--mute);width:100%}
+.cv{position:relative;flex:1;min-height:0}.cv canvas{position:absolute;inset:0;width:100%;height:100%}
+.val{font-family:Georgia,serif;font-size:clamp(12px,1.5vw,15px);color:var(--mute);text-align:center}.val b{color:var(--ink)}
+.bar{display:flex;align-items:center;gap:12px;padding-top:8px;font-size:14px;color:var(--mute)}
+.bar label{flex:1;display:flex;align-items:center;gap:10px}.bar label b{color:var(--ink);min-width:3ch}
+input[type=range]{flex:1;accent-color:var(--o)}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 14px;border-radius:999px;cursor:pointer}
+@media(max-width:700px){.row{grid-template-columns:1fr;grid-template-rows:repeat(var(--n),minmax(0,1fr));gap:6px}.ds{display:none}.p{padding:6px 10px}}
+@media(max-height:520px){.sub{display:none}}</style></head><body>
+<h1>Taylor Series: Polynomials That Mimic Functions</h1><p class="sub">Add more terms and the polynomial hugs the curve. <b>But only inside its radius of convergence.</b></p><div class="row" id="row"></div>
+<div class="bar"><label>Degree n <b id="nv"></b><input id="n" type="range" min="0" max="13" step="1" value="1"></label><button id="au">Auto: on</button></div>
+<script>
+var $=function(i){return document.getElementById(i)},PN=[["o", "sin x", "x − x³/3! + x⁵/5! − …", "Converges for every x."], ["t", "eˣ", "1 + x + x²/2! + x³/3! + …", "Converges for every x."], ["v", "ln(1+x)", "x − x²/2 + x³/3 − …", "Converges only for |x| &lt; 1."]];
+$('row').style.setProperty('--n',PN.length);
+$('row').innerHTML=PN.map(function(p,i){return '<section class="p"><div class="hd"><h2 style="color:var(--'+p[0]+')">'+p[1]+'</h2><span class="fm">'+p[2]+'</span><span class="ds">'+p[3]+'</span></div><div class="cv"><canvas id="c'+i+'"></canvas></div><div class="val" id="v'+i+'"></div></section>'}).join('');
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+var cvs=PN.map(function(p,i){return $('c'+i)}),cx=cvs.map(function(c){return c.getContext('2d')}),sz=PN.map(function(){return[300,300]});
+var ro=new ResizeObserver(function(){cvs.forEach(function(c,i){var b=c.parentNode.getBoundingClientRect(),d=window.devicePixelRatio||1;sz[i]=[b.width,b.height];c.width=Math.max(1,b.width*d);c.height=Math.max(1,b.height*d);cx[i].setTransform(d,0,0,d,0,0)})});
+cvs.forEach(function(c){ro.observe(c.parentNode)});
+function txt(c,s,x,y,col,z,al){c.fillStyle=col;c.font='italic '+(z||14)+'px Georgia,serif';c.textAlign=al||'center';c.fillText(s,x,y)}
+function arrow(c,x1,y1,x2,y2,col,lw){if(Math.hypot(x2-x1,y2-y1)<4)return;c.save();c.strokeStyle=col;c.fillStyle=col;c.lineWidth=lw||2.5;c.setLineDash([]);c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();var a=Math.atan2(y2-y1,x2-x1),k=Math.min(10,3+lw*2);c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-k*Math.cos(a-.4),y2-k*Math.sin(a-.4));c.lineTo(x2-k*Math.cos(a+.4),y2-k*Math.sin(a+.4));c.fill();c.restore()}
+function fact(n){var r=1;for(var i=2;i<=n;i++)r*=i;return r}
+var FN=[{f:Math.sin,tp:function(x,n){var s=0;for(var k=1;k<=n;k+=2)s+=(((k-1)/2)%2?-1:1)*Math.pow(x,k)/fact(k);return s},x0:-7,x1:7,y0:-3,y1:3,xs:2,R:0},
+{f:Math.exp,tp:function(x,n){var s=0;for(var k=0;k<=n;k++)s+=Math.pow(x,k)/fact(k);return s},x0:-3,x1:3,y0:-2,y1:10,xs:2,R:0},
+{f:function(x){return Math.log(1+x)},tp:function(x,n){var s=0;for(var k=1;k<=n;k++)s+=(k%2?1:-1)*Math.pow(x,k)/k;return s},x0:-.95,x1:3,y0:-4,y1:3,xs:1.5,R:1}];
+function mk(k){return function(c,w,h,n,T,C){var F=FN[k],col=[C.o,C.t,C.v][k],l=26,r=10,t=10,b=18,X=function(x){return l+(x-F.x0)/(F.x1-F.x0)*(w-l-r)},Y=function(y){return h-b-(y-F.y0)/(F.y1-F.y0)*(h-t-b)};
+c.save();c.beginPath();c.rect(l,t,w-l-r,h-t-b);c.clip();
+if(F.R){c.fillStyle=col;c.globalAlpha=.12;c.fillRect(X(-F.R),t,X(F.R)-X(-F.R),h);c.globalAlpha=1}
+c.strokeStyle=C.line;c.lineWidth=1.5;c.beginPath();c.moveTo(l,Y(0));c.lineTo(w,Y(0));c.moveTo(X(0),t);c.lineTo(X(0),h);c.stroke();
+[[F.f,C.ink,2.5],[function(x){return F.tp(x,n)},col,3]].forEach(function(q){c.strokeStyle=q[1];c.lineWidth=q[2];c.beginPath();for(var i=0;i<=200;i++){var x=F.x0+(F.x1-F.x0)*i/200,y=q[0](x);i?c.lineTo(X(x),Y(y)):c.moveTo(X(x),Y(y))}c.stroke()});
+c.restore();
+c.save();c.setLineDash([4,5]);c.strokeStyle=C.mute;c.beginPath();c.moveTo(X(F.xs),t);c.lineTo(X(F.xs),h-b);c.stroke();c.restore();
+txt(c,'x = '+F.xs,X(F.xs),h-4,C.mute,12);txt(c,'P'+n+'(x)',l+4,t+14,col,14,'left');
+var p=F.tp(F.xs,n),f=F.f(F.xs);return 'P'+n+'('+F.xs+') = <b>'+(Math.abs(p)>999?p.toExponential(1):p.toFixed(3))+'</b> · f = '+f.toFixed(3)}}
+var DR=[mk(0),mk(1),mk(2)];
+function AU(T){return Math.round(6.5*(1-Math.cos(T*.5)))}
+var T=0,last=0,auto=true;
+$('au').onclick=function(){auto=!auto;this.textContent='Auto: '+(auto?'on':'off')};
+$('n').addEventListener('input',function(){auto=false;$('au').textContent='Auto: off'});
+function fr(ts){var dt=Math.min(.05,last?(ts-last)/1000:0);last=ts;T+=dt;if(auto)$('n').value=AU(T);var v=+$('n').value;$('nv').textContent=v.toFixed(0);
+var C={o:css('--o'),t:css('--t'),v:css('--v'),ink:css('--ink'),mute:css('--mute'),card:css('--card'),line:css('--line')};
+for(var i=0;i<DR.length;i++){cx[i].clearRect(0,0,sz[i][0],sz[i][1]);$('v'+i).innerHTML=DR[i](cx[i],sz[i][0],sz[i][1],v,T,C,dt)}
+requestAnimationFrame(fr)}
+requestAnimationFrame(fr);
+</script></body></html>

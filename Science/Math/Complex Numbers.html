@@ -1,0 +1,62 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Complex Numbers: Rotation Meets Scaling</title><style>:root{--bg:#f6f1e6;--card:#efe8d8;--ink:#1c2a44;--mute:#52607a;--o:#d9572b;--t:#1a9aa8;--v:#7c5cc4;--line:#c9bfa8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--v:#b79cff;--line:#2c3656;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--v:#b79cff;--line:#2c3656;color-scheme:dark}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;padding:10px 12px}
+h1{font-size:clamp(20px,3.6vw,34px);text-align:center;margin:0;letter-spacing:-.02em;line-height:1.15}
+.sub{text-align:center;color:var(--mute);font-size:clamp(12px,1.7vw,16px);margin:2px 0 8px}.sub b{color:var(--o)}
+.row{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:10px}
+.p{background:var(--card);border-radius:16px;padding:8px 12px;display:flex;flex-direction:column;min-height:0;min-width:0}
+.hd{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.hd h2{margin:0;font-size:clamp(14px,1.9vw,18px)}
+.fm{font-family:Georgia,"Times New Roman",serif;font-size:clamp(15px,2.2vw,22px)}
+.ds{font-size:12px;color:var(--mute);width:100%}
+.cv{position:relative;flex:1;min-height:0}.cv canvas{position:absolute;inset:0;width:100%;height:100%}
+.val{font-family:Georgia,serif;font-size:clamp(12px,1.5vw,15px);color:var(--mute);text-align:center}.val b{color:var(--ink)}
+.bar{display:flex;align-items:center;gap:12px;padding-top:8px;font-size:14px;color:var(--mute)}
+.bar label{flex:1;display:flex;align-items:center;gap:10px}.bar label b{color:var(--ink);min-width:3ch}
+input[type=range]{flex:1;accent-color:var(--o)}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 14px;border-radius:999px;cursor:pointer}
+@media(max-width:700px){.row{grid-template-columns:1fr;grid-template-rows:repeat(var(--n),minmax(0,1fr));gap:6px}.ds{display:none}.p{padding:6px 10px}}
+@media(max-height:520px){.sub{display:none}}</style></head><body>
+<h1>Complex Numbers: Rotation Meets Scaling</h1><p class="sub">Adding slides arrows tip to tail. <b>Multiplying</b> rotates and scales. Roots of unity split a circle evenly.</p><div class="row" id="row"></div>
+<div class="bar"><label>Roots n <b id="nv"></b><input id="n" type="range" min="2" max="12" step="1" value="5"></label><button id="au">Auto: on</button></div>
+<script>
+var $=function(i){return document.getElementById(i)},PN=[["o", "Adding", "z₁ + z₂", "Arrows join tip to tail (the parallelogram rule)."], ["t", "Multiplying", "z₁ · z₂", "Angles add and lengths multiply."], ["v", "Roots of unity", "zⁿ = 1", "The n roots sit evenly around the unit circle."]];
+$('row').style.setProperty('--n',PN.length);
+$('row').innerHTML=PN.map(function(p,i){return '<section class="p"><div class="hd"><h2 style="color:var(--'+p[0]+')">'+p[1]+'</h2><span class="fm">'+p[2]+'</span><span class="ds">'+p[3]+'</span></div><div class="cv"><canvas id="c'+i+'"></canvas></div><div class="val" id="v'+i+'"></div></section>'}).join('');
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+var cvs=PN.map(function(p,i){return $('c'+i)}),cx=cvs.map(function(c){return c.getContext('2d')}),sz=PN.map(function(){return[300,300]});
+var ro=new ResizeObserver(function(){cvs.forEach(function(c,i){var b=c.parentNode.getBoundingClientRect(),d=window.devicePixelRatio||1;sz[i]=[b.width,b.height];c.width=Math.max(1,b.width*d);c.height=Math.max(1,b.height*d);cx[i].setTransform(d,0,0,d,0,0)})});
+cvs.forEach(function(c){ro.observe(c.parentNode)});
+function txt(c,s,x,y,col,z,al){c.fillStyle=col;c.font='italic '+(z||14)+'px Georgia,serif';c.textAlign=al||'center';c.fillText(s,x,y)}
+function arrow(c,x1,y1,x2,y2,col,lw){if(Math.hypot(x2-x1,y2-y1)<4)return;c.save();c.strokeStyle=col;c.fillStyle=col;c.lineWidth=lw||2.5;c.setLineDash([]);c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();var a=Math.atan2(y2-y1,x2-x1),k=Math.min(10,3+lw*2);c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-k*Math.cos(a-.4),y2-k*Math.sin(a-.4));c.lineTo(x2-k*Math.cos(a+.4),y2-k*Math.sin(a+.4));c.fill();c.restore()}
+var A1=25*Math.PI/180,M1=1.4,M2=1.1;
+function setup(w,h){var u=Math.min(w,h)*.5/2.7,x0=w/2,y0=h/2;return{u:u,x0:x0,y0:y0,X:function(r){return x0+r*u},Y:function(i){return y0-i*u}}}
+function axes(c,g,C,w,h){c.strokeStyle=C.line;c.lineWidth=1.5;c.beginPath();c.moveTo(0,g.y0);c.lineTo(w,g.y0);c.moveTo(g.x0,0);c.lineTo(g.x0,h);c.stroke();c.beginPath();c.arc(g.x0,g.y0,g.u,0,7);c.stroke();txt(c,'Re',w-14,g.y0-6,C.mute,12);txt(c,'Im',g.x0+14,12,C.mute,12)}
+function vec(c,g,z,col,lab){arrow(c,g.x0,g.y0,g.X(z[0]),g.Y(z[1]),col,3);txt(c,lab,g.X(z[0])+(z[0]>=0?16:-16),g.Y(z[1])-6,col,14)}
+function zz(m,a){return[m*Math.cos(a),m*Math.sin(a)]}
+function dg(a){return(((a*180/Math.PI)%360)+360)%360}
+var DR=[function(c,w,h,n,T,C){var g=setup(w,h),z1=zz(M1,A1),z2=zz(M2,T*.6),s=[z1[0]+z2[0],z1[1]+z2[1]];axes(c,g,C,w,h);
+c.save();c.setLineDash([5,5]);c.strokeStyle=C.mute;c.lineWidth=1.5;c.beginPath();c.moveTo(g.X(z1[0]),g.Y(z1[1]));c.lineTo(g.X(s[0]),g.Y(s[1]));c.moveTo(g.X(z2[0]),g.Y(z2[1]));c.lineTo(g.X(s[0]),g.Y(s[1]));c.stroke();c.restore();
+vec(c,g,z1,C.t,'z₁');vec(c,g,z2,C.o,'z₂');vec(c,g,s,C.ink,'z₁+z₂');
+return 'z₁ + z₂ = <b>'+s[0].toFixed(2)+(s[1]<0?' − ':' + ')+Math.abs(s[1]).toFixed(2)+'i</b>'},
+function(c,w,h,n,T,C){var g=setup(w,h),th=(T*.6)%6.2832,z1=zz(M1,A1),z2=zz(M2,th),p=zz(M1*M2,A1+th);axes(c,g,C,w,h);
+c.strokeStyle=C.o;c.lineWidth=2;c.beginPath();c.arc(g.x0,g.y0,.55*g.u,-A1,-(A1+th),true);c.stroke();
+vec(c,g,z1,C.t,'z₁');vec(c,g,z2,C.o,'z₂');vec(c,g,p,C.ink,'z₁z₂');
+return 'angles add: '+dg(A1).toFixed(0)+'° + '+dg(th).toFixed(0)+'° = <b>'+dg(A1+th).toFixed(0)+'°</b> · lengths: 1.4 × 1.1 = <b>1.54</b>'},
+function(c,w,h,n,T,C){var g=setup(w,h),hi=Math.floor(T*.8)%n;axes(c,g,C,w,h);
+c.strokeStyle=C.v;c.lineWidth=2;c.beginPath();for(var k=0;k<=n;k++){var a=k*2*Math.PI/n,x=g.X(Math.cos(a)),y=g.Y(Math.sin(a));k?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();
+c.strokeStyle=C.o;c.lineWidth=1.5;c.beginPath();c.arc(g.x0,g.y0,.4*g.u,0,-2*Math.PI/n,true);c.stroke();
+for(var k=0;k<n;k++){var a=k*2*Math.PI/n,x=g.X(Math.cos(a)),y=g.Y(Math.sin(a));if(k==hi)arrow(c,g.x0,g.y0,x,y,C.o,2.5);c.fillStyle=k==hi?C.o:C.v;c.beginPath();c.arc(x,y,k==hi?7:5,0,7);c.fill()}
+txt(c,'ω'+(hi>1?'^'+hi:hi?'':'⁰'),g.X(Math.cos(hi*2*Math.PI/n))*1+0,g.Y(Math.sin(hi*2*Math.PI/n))-12,C.o,14);
+return 'ω = e^(2πi/n) · each root is <b>'+(360/n).toFixed(0)+'°</b> apart · ωⁿ = 1'}];
+function AU(T){return 2+Math.round(5*(1-Math.cos(T*.3)))}
+var T=0,last=0,auto=true;
+$('au').onclick=function(){auto=!auto;this.textContent='Auto: '+(auto?'on':'off')};
+$('n').addEventListener('input',function(){auto=false;$('au').textContent='Auto: off'});
+function fr(ts){var dt=Math.min(.05,last?(ts-last)/1000:0);last=ts;T+=dt;if(auto)$('n').value=AU(T);var v=+$('n').value;$('nv').textContent=v.toFixed(0);
+var C={o:css('--o'),t:css('--t'),v:css('--v'),ink:css('--ink'),mute:css('--mute'),card:css('--card'),line:css('--line')};
+for(var i=0;i<DR.length;i++){cx[i].clearRect(0,0,sz[i][0],sz[i][1]);$('v'+i).innerHTML=DR[i](cx[i],sz[i][0],sz[i][1],v,T,C,dt)}
+requestAnimationFrame(fr)}
+requestAnimationFrame(fr);
+</script></body></html>
