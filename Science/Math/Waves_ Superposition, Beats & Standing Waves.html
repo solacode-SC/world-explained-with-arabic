@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Waves: Superposition, Beats &amp; Standing Waves</title><style>:root{--bg:#f6f1e6;--card:#efe8d8;--ink:#1c2a44;--mute:#52607a;--o:#d9572b;--t:#1a9aa8;--v:#7c5cc4;--line:#c9bfa8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--v:#b79cff;--line:#2c3656;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--v:#b79cff;--line:#2c3656;color-scheme:dark}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;padding:10px 12px}
+h1{font-size:clamp(20px,3.6vw,34px);text-align:center;margin:0;letter-spacing:-.02em;line-height:1.15}
+.sub{text-align:center;color:var(--mute);font-size:clamp(12px,1.7vw,16px);margin:2px 0 8px}.sub b{color:var(--o)}
+.row{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:10px}
+.p{background:var(--card);border-radius:16px;padding:8px 12px;display:flex;flex-direction:column;min-height:0;min-width:0}
+.hd{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.hd h2{margin:0;font-size:clamp(14px,1.9vw,18px)}
+.fm{font-family:Georgia,"Times New Roman",serif;font-size:clamp(15px,2.2vw,22px)}
+.ds{font-size:12px;color:var(--mute);width:100%}
+.cv{position:relative;flex:1;min-height:0}.cv canvas{position:absolute;inset:0;width:100%;height:100%}
+.val{font-family:Georgia,serif;font-size:clamp(12px,1.5vw,15px);color:var(--mute);text-align:center}.val b{color:var(--ink)}
+.bar{display:flex;align-items:center;gap:12px;padding-top:8px;font-size:14px;color:var(--mute)}
+.bar label{flex:1;display:flex;align-items:center;gap:10px}.bar label b{color:var(--ink);min-width:3ch}
+input[type=range]{flex:1;accent-color:var(--o)}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 14px;border-radius:999px;cursor:pointer}
+@media(max-width:700px){.row{grid-template-columns:1fr;grid-template-rows:repeat(var(--n),minmax(0,1fr));gap:6px}.ds{display:none}.p{padding:6px 10px}}
+@media(max-height:520px){.sub{display:none}}</style></head><body>
+<h1>Waves: Superposition, Beats &amp; Standing Waves</h1><p class="sub">Waves simply add. <b>Close frequencies make beats</b>, and two opposite waves make a standing wave.</p><div class="row" id="row"></div>
+<div class="bar"><label>Frequency f₂ <b id="nv"></b><input id="n" type="range" min="3" max="7" step="0.1" value="5.8"></label><button id="au">Auto: on</button></div>
+<script>
+var $=function(i){return document.getElementById(i)},PN=[["o", "Two waves", "y₁ , y₂", "Wave 1 has f₁ = 5. Move f₂ to change wave 2."], ["t", "Their sum", "y₁ + y₂", "When f₂ ≈ f₁ the loudness swells and fades: beats."], ["v", "Standing wave", "sin(nπx/L) cos ωt", "Two opposite waves leave fixed nodes."]];
+$('row').style.setProperty('--n',PN.length);
+$('row').innerHTML=PN.map(function(p,i){return '<section class="p"><div class="hd"><h2 style="color:var(--'+p[0]+')">'+p[1]+'</h2><span class="fm">'+p[2]+'</span><span class="ds">'+p[3]+'</span></div><div class="cv"><canvas id="c'+i+'"></canvas></div><div class="val" id="v'+i+'"></div></section>'}).join('');
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+var cvs=PN.map(function(p,i){return $('c'+i)}),cx=cvs.map(function(c){return c.getContext('2d')}),sz=PN.map(function(){return[300,300]});
+var ro=new ResizeObserver(function(){cvs.forEach(function(c,i){var b=c.parentNode.getBoundingClientRect(),d=window.devicePixelRatio||1;sz[i]=[b.width,b.height];c.width=Math.max(1,b.width*d);c.height=Math.max(1,b.height*d);cx[i].setTransform(d,0,0,d,0,0)})});
+cvs.forEach(function(c){ro.observe(c.parentNode)});
+function txt(c,s,x,y,col,z,al){c.fillStyle=col;c.font='italic '+(z||14)+'px Georgia,serif';c.textAlign=al||'center';c.fillText(s,x,y)}
+function arrow(c,x1,y1,x2,y2,col,lw){if(Math.hypot(x2-x1,y2-y1)<4)return;c.save();c.strokeStyle=col;c.fillStyle=col;c.lineWidth=lw||2.5;c.setLineDash([]);c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();var a=Math.atan2(y2-y1,x2-x1),k=Math.min(10,3+lw*2);c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-k*Math.cos(a-.4),y2-k*Math.sin(a-.4));c.lineTo(x2-k*Math.cos(a+.4),y2-k*Math.sin(a+.4));c.fill();c.restore()}
+var F1=5,CS=.12;
+function pl(c,w,h,fn,col,lw,ym){var l=8,r=8;c.strokeStyle=col;c.lineWidth=lw;c.beginPath();for(var i=0;i<=320;i++){var x=2*i/320,y=fn(x),px=l+x/2*(w-l-r),py=h/2-y*(h/2-12)/ym;i?c.lineTo(px,py):c.moveTo(px,py)}c.stroke()}
+function ax(c,w,h,C){c.strokeStyle=C.line;c.lineWidth=1.5;c.beginPath();c.moveTo(8,h/2);c.lineTo(w-8,h/2);c.stroke()}
+var DR=[function(c,w,h,f2,T,C){ax(c,w,h,C);pl(c,w,h,function(x){return Math.sin(2*Math.PI*F1*(x-CS*T))},C.o,2.5,2.2);pl(c,w,h,function(x){return Math.sin(2*Math.PI*f2*(x-CS*T))},C.t,2.5,2.2);
+txt(c,'f₁ = 5',12,16,C.o,14,'left');txt(c,'f₂ = '+f2.toFixed(1),12,34,C.t,14,'left');return 'wave 1: f₁ = <b>5.0</b> · wave 2: f₂ = <b>'+f2.toFixed(1)+'</b>'},
+function(c,w,h,f2,T,C){ax(c,w,h,C);var env=function(x){return 2*Math.abs(Math.cos(Math.PI*(F1-f2)*(x-CS*T)))};
+c.save();c.setLineDash([6,5]);pl(c,w,h,env,C.mute,1.8,2.2);pl(c,w,h,function(x){return -env(x)},C.mute,1.8,2.2);c.restore();
+pl(c,w,h,function(x){return Math.sin(2*Math.PI*F1*(x-CS*T))+Math.sin(2*Math.PI*f2*(x-CS*T))},C.t,2.8,2.2);
+var d=Math.abs(F1-f2);return 'beat frequency |f₁ − f₂| = <b>'+d.toFixed(1)+'</b>'+(d<.05?' · identical: amplitude doubles':'')},
+function(c,w,h,f2,T,C){ax(c,w,h,C);var n=Math.max(1,Math.round(f2)),ph=Math.cos(T*.8*n);
+c.save();c.setLineDash([4,5]);pl(c,w,h,function(x){return Math.sin(n*Math.PI*x/2)},C.line,1.5,1.3);pl(c,w,h,function(x){return -Math.sin(n*Math.PI*x/2)},C.line,1.5,1.3);c.restore();
+pl(c,w,h,function(x){return Math.sin(n*Math.PI*x/2)*ph},C.v,3.5,1.3);
+for(var k=0;k<=n;k++){c.fillStyle=C.o;c.beginPath();c.arc(8+k/n*(w-16),h/2,4.5,0,7);c.fill()}
+return 'harmonic n = <b>'+n+'</b> · '+(n+1)+' nodes (orange), fₙ = n·f₀'}];
+function AU(T){return 5+2*Math.sin(T*.25)}
+var T=0,last=0,auto=true;
+$('au').onclick=function(){auto=!auto;this.textContent='Auto: '+(auto?'on':'off')};
+$('n').addEventListener('input',function(){auto=false;$('au').textContent='Auto: off'});
+function fr(ts){var dt=Math.min(.05,last?(ts-last)/1000:0);last=ts;T+=dt;if(auto)$('n').value=AU(T);var v=+$('n').value;$('nv').textContent=v.toFixed(1);
+var C={o:css('--o'),t:css('--t'),v:css('--v'),ink:css('--ink'),mute:css('--mute'),card:css('--card'),line:css('--line')};
+for(var i=0;i<DR.length;i++){cx[i].clearRect(0,0,sz[i][0],sz[i][1]);$('v'+i).innerHTML=DR[i](cx[i],sz[i][0],sz[i][1],v,T,C,dt)}
+requestAnimationFrame(fr)}
+requestAnimationFrame(fr);
+</script></body></html>
