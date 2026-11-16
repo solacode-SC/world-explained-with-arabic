@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>The Double Slit: Wave and Particle</title><style>:root{--bg:#f6f1e6;--card:#efe8d8;--ink:#1c2a44;--mute:#52607a;--o:#d9572b;--t:#1a9aa8;--v:#7c5cc4;--line:#c9bfa8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--v:#b79cff;--line:#2c3656;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1320;--card:#161d30;--ink:#eef1f8;--mute:#9aa6c2;--o:#ff8a52;--t:#3fd0de;--v:#b79cff;--line:#2c3656;color-scheme:dark}
+*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;padding:10px 12px}
+h1{font-size:clamp(20px,3.6vw,34px);text-align:center;margin:0;letter-spacing:-.02em;line-height:1.15}
+.sub{text-align:center;color:var(--mute);font-size:clamp(12px,1.7vw,16px);margin:2px 0 8px}.sub b{color:var(--o)}
+.row{flex:1;min-height:0;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:10px}
+.p{background:var(--card);border-radius:16px;padding:8px 12px;display:flex;flex-direction:column;min-height:0;min-width:0}
+.hd{display:flex;align-items:baseline;gap:4px 10px;flex-wrap:wrap}.hd h2{margin:0;font-size:clamp(14px,1.9vw,18px)}
+.fm{font-family:Georgia,"Times New Roman",serif;font-size:clamp(15px,2.2vw,22px)}
+.ds{font-size:12px;color:var(--mute);width:100%}
+.cv{position:relative;flex:1;min-height:0}.cv canvas{position:absolute;inset:0;width:100%;height:100%}
+.val{font-family:Georgia,serif;font-size:clamp(12px,1.5vw,15px);color:var(--mute);text-align:center}.val b{color:var(--ink)}
+.bar{display:flex;align-items:center;gap:12px;padding-top:8px;font-size:14px;color:var(--mute)}
+.bar label{flex:1;display:flex;align-items:center;gap:10px}.bar label b{color:var(--ink);min-width:3ch}
+input[type=range]{flex:1;accent-color:var(--o)}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 14px;border-radius:999px;cursor:pointer}
+@media(max-width:700px){.row{grid-template-columns:1fr;grid-template-rows:repeat(var(--n),minmax(0,1fr));gap:6px}.ds{display:none}.p{padding:6px 10px}}
+@media(max-height:520px){.sub{display:none}}</style></head><body>
+<h1>The Double Slit: Wave and Particle</h1><p class="sub">Send electrons <b>one at a time</b> and they still build an interference pattern. Each one passes through both slits as a wave.</p><div class="row" id="row"></div>
+<div class="bar"><label>Slit gap d (in λ) <b id="nv"></b><input id="n" type="range" min="1.5" max="6" step="0.25" value="3.5"></label><button id="au">Auto: on</button></div>
+<script>
+var $=function(i){return document.getElementById(i)},PN=[["o", "As a wave", "d sinθ = mλ", "Waves from both slits add: bright where the crests meet."], ["t", "One at a time", "single electrons", "Each lands at a single point, apparently at random."], ["v", "The pattern", "I ∝ cos²(πd sinθ/λ)", "The probability of landing follows the wave."]];
+$('row').style.setProperty('--n',PN.length);
+$('row').innerHTML=PN.map(function(p,i){return '<section class="p"><div class="hd"><h2 style="color:var(--'+p[0]+')">'+p[1]+'</h2><span class="fm">'+p[2]+'</span><span class="ds">'+p[3]+'</span></div><div class="cv"><canvas id="c'+i+'"></canvas></div><div class="val" id="v'+i+'"></div></section>'}).join('');
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+var cvs=PN.map(function(p,i){return $('c'+i)}),cx=cvs.map(function(c){return c.getContext('2d')}),sz=PN.map(function(){return[300,300]});
+var ro=new ResizeObserver(function(){cvs.forEach(function(c,i){var b=c.parentNode.getBoundingClientRect(),d=window.devicePixelRatio||1;sz[i]=[b.width,b.height];c.width=Math.max(1,b.width*d);c.height=Math.max(1,b.height*d);cx[i].setTransform(d,0,0,d,0,0)})});
+cvs.forEach(function(c){ro.observe(c.parentNode)});
+function txt(c,s,x,y,col,z,al){c.fillStyle=col;c.font='italic '+(z||14)+'px Georgia,serif';c.textAlign=al||'center';c.fillText(s,x,y)}
+function arrow(c,x1,y1,x2,y2,col,lw){if(Math.hypot(x2-x1,y2-y1)<4)return;c.save();c.strokeStyle=col;c.fillStyle=col;c.lineWidth=lw||2.5;c.setLineDash([]);c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();var a=Math.atan2(y2-y1,x2-x1),k=Math.min(10,3+lw*2);c.beginPath();c.moveTo(x2,y2);c.lineTo(x2-k*Math.cos(a-.4),y2-k*Math.sin(a-.4));c.lineTo(x2-k*Math.cos(a+.4),y2-k*Math.sin(a+.4));c.fill();c.restore()}
+var LAM=8,LL=240,SY=[],HD=-1;
+function sinc(x){return Math.abs(x)<1e-6?1:Math.sin(x)/x}
+function inten(d,y){var s=y/Math.sqrt(y*y+LL*LL),a=Math.PI*1.5*s;return Math.pow(Math.cos(Math.PI*d*s),2)*Math.pow(sinc(a),2)}
+var DR=[function(c,w,h,d,T,C){var x0=w*.22,x1=w*.88,cy=h/2,dp=d*LAM,k=2*Math.PI/LAM,om=T*5,cell=5,g=4;
+for(var x=x0+cell;x<x1;x+=cell)for(var y=0;y<h;y+=cell){var r1=Math.hypot(x-x0,y-(cy-dp/2)),r2=Math.hypot(x-x0,y-(cy+dp/2)),u=(Math.cos(k*r1-om)/Math.sqrt(Math.max(r1,6))+Math.cos(k*r2-om)/Math.sqrt(Math.max(r2,6)))*2;
+c.fillStyle=u>0?C.o:C.t;c.globalAlpha=Math.min(.9,Math.abs(u)*.55);c.fillRect(x,y,cell,cell)}c.globalAlpha=1;
+c.fillStyle=C.ink;c.fillRect(x0-3,0,6,cy-dp/2-g);c.fillRect(x0-3,cy-dp/2+g,6,dp-2*g);c.fillRect(x0-3,cy+dp/2+g,6,h-(cy+dp/2+g));
+for(var y=0;y<h;y+=3){var I=inten(d,(y-cy)*LL/(x1-x0));c.fillStyle=C.ink;c.fillRect(x1+3,y,I*(w-x1-6),3)}
+return 'bright where the path difference is a whole number of λ'},
+function(c,w,h,d,T,C){if(d!=HD){HD=d;SY=[]}var n=0;while(n<6){var y=(Math.random()-.5)*h;if(Math.random()<inten(d,y)){SY.push([Math.random(),y]);n++}}if(SY.length>3500)SY.splice(0,200);
+c.strokeStyle=C.line;c.lineWidth=2;c.strokeRect(10,2,w-20,h-4);
+c.fillStyle=C.t;c.globalAlpha=.85;SY.forEach(function(p){c.beginPath();c.arc(14+p[0]*(w-28),h/2+p[1],1.8,0,7);c.fill()});c.globalAlpha=1;
+return '<b>'+SY.length+'</b> electrons landed, one at a time'},
+function(c,w,h,d,T,C){var l=16,r=16,H0=h-24,X=function(y){return l+(y/h+.5)*(w-l-r)},Y=function(v){return H0-v*(H0-16)};
+c.strokeStyle=C.line;c.lineWidth=1.5;c.beginPath();c.moveTo(l,H0);c.lineTo(w-r,H0);c.stroke();
+c.beginPath();for(var i=0;i<=300;i++){var y=(i/300-.5)*h,v=inten(d,y);i?c.lineTo(X(y),Y(v)):c.moveTo(X(y),Y(v))}c.lineTo(w-r,H0);c.lineTo(l,H0);c.closePath();c.fillStyle=C.v;c.globalAlpha=.3;c.fill();c.globalAlpha=1;c.strokeStyle=C.v;c.lineWidth=3;c.stroke();
+var dy=LL/d;c.strokeStyle=C.o;c.lineWidth=2;c.beginPath();c.moveTo(X(0),Y(1)-10);c.lineTo(X(dy),Y(1)-10);c.stroke();txt(c,'Δy',X(dy/2),Y(1)-16,C.o,14);
+return 'fringe spacing Δy = λL/d = <b>'+dy.toFixed(0)+' px</b> · wider gap, finer fringes'}];
+function AU(T){return 3.75+2*Math.sin(T*.08)}
+var T=0,last=0,auto=true;
+$('au').onclick=function(){auto=!auto;this.textContent='Auto: '+(auto?'on':'off')};
+$('n').addEventListener('input',function(){auto=false;$('au').textContent='Auto: off'});
+function fr(ts){var dt=Math.min(.05,last?(ts-last)/1000:0);last=ts;T+=dt;if(auto)$('n').value=AU(T);var v=+$('n').value;$('nv').textContent=v.toFixed(2);
+var C={o:css('--o'),t:css('--t'),v:css('--v'),ink:css('--ink'),mute:css('--mute'),card:css('--card'),line:css('--line')};
+for(var i=0;i<DR.length;i++){cx[i].clearRect(0,0,sz[i][0],sz[i][1]);$('v'+i).innerHTML=DR[i](cx[i],sz[i][0],sz[i][1],v,T,C,dt)}
+requestAnimationFrame(fr)}
+requestAnimationFrame(fr);
+</script></body></html>
