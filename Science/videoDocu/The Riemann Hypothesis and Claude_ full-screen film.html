@@ -1,0 +1,2332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Riemann Hypothesis and Claude — Full-Screen Documentary Film</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05070c;
+    --glass: rgba(10, 14, 24, 0.68);
+    --border: rgba(255, 255, 255, 0.12);
+    --gold: #FFD866;
+    --cyan: #58C4DD;
+    --text: #f3f6fc;
+    --muted: #9aa5bc;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+  }
+  body.hide-cursor { cursor: none; }
+  canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Intro Overlay */
+  #intro {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 42%, rgba(10, 16, 30, 0.42) 0%, rgba(5, 7, 12, 0.86) 72%, rgba(5, 7, 12, 0.96) 100%);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    transition: opacity 1.1s cubic-bezier(0.22, 1, 0.36, 1), visibility 1.1s;
+    padding: 24px;
+  }
+  #intro.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .intro-kicker {
+    font-size: 12px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 18px;
+    opacity: 0.9;
+  }
+  .intro-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(42px, 6.2vw, 84px);
+    line-height: 1.05;
+    margin: 0 0 14px;
+    color: #f8faff;
+    text-shadow: 0 0 42px rgba(88, 196, 221, 0.38);
+  }
+  .intro-sub {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: var(--muted);
+    margin: 0 0 38px;
+    font-weight: 400;
+  }
+  .intro-rule {
+    width: 110px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 216, 102, 0.8), transparent);
+    margin: 0 auto 36px;
+  }
+  #startBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 36px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 216, 102, 0.45);
+    background: linear-gradient(135deg, rgba(255, 216, 102, 0.16), rgba(88, 196, 221, 0.14));
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 0 36px rgba(255, 216, 102, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s, background 0.3s, border-color 0.3s;
+  }
+  #startBtn:hover {
+    transform: translateY(-2px) scale(1.03);
+    border-color: rgba(255, 216, 102, 0.85);
+    background: linear-gradient(135deg, rgba(255, 216, 102, 0.26), rgba(88, 196, 221, 0.22));
+    box-shadow: 0 0 54px rgba(255, 216, 102, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  #startBtn svg { width: 16px; height: 16px; fill: var(--gold); }
+  .intro-meta {
+    margin-top: 26px;
+    font-size: 12px;
+    color: rgba(154, 165, 188, 0.72);
+    letter-spacing: 0.08em;
+  }
+
+  /* Cinema HUD */
+  #hudTop {
+    position: fixed;
+    top: 22px;
+    left: 28px;
+    right: 28px;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+  #hudTop.visible { opacity: 1; transform: translateY(0); }
+  .chapter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #dfe6f5;
+  }
+  .chapter-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan);
+  }
+  .voice-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .eq-bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 11px;
+  }
+  .eq-bars span {
+    width: 2px;
+    background: var(--gold);
+    border-radius: 2px;
+    height: 3px;
+    transition: height 0.12s;
+  }
+  .voice-badge.speaking .eq-bars span:nth-child(1) { animation: eq1 0.55s infinite ease-in-out; }
+  .voice-badge.speaking .eq-bars span:nth-child(2) { animation: eq2 0.43s infinite ease-in-out; }
+  .voice-badge.speaking .eq-bars span:nth-child(3) { animation: eq3 0.62s infinite ease-in-out; }
+  @keyframes eq1 { 0%,100%{height:3px} 50%{height:11px} }
+  @keyframes eq2 { 0%,100%{height:10px} 50%{height:3px} }
+  @keyframes eq3 { 0%,100%{height:4px} 50%{height:9px} }
+
+  #hud {
+    position: fixed;
+    left: 28px;
+    right: 28px;
+    bottom: 20px;
+    z-index: 20;
+    padding: 12px 18px 14px;
+    border-radius: 16px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translateY(14px);
+    pointer-events: none;
+    transition: opacity 0.45s ease, transform 0.45s ease;
+  }
+  #hud.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .timeline-wrap {
+    position: relative;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .timeline-track {
+    position: relative;
+    width: 100%;
+    height: 4px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.14);
+    overflow: visible;
+    transition: height 0.18s;
+  }
+  .timeline-wrap:hover .timeline-track { height: 6px; }
+  .timeline-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0%;
+    border-radius: 99px;
+    background: var(--cyan);
+    box-shadow: 0 0 14px var(--cyan);
+  }
+  .timeline-thumb {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.85);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.18s;
+  }
+  .timeline-wrap:hover .timeline-thumb { transform: translate(-50%, -50%) scale(1); }
+  .chapter-tick {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+  #hoverTip {
+    position: absolute;
+    bottom: 22px;
+    transform: translateX(-50%);
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(8, 11, 18, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 11px;
+    color: #eef3fc;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 11px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.05);
+    color: #e6ecf8;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+  .btn.active {
+    background: rgba(255, 216, 102, 0.16);
+    border-color: rgba(255, 216, 102, 0.4);
+    color: var(--gold);
+  }
+  .btn.off {
+    opacity: 0.45;
+  }
+  .btn svg { width: 14px; height: 14px; fill: currentColor; }
+  .time-readout {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 6px;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- Cinematic Start Screen -->
+<div id="intro">
+  <div class="intro-kicker">A Mathematical Documentary</div>
+  <h1 class="intro-title">The Riemann Hypothesis</h1>
+  <p class="intro-sub">A claimed proof, built with Claude &middot; November 2026</p>
+  <div class="intro-rule"></div>
+  <button id="startBtn" type="button">
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <span>Play Film with Narration</span>
+  </button>
+  <div class="intro-meta">4 min 10 sec &nbsp;&middot;&nbsp; Documentary Voice-Over &amp; Ambient Score &nbsp;&middot;&nbsp; Press F for Fullscreen</div>
+</div>
+
+<!-- Auto-Hiding Cinema HUD -->
+<div id="hudTop">
+  <div class="chapter-pill">
+    <span class="chapter-dot" id="chDot"></span>
+    <span id="chLabel">I · The Mystery of Primes</span>
+  </div>
+  <div class="voice-badge" id="voiceBadge">
+    <div class="eq-bars"><span></span><span></span><span></span></div>
+    <span id="voiceLabel">Narrator</span>
+  </div>
+</div>
+
+<div id="hud">
+  <div class="timeline-wrap" id="timeline">
+    <div id="hoverTip">00:00</div>
+    <div class="timeline-track" id="track">
+      <div class="timeline-fill" id="fill"></div>
+      <div class="timeline-thumb" id="thumb"></div>
+    </div>
+  </div>
+  <div class="controls-row">
+    <div class="ctrl-group">
+      <button class="btn" id="playPauseBtn" title="Play / Pause (Space)">
+        <svg id="ppIcon" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+      </button>
+      <button class="btn" id="prevChBtn" title="Previous Chapter (←)">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+      <button class="btn" id="nextChBtn" title="Next Chapter (→)">
+        <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg>
+      </button>
+      <span class="time-readout" id="timeReadout">00:00 / 04:10</span>
+    </div>
+    <div class="ctrl-group">
+      <button class="btn active" id="voiceBtn" title="Toggle Documentary Narration (V)">Voice</button>
+      <button class="btn active" id="musicBtn" title="Toggle Ambient Score (M)">Score</button>
+      <button class="btn active" id="ccBtn" title="Toggle Subtitles (C)">CC</button>
+      <button class="btn" id="fsBtn" title="Fullscreen (F)">
+        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const canvas = document.getElementById('c');
+  const g = canvas.getContext('2d', { alpha: false });
+
+  // Logical coordinate system 1600x900
+  let W = 1600, H = 900, dpr = 1, sc = 1, ox = 0, oy = 0;
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    sc = Math.min(W / 1600, H / 900);
+    ox = (W - 1600 * sc) / 2;
+    oy = (H - 900 * sc) / 2;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Color palette
+  const COL = {
+    B: '#58C4DD',
+    Y: '#FFD866',
+    G: '#83C167',
+    R: '#FC6255',
+    P: '#C77DFF',
+    O: '#FF9F43',
+    T: '#2EE6D6',
+    D: '#98a4bc',
+    F: '#f4f7fd',
+    BG: '#05070c'
+  };
+
+  // Easing & math utilities
+  const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const fd = (t, a, b) => cl((t - a) / (b - a));
+  const smooth = x => { x = cl(x); return x * x * (3 - 2 * x); };
+  const eo3 = x => { x = cl(x); return 1 - Math.pow(1 - x, 3); };
+  const eo4 = x => { x = cl(x); return 1 - Math.pow(1 - x, 4); };
+  const eo5 = x => { x = cl(x); return 1 - Math.pow(1 - x, 5); };
+  const eoExp = x => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+  const eio5 = x => { x = cl(x); return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2; };
+  const springOut = x => {
+    x = cl(x);
+    if (x === 0 || x === 1) return x;
+    return 1 + Math.pow(2, -9 * x) * Math.sin((x * 10 - 0.75) * (2 * Math.PI / 3)) * 0.35;
+  };
+  const lerpRGB = (c1, c2, t) => [
+    Math.round(lerp(c1[0], c2[0], t)),
+    Math.round(lerp(c1[1], c2[1], t)),
+    Math.round(lerp(c1[2], c2[2], t))
+  ];
+
+  // Fonts
+  const SERIF = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
+  const SANS = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+  const MONO = "'JetBrains Mono', ui-monospace, monospace";
+
+  // Precompute primes & Ulam spiral
+  const MAX_N = 2600;
+  const SV = new Uint8Array(MAX_N).fill(1);
+  SV[0] = SV[1] = 0;
+  for (let i = 2; i * i < MAX_N; i++) if (SV[i]) for (let j = i * i; j < MAX_N; j += i) SV[j] = 0;
+  const PL = [];
+  for (let i = 2; i < 600; i++) if (SV[i]) PL.push(i);
+
+  // Ulam spiral coordinates (45x45 = 2025)
+  const ULAM_N = 1849; // 43x43
+  const ULAM = [[0, 0]];
+  {
+    let x = 0, y = 0, d = 0, len = 1;
+    const dirs = [[1, 0], [0, -1], [-1, 0], [0, 1]];
+    while (ULAM.length < ULAM_N) {
+      for (let r = 0; r < 2; r++) {
+        for (let k = 0; k < len && ULAM.length < ULAM_N; k++) {
+          x += dirs[d][0];
+          y += dirs[d][1];
+          ULAM.push([x, y]);
+        }
+        d = (d + 1) % 4;
+      }
+      len++;
+    }
+  }
+
+  // Detect notable prime-rich diagonals in Ulam spiral for subtle golden constellation lines
+  const DIAGONALS = [];
+  {
+    const primeMap = new Map();
+    for (let n = 1; n <= ULAM_N; n++) {
+      if (SV[n]) primeMap.set(`${ULAM[n - 1][0]},${ULAM[n - 1][1]}`, n);
+    }
+    const seen = new Set();
+    const dirs = [[1, 1], [1, -1]];
+    for (let n = 2; n <= ULAM_N; n++) {
+      if (!SV[n]) continue;
+      const [sx, sy] = ULAM[n - 1];
+      for (const [dx, dy] of dirs) {
+        const prevKey = `${sx - dx},${sy - dy}`;
+        if (primeMap.has(prevKey)) continue;
+        const pts = [[sx, sy, n]];
+        let cx = sx + dx, cy = sy + dy, gaps = 0;
+        while (Math.abs(cx) <= 21 && Math.abs(cy) <= 21) {
+          const hit = primeMap.get(`${cx},${cy}`);
+          if (hit) { pts.push([cx, cy, hit]); gaps = 0; }
+          else { gaps++; if (gaps > 1) break; }
+          cx += dx; cy += dy;
+        }
+        if (pts.length >= 6) {
+          const id = `${pts[0][2]}-${pts[pts.length - 1][2]}`;
+          if (!seen.has(id)) {
+            seen.add(id);
+            DIAGONALS.push({
+              x1: pts[0][0], y1: pts[0][1],
+              x2: pts[pts.length - 1][0], y2: pts[pts.length - 1][1],
+              count: pts.length
+            });
+          }
+        }
+      }
+    }
+    DIAGONALS.sort((a, b) => b.count - a.count);
+    DIAGONALS.splice(14); // keep top 14 richest prime diagonals
+  }
+
+  // Precompute Euler sum & product tables for smooth continuous interpolation
+  const EULER_MAX = 120;
+  const ESUM = new Float64Array(EULER_MAX + 1);
+  const EPROD = new Float64Array(EULER_MAX + 1);
+  {
+    let s = 0, p = 1;
+    ESUM[0] = 0; EPROD[0] = 1;
+    for (let n = 1; n <= EULER_MAX; n++) {
+      s += 1 / (n * n);
+      if (SV[n]) p /= 1 - 1 / (n * n);
+      ESUM[n] = s;
+      EPROD[n] = p;
+    }
+  }
+  function eulerAt(v) {
+    const f = cl(v, 1, EULER_MAX);
+    const i = Math.floor(f);
+    const r = f - i;
+    const j = Math.min(EULER_MAX, i + 1);
+    return [lerp(ESUM[i], ESUM[j], r), lerp(EPROD[i], EPROD[j], r)];
+  }
+
+  // First 6 non-trivial Riemann zeros (imaginary parts)
+  const ZEROS = [14.1347, 21.0220, 25.0109, 30.4249, 32.9351, 37.5862];
+  const WAVE_COLS = [COL.B, COL.G, COL.Y, COL.R, COL.P, COL.O];
+
+  // Parallax cosmic starfield & drifting primes
+  const STARS = Array.from({ length: 130 }, (_, i) => {
+    const h1 = Math.sin(i * 127.1 + 311.7) * 43758.5453;
+    const h2 = Math.sin(i * 269.5 + 183.3) * 43758.5453;
+    const h3 = Math.sin(i * 419.2 + 97.1) * 43758.5453;
+    const r1 = h1 - Math.floor(h1), r2 = h2 - Math.floor(h2), r3 = h3 - Math.floor(h3);
+    return {
+      x: r1 * 1600,
+      y: r2 * 900,
+      z: 0.25 + r3 * 0.95,
+      size: 0.7 + r3 * 1.9,
+      phase: r1 * Math.PI * 2,
+      twinkle: 0.6 + r2 * 1.8
+    };
+  });
+  const FLOAT_PRIMES = Array.from({ length: 24 }, (_, k) => ({
+    val: String(PL[(k * 11 + 3) % PL.length]),
+    x: ((k * 617 + 130) % 1520) + 40,
+    y0: (k * 193) % 1020,
+    size: 26 + (k % 4) * 10,
+    speed: 10 + (k % 5) * 4.5,
+    alpha: 0.032 + (k % 3) * 0.015
+  }));
+
+  // Drawing helpers
+  const glow = (col, blur) => { g.shadowColor = col; g.shadowBlur = blur; };
+  const noGlow = () => { g.shadowBlur = 0; g.shadowColor = 'transparent'; };
+
+  function drawText(str, x, y, size, col, a = 1, align = 'center', fontSpec = '', glowCol = null, glowBlur = 18) {
+    if (a <= 0.002) return;
+    g.save();
+    g.globalAlpha = cl(a);
+    g.fillStyle = col;
+    g.font = fontSpec ? `${fontSpec} ${size}px ${SERIF}` : `${size}px ${SERIF}`;
+    g.textAlign = align;
+    g.textBaseline = 'alphabetic';
+    if (glowCol) glow(glowCol, glowBlur);
+    g.fillText(str, x, y);
+    g.restore();
+  }
+
+  function drawSans(str, x, y, size, col, a = 1, align = 'center', weight = '400', glowCol = null) {
+    if (a <= 0.002) return;
+    g.save();
+    g.globalAlpha = cl(a);
+    g.fillStyle = col;
+    g.font = `${weight} ${size}px ${SANS}`;
+    g.textAlign = align;
+    if (glowCol) glow(glowCol, 14);
+    g.fillText(str, x, y);
+    g.restore();
+  }
+
+  function drawMono(str, x, y, size, col, a = 1, align = 'left', glowCol = null) {
+    if (a <= 0.002) return;
+    g.save();
+    g.globalAlpha = cl(a);
+    g.fillStyle = col;
+    g.font = `500 ${size}px ${MONO}`;
+    g.textAlign = align;
+    if (glowCol) glow(glowCol, 14);
+    g.fillText(str, x, y);
+    g.restore();
+  }
+
+  function drawLine(x1, y1, x2, y2, col, wd = 2, p = 1, a = 1, glowCol = null, glowBlur = 14) {
+    if (a <= 0.002 || p <= 0.001) return;
+    g.save();
+    g.globalAlpha = cl(a);
+    g.strokeStyle = col;
+    g.lineWidth = wd;
+    g.lineCap = 'round';
+    if (glowCol) glow(glowCol, glowBlur);
+    g.beginPath();
+    g.moveTo(x1, y1);
+    g.lineTo(lerp(x1, x2, cl(p)), lerp(y1, y2, cl(p)));
+    g.stroke();
+    g.restore();
+  }
+
+  function drawDot(x, y, r, col, a = 1, blur = 20) {
+    if (a <= 0.002 || r <= 0.1) return;
+    g.save();
+    g.globalAlpha = cl(a);
+    if (blur > 0) glow(col, blur);
+    g.fillStyle = col;
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.fill();
+    g.restore();
+  }
+
+  function roundRectPath(x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r);
+    g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r);
+    g.arcTo(x, y, x + w, y, r);
+    g.closePath();
+  }
+
+  function drawHairline(cx, y, halfW, col, p, a) {
+    if (p <= 0.001 || a <= 0.002) return;
+    const hw = halfW * eo4(p);
+    g.save();
+    g.globalAlpha = cl(a);
+    const grad = g.createLinearGradient(cx - hw, y, cx + hw, y);
+    grad.addColorStop(0, 'rgba(255,255,255,0)');
+    grad.addColorStop(0.5, col);
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.strokeStyle = grad;
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.moveTo(cx - hw, y);
+    g.lineTo(cx + hw, y);
+    g.stroke();
+    g.restore();
+  }
+
+  // =========================================================================
+  // SCENE DEFINITIONS & SYNCHRONIZED DOCUMENTARY NARRATION TIMING
+  // =========================================================================
+  const SCENES = [
+    {
+      id: 0,
+      title: 'I · The Mystery of Primes',
+      d: 38.0,
+      rgb: [88, 196, 221],
+      hex: COL.B,
+      chord: [146.83, 220.00, 261.63, 329.63], // Dm9
+      render: scene1,
+      cues: [
+        { id: 's1_0', t: 1.4, dur: 7.06, cap: 'The Riemann Hypothesis — the most celebrated open problem in mathematics.' },
+        { id: 's1_1', t: 10.0, dur: 10.70, cap: 'Arrange the integers in a spiral, and the primes scatter like starlight — seemingly random.' },
+        { id: 's1_2', t: 22.2, dur: 14.11, cap: 'Yet ghostly diagonals emerge. The hypothesis declares: the primes are as regular as mathematics allows.' }
+      ]
+    },
+    {
+      id: 1,
+      title: 'II · Euler’s Golden Bridge',
+      d: 40.0,
+      rgb: [131, 193, 103],
+      hex: COL.G,
+      chord: [196.00, 246.94, 293.66, 369.99], // Gmaj7
+      render: scene2,
+      cues: [
+        { id: 's2_0', t: 1.2, dur: 11.18, cap: 'Euler’s bridge: a sum over every integer equals an infinite product built solely from primes.' },
+        { id: 's2_1', t: 13.8, dur: 10.44, cap: 'Watch both sides converge in lockstep — bound together by unique prime factorization.' },
+        { id: 's2_2', t: 25.8, dur: 12.17, cap: 'At s = 2, both converge to π²/6. Riemann extended this bridge across the complex plane.' }
+      ]
+    },
+    {
+      id: 2,
+      title: 'III · The Critical Strip',
+      d: 41.0,
+      rgb: [199, 125, 255],
+      hex: COL.P,
+      chord: [116.54, 174.61, 220.00, 293.66], // Bbmaj7
+      render: scene3,
+      cues: [
+        { id: 's3_0', t: 1.2, dur: 10.34, cap: 'Inside the critical strip, ζ(s) vanishes at infinitely many points — its non-trivial zeros.' },
+        { id: 's3_1', t: 13.0, dur: 13.13, cap: 'Every zero ever computed — trillions of them — lies precisely on the critical line Re(s) = ½.' },
+        { id: 's3_2', t: 27.8, dur: 11.45, cap: 'The hypothesis: none ever leaves the line. Even a single exception would break it.' }
+      ]
+    },
+    {
+      id: 3,
+      title: 'IV · The Music of the Primes',
+      d: 38.0,
+      rgb: [255, 159, 67],
+      hex: COL.O,
+      chord: [174.61, 220.00, 261.63, 329.63], // Fmaj7
+      render: scene4,
+      cues: [
+        { id: 's4_0', t: 1.2, dur: 10.99, cap: 'Each zero acts like a frequency — adding a pure wave to the prime-counting error.' },
+        { id: 's4_1', t: 13.6, dur: 11.18, cap: 'Layer wave upon wave, and interference sharpens the silhouette of the primes.' },
+        { id: 's4_2', t: 26.2, dur: 9.67, cap: 'With all zeros on the line, the error remains tightly bound near √x — as small as possible.' }
+      ]
+    },
+    {
+      id: 4,
+      title: 'V · The Claimed Route',
+      d: 45.0,
+      rgb: [46, 230, 214],
+      hex: COL.T,
+      chord: [130.81, 196.00, 246.94, 293.66], // Cmaj9
+      render: scene5,
+      cues: [
+        { id: 's5_0', t: 1.2, dur: 11.42, cap: 'Nov 2026: Levent Alpöge announces a claimed proof, developed with Claude.' },
+        { id: 's5_1', t: 14.0, dur: 10.10, cap: 'The route pairs Stepanov’s method with a sign-only argument avoiding delicate cancellation.' },
+        { id: 's5_2', t: 25.5, dur: 10.18, cap: 'Chained theta lifts (~√X) build multiplicity; positivity determinants forbid zeros off the line.' },
+        { id: 's5_3', t: 36.8, dur: 7.15, cap: 'The entire argument is claimed formalized in Lean, with no extra assumptions.' }
+      ]
+    },
+    {
+      id: 5,
+      title: 'VI · Where Things Stand',
+      d: 48.0,
+      rgb: [252, 98, 85],
+      hex: COL.R,
+      chord: [146.83, 220.00, 293.66, 369.99], // Dmaj (open luminous resolution)
+      render: scene6,
+      cues: [
+        { id: 's6_0', t: 1.2, dur: 9.12, cap: 'The note and 14 Lean files are public; one mathematician reports the project compiles.' },
+        { id: 's6_1', t: 11.8, dur: 13.18, cap: 'Independent verification is still open: does the Lean statement truly capture RH?' },
+        { id: 's6_2', t: 26.5, dur: 18.31, cap: 'Extraordinary claims require independent verification.' }
+      ]
+    }
+  ];
+
+  const ST0 = [];
+  let TOT = 0;
+  SCENES.forEach(s => { ST0.push(TOT); TOT += s.d; });
+
+  // Build flat narration cue list with global timestamps
+  const ALL_CUES = [];
+  SCENES.forEach((s, si) => {
+    s.cues.forEach(c => {
+      ALL_CUES.push({
+        ...c,
+        scene: si,
+        globalStart: ST0[si] + c.t,
+        globalEnd: ST0[si] + c.t + c.dur,
+        audio: null,
+        failed: false
+      });
+    });
+  });
+
+  // =========================================================================
+  // SCENE 1 — ULAM SPIRAL & HIDDEN PRIME CONSTELLATIONS
+  // =========================================================================
+  function scene1(t, T) {
+    // Gentle camera pull-back as spiral grows
+    const camZoom = lerp(1.09, 0.99, eo3(fd(t, 4, 34)));
+    const camY = lerp(24, 0, eo3(fd(t, 0, 14)));
+
+    // Opening title choreography
+    const titleA = eo4(fd(t, 0.5, 3.6));
+    const titleLift = (1 - eo4(fd(t, 0.5, 3.6))) * 24;
+    drawText('The Riemann Hypothesis', 800, 108 + titleLift, 84, COL.F, titleA, 'center', 'italic 400', COL.B, 28);
+    drawHairline(800, 126, 260, COL.Y, fd(t, 1.4, 4.2), titleA * 0.85);
+    drawSans('A CLAIMED PROOF, BUILT WITH CLAUDE  ·  NOVEMBER 2026', 800, 158 + titleLift * 0.5, 14, COL.D, eo3(fd(t, 2.2, 5.2)) * 0.9, 'center', '500');
+
+    // Ulam Spiral inside camera transform
+    g.save();
+    g.translate(800, 505 + camY);
+    g.scale(camZoom, camZoom);
+
+    const spiralProg = eo3(fd(t, 5.0, 26.0));
+    const kExact = ULAM_N * spiralProg;
+    const k = Math.floor(kExact);
+    const cell = 12.6;
+
+    // Soft radial aura behind spiral center
+    const auraA = fd(t, 4.5, 10) * 0.22;
+    if (auraA > 0) {
+      const rg = g.createRadialGradient(0, 0, 0, 0, 0, 310);
+      rg.addColorStop(0, `rgba(255, 216, 102, ${auraA})`);
+      rg.addColorStop(0.55, `rgba(88, 196, 221, ${auraA * 0.4})`);
+      rg.addColorStop(1, 'rgba(5, 7, 12, 0)');
+      g.fillStyle = rg;
+      g.beginPath();
+      g.arc(0, 0, 310, 0, Math.PI * 2);
+      g.fill();
+    }
+
+    // Gossamer spiral path ribbon (first 420 steps for elegance, fading outward)
+    const ribbonN = Math.min(k, 480);
+    if (ribbonN > 1) {
+      g.save();
+      g.strokeStyle = 'rgba(88, 196, 221, 0.14)';
+      g.lineWidth = 1.1;
+      g.beginPath();
+      g.moveTo(0, 0);
+      for (let n = 2; n <= ribbonN; n++) {
+        const p = ULAM[n - 1];
+        g.lineTo(p[0] * cell, p[1] * cell);
+      }
+      g.stroke();
+      g.restore();
+    }
+
+    // Composite dust motes (batched for crisp 60fps performance)
+    if (k > 0) {
+      g.fillStyle = 'rgba(88, 196, 221, 0.19)';
+      g.beginPath();
+      for (let n = 1; n <= k; n++) {
+        if (!SV[n]) {
+          const p = ULAM[n - 1];
+          const x = p[0] * cell, y = p[1] * cell;
+          g.rect(x - 1.2, y - 1.2, 2.4, 2.4);
+        }
+      }
+      g.fill();
+    }
+
+    // Luminous golden prime-rich diagonal constellations (emerge around t=21..35)
+    const diagPhase = fd(t, 20.5, 29.0);
+    if (diagPhase > 0) {
+      DIAGONALS.forEach((d, idx) => {
+        const p = eo4(fd(t, 20.5 + idx * 0.35, 24.5 + idx * 0.35));
+        if (p <= 0) return;
+        const pulse = 0.62 + 0.38 * Math.sin(T * 1.9 + idx * 0.8);
+        const x1 = d.x1 * cell, y1 = d.y1 * cell;
+        const x2 = d.x2 * cell, y2 = d.y2 * cell;
+        g.save();
+        g.globalAlpha = p * 0.42 * pulse;
+        g.strokeStyle = COL.Y;
+        g.lineWidth = 1.8;
+        glow(COL.Y, 12);
+        g.beginPath();
+        g.moveTo(x1, y1);
+        g.lineTo(lerp(x1, x2, p), lerp(y1, y2, p));
+        g.stroke();
+        g.restore();
+      });
+    }
+
+    // Primes with organic spring pop-in and shimmering golden cores
+    if (k > 0) {
+      for (let n = 2; n <= k; n++) {
+        if (!SV[n]) continue;
+        const p = ULAM[n - 1];
+        const x = p[0] * cell, y = p[1] * cell;
+        const age = cl((kExact - n) / 28, 0, 1);
+        const scale = springOut(age);
+        const shimmer = 0.78 + 0.22 * Math.sin(T * 2.4 + n * 0.17);
+        const r = 3.1 * scale;
+
+        // Soft halo on freshly ignited primes or periodic pulse
+        if (age < 0.95) {
+          g.save();
+          g.globalAlpha = (1 - age) * 0.75;
+          g.strokeStyle = COL.Y;
+          g.lineWidth = 1.5;
+          g.beginPath();
+          g.arc(x, y, 4 + age * 14, 0, Math.PI * 2);
+          g.stroke();
+          g.restore();
+        }
+        g.save();
+        g.globalAlpha = cl(age * 1.4) * shimmer;
+        g.fillStyle = COL.Y;
+        g.beginPath();
+        g.arc(x, y, r, 0, Math.PI * 2);
+        g.fill();
+        // Warm bright center
+        g.fillStyle = '#fff9e6';
+        g.beginPath();
+        g.arc(x, y, r * 0.42, 0, Math.PI * 2);
+        g.fill();
+        g.restore();
+      }
+    }
+
+    // Center origin marker ("1")
+    const cA = eo3(fd(t, 4.6, 6.2));
+    drawDot(0, 0, 4.2, COL.B, cA, 16);
+
+    g.restore();
+
+    // Right poetic editorial callout
+    const noteA = eo4(fd(t, 22.5, 25.5));
+    const noteX = 1170 + (1 - noteA) * 24;
+    drawText('Primes', noteX, 430, 52, COL.Y, noteA, 'left', 'italic 600', COL.Y, 22);
+    drawHairline(noteX + 75, 446, 75, COL.Y, fd(t, 23.0, 26.0), noteA * 0.8);
+    drawText('align along mysterious', noteX, 486, 29, COL.F, eo3(fd(t, 23.8, 26.6)), 'left');
+    drawText('diagonal constellations…', noteX, 524, 29, COL.F, eo3(fd(t, 24.6, 27.4)), 'left');
+    drawSans('ULAM SPIRAL · 1,849 INTEGERS', noteX, 566, 12, COL.D, eo3(fd(t, 25.4, 28.2)) * 0.8, 'left', '500');
+
+    // Left counter readout
+    const cntA = eo3(fd(t, 6.0, 8.5));
+    if (cntA > 0) {
+      let pCount = 0;
+      for (let n = 2; n <= k; n++) if (SV[n]) pCount++;
+      drawSans('INTEGERS PLOTTED', 120, 440, 11, COL.D, cntA * 0.75, 'left', '600');
+      drawMono(String(k).padStart(4, '0'), 120, 474, 28, COL.B, cntA, 'left', COL.B);
+      drawSans('PRIMES ILLUMINATED', 120, 524, 11, COL.D, cntA * 0.75, 'left', '600');
+      drawMono(String(pCount).padStart(3, '0'), 120, 558, 28, COL.Y, cntA, 'left', COL.Y);
+    }
+  }
+
+  // =========================================================================
+  // SCENE 2 — EULER'S GOLDEN BRIDGE & SMOOTH CONVERGENCE
+  // =========================================================================
+  function scene2(t, T) {
+    // Chapter header & Euler Product Formula
+    const eq1A = eo4(fd(t, 1.0, 4.2));
+    const eq2A = eo4(fd(t, 5.2, 8.6));
+    const eqLift1 = (1 - eq1A) * 20;
+    const eqLift2 = (1 - eq2A) * 20;
+
+    drawSans('EULER’S PRODUCT FORMULA  ·  1737', 800, 74, 13, COL.D, eo3(fd(t, 0.6, 3.0)) * 0.85, 'center', '600');
+
+    drawText('ζ(s)  =  Σ  1 / nˢ', 495, 162 + eqLift1, 68, COL.G, eq1A, 'center', 'italic 600', COL.G, 24);
+    drawText('=  Π  1 / (1 − p⁻ˢ)', 1110, 162 + eqLift2, 68, COL.Y, eq2A, 'center', 'italic 600', COL.Y, 24);
+
+    // Subtle glowing golden bridge arc linking Sum & Product
+    const bridgeP = eo4(fd(t, 7.2, 11.2));
+    if (bridgeP > 0) {
+      g.save();
+      g.globalAlpha = bridgeP * 0.65;
+      const grad = g.createLinearGradient(495, 195, 1110, 195);
+      grad.addColorStop(0, COL.G);
+      grad.addColorStop(0.5, '#ffffff');
+      grad.addColorStop(1, COL.Y);
+      g.strokeStyle = grad;
+      g.lineWidth = 2;
+      glow(COL.Y, 14);
+      g.beginPath();
+      g.moveTo(495, 190);
+      g.quadraticCurveTo(800, 232, lerp(495, 1110, bridgeP), lerp(190, 190, bridgeP));
+      g.stroke();
+      // Traveling light bead across Euler's bridge
+      if (bridgeP > 0.8) {
+        const u = (T * 0.42) % 1;
+        const bx = (1 - u) * (1 - u) * 495 + 2 * (1 - u) * u * 800 + u * u * 1110;
+        const by = (1 - u) * (1 - u) * 190 + 2 * (1 - u) * u * 232 + u * u * 190;
+        drawDot(bx, by, 4.5, '#fff', 0.95, 16);
+      }
+      g.restore();
+    }
+
+    drawText('every integer   ·   built uniquely from primes', 800, 250, 27, COL.D, eo3(fd(t, 9.5, 12.8)), 'center', 'italic');
+
+    // Interactive glass convergence panel
+    const panelA = eo4(fd(t, 12.2, 15.2));
+    if (panelA > 0) {
+      const px = 175, py = 296, pw = 1250, ph = 430;
+      g.save();
+      g.globalAlpha = panelA;
+      roundRectPath(px, py, pw, ph, 20);
+      g.fillStyle = 'rgba(11, 16, 26, 0.72)';
+      g.fill();
+      g.strokeStyle = 'rgba(255, 255, 255, 0.09)';
+      g.lineWidth = 1.5;
+      g.stroke();
+      g.restore();
+
+      // Continuous smooth N progression
+      const Nval = 1 + 99 * eo3(fd(t, 14.0, 32.0));
+      const [sumV, prodV] = eulerAt(Nval);
+      const target = Math.PI * Math.PI / 6; // 1.644934
+
+      drawSans('LIVE CONVERGENCE AT s = 2', px + 44, py + 44, 12, COL.D, panelA * 0.85, 'left', '600');
+      drawMono(`N = ${Math.floor(Nval)} terms`, px + pw - 44, py + 44, 16, COL.F, panelA * 0.9, 'right');
+
+      const barX = px + 185;
+      const barMaxW = 820;
+      const mapX = v => barX + (v / 1.72) * barMaxW;
+      const targetX = mapX(target);
+
+      // Subtle guide ticks
+      [0.5, 1.0, 1.5].forEach(tick => {
+        const tx = mapX(tick);
+        drawLine(tx, py + 72, tx, py + 240, 'rgba(255,255,255,0.06)', 1, 1, panelA);
+        drawMono(tick.toFixed(1), tx - 12, py + 260, 12, 'rgba(152,164,188,0.55)', panelA, 'left');
+      });
+
+      // Liquid-light bars for Sum & Product
+      const bars = [
+        { label: 'Sum Σ', val: sumV, col: COL.G, y: py + 114 },
+        { label: 'Product Π', val: prodV, col: COL.Y, y: py + 194 }
+      ];
+      bars.forEach(b => {
+        const w = Math.max(8, mapX(b.val) - barX);
+        drawText(b.label, barX - 24, b.y + 8, 30, b.col, panelA, 'right', 'italic 600', b.col, 14);
+        // Track
+        g.save();
+        g.globalAlpha = panelA * 0.22;
+        roundRectPath(barX, b.y - 20, barMaxW, 38, 10);
+        g.fillStyle = '#1b2436';
+        g.fill();
+        g.restore();
+
+        // Luminous gradient bar
+        g.save();
+        g.globalAlpha = panelA;
+        const bg = g.createLinearGradient(barX, b.y, barX + w, b.y);
+        bg.addColorStop(0, b.col + '55');
+        bg.addColorStop(0.75, b.col + 'cc');
+        bg.addColorStop(1, '#ffffff');
+        roundRectPath(barX, b.y - 20, w, 38, 10);
+        glow(b.col, 22);
+        g.fillStyle = bg;
+        g.fill();
+        g.restore();
+
+        // Glowing leading orb
+        drawDot(barX + w, b.y - 1, 5.5, '#ffffff', panelA, 18);
+        drawMono(b.val.toFixed(5), barX + w + 20, b.y + 7, 22, COL.F, panelA, 'left');
+      });
+
+      // Mini dual convergence curve trace underneath
+      const gx = barX, gy = py + 382, gw = barMaxW, gh = 86;
+      drawLine(gx, gy, gx + gw, gy, 'rgba(255,255,255,0.12)', 1, 1, panelA);
+      const steps = Math.max(2, Math.floor(Nval));
+      const drawTrace = (arr, col) => {
+        g.save();
+        g.globalAlpha = panelA * 0.92;
+        g.strokeStyle = col;
+        g.lineWidth = 2.4;
+        glow(col, 10);
+        g.beginPath();
+        for (let i = 1; i <= steps; i++) {
+          const cx = gx + ((i - 1) / (EULER_MAX - 20)) * gw;
+          const cy = gy - ((arr[i] - 0.9) / 0.85) * gh;
+          if (i === 1) g.moveTo(cx, cy); else g.lineTo(cx, cy);
+        }
+        g.stroke();
+        g.restore();
+      };
+      drawTrace(ESUM, COL.G);
+      drawTrace(EPROD, COL.Y);
+
+      // Ruby target line π²/6
+      const rubyA = eo4(fd(t, 25.0, 28.5));
+      if (rubyA > 0) {
+        drawLine(targetX, py + 66, targetX, py + 266, COL.R, 2.5, rubyA, rubyA, COL.R, 18);
+        const asymY = gy - ((target - 0.9) / 0.85) * gh;
+        g.save();
+        g.setLineDash([6, 6]);
+        drawLine(gx, asymY, gx + gw, asymY, COL.R, 1.5, rubyA, rubyA * 0.75, COL.R, 8);
+        g.restore();
+
+        drawText('π² / 6', targetX, py + 298, 34, COL.R, rubyA, 'center', 'italic 600', COL.R, 20);
+        drawMono('≈ 1.64493', targetX + 46, py + 295, 15, COL.D, rubyA * 0.9, 'left');
+
+        // Soft pulse when curves kiss target
+        const kiss = fd(t, 28.5, 34.0);
+        if (kiss > 0 && kiss < 1) {
+          g.save();
+          g.globalAlpha = (1 - kiss) * 0.5;
+          g.strokeStyle = COL.R;
+          g.lineWidth = 2;
+          g.beginPath();
+          g.arc(targetX, py + 154, 18 + kiss * 90, 0, Math.PI * 2);
+          g.stroke();
+          g.restore();
+        }
+      }
+    }
+  }
+
+  // =========================================================================
+  // SCENE 3 — THE CRITICAL STRIP & ZEROS ON Re(s) = 1/2
+  // =========================================================================
+  const s3X = s => 490 + s * 560;
+  const s3Y = im => 760 - im * 15.8;
+
+  function scene3(t, T) {
+    // Complex plane subtle coordinate grid
+    const gridA = eo3(fd(t, 0.3, 3.0));
+    if (gridA > 0) {
+      g.save();
+      g.globalAlpha = gridA * 0.08;
+      g.strokeStyle = COL.P;
+      g.lineWidth = 1;
+      for (let rx = -0.25; rx <= 1.25; rx += 0.25) {
+        const x = s3X(rx);
+        g.beginPath(); g.moveTo(x, 90); g.lineTo(x, 760); g.stroke();
+      }
+      for (let im = 5; im <= 40; im += 5) {
+        const y = s3Y(im);
+        g.beginPath(); g.moveTo(s3X(-0.3), y); g.lineTo(s3X(1.3), y); g.stroke();
+      }
+      g.restore();
+    }
+
+    // Luminous translucent Critical Strip (0 < Re(s) < 1) with gentle animated phase shimmer
+    const stripA = eo4(fd(t, 0.8, 3.8));
+    if (stripA > 0) {
+      const grad = g.createLinearGradient(s3X(0), 0, s3X(1), 0);
+      grad.addColorStop(0, `rgba(199, 125, 255, ${0.03 * stripA})`);
+      grad.addColorStop(0.5, `rgba(199, 125, 255, ${0.18 * stripA})`);
+      grad.addColorStop(1, `rgba(199, 125, 255, ${0.03 * stripA})`);
+      g.fillStyle = grad;
+      g.fillRect(s3X(0), 95, 560, 665);
+
+      // Subtle animated zeta-contour wave bands inside the strip
+      g.save();
+      g.beginPath();
+      g.rect(s3X(0), 95, 560, 665);
+      g.clip();
+      for (let k = 0; k < 6; k++) {
+        const wy = 140 + k * 105 + Math.sin(T * 0.8 + k) * 12;
+        const rg = g.createRadialGradient(s3X(0.5), wy, 10, s3X(0.5), wy, 260);
+        rg.addColorStop(0, `rgba(199, 125, 255, ${0.07 * stripA})`);
+        rg.addColorStop(1, 'rgba(199, 125, 255, 0)');
+        g.fillStyle = rg;
+        g.fillRect(s3X(0), wy - 120, 560, 240);
+      }
+      g.restore();
+    }
+
+    // Axes & boundary beams
+    const axP = eo4(fd(t, 0.4, 3.2));
+    drawLine(s3X(-0.28), 760, s3X(1.28), 760, 'rgba(154,165,188,0.55)', 1.8, axP, 1);
+    drawLine(s3X(0), 760, s3X(0), 95, 'rgba(199,125,255,0.45)', 1.5, axP, 1);
+    drawLine(s3X(1), 760, s3X(1), 95, 'rgba(199,125,255,0.45)', 1.5, axP, 1);
+
+    drawMono('0', s3X(0) - 5, 792, 18, COL.D, fd(t, 1.5, 3.5), 'left');
+    drawMono('1', s3X(1) - 5, 792, 18, COL.D, fd(t, 1.5, 3.5), 'left');
+    drawSans('Re(s)', s3X(1.26), 788, 13, COL.D, fd(t, 1.5, 3.5) * 0.8, 'right', '500');
+    drawSans('Im(s)', s3X(0) - 18, 110, 13, COL.D, fd(t, 1.5, 3.5) * 0.8, 'right', '500');
+
+    drawText('The Critical Strip', s3X(0.5), 74, 42, COL.P, eo4(fd(t, 1.2, 4.2)), 'center', 'italic 600', COL.P, 22);
+
+    // Golden Critical Line Re(s) = 1/2 shooting upward like a light beam
+    const lineP = eo4(fd(t, 11.5, 15.2));
+    if (lineP > 0) {
+      g.save();
+      g.setLineDash([12, 9]);
+      g.lineDashOffset = -T * 18;
+      drawLine(s3X(0.5), 760, s3X(0.5), 102, COL.Y, 3.2, lineP, 1, COL.Y, 22);
+      g.restore();
+
+      // Rising light motes along critical line
+      if (lineP > 0.9) {
+        for (let m = 0; m < 4; m++) {
+          const q = (T * 0.16 + m * 0.25) % 1;
+          const my = lerp(755, 110, q);
+          drawDot(s3X(0.5), my, 2.8, COL.Y, Math.sin(q * Math.PI) * 0.7, 10);
+        }
+      }
+      drawText('Re(s) = ½', s3X(0.5) + 20, 128, 30, COL.Y, eo3(fd(t, 13.5, 16.0)), 'left', 'italic 600', COL.Y, 16);
+    }
+
+    // Six Non-Trivial Zeros blooming with concentric harmonic shockwaves
+    ZEROS.forEach((z, idx) => {
+      const t0 = 14.2 + idx * 1.9;
+      const a = eo4(fd(t, t0, t0 + 1.1));
+      if (a <= 0) return;
+      const zx = s3X(0.5), zy = s3Y(z);
+      const age = t - t0;
+
+      // Trigger crystalline chime once per zero during live playback
+      triggerSceneEvent(`s3_zero_${idx}`, age > 0 && age < 0.35, () => {
+        audioEngine.playChime(523.25 * Math.pow(1.12246, idx * 1.5), 0.08);
+      });
+
+      // Repeating harmonic pulse rings
+      for (let ring = 0; ring < 2; ring++) {
+        const q = ((age + ring * 1.1) % 2.2) / 2.2;
+        g.save();
+        g.globalAlpha = (1 - q) * 0.55 * a;
+        g.strokeStyle = COL.G;
+        g.lineWidth = 2.2 * (1 - q * 0.5);
+        g.beginPath();
+        g.arc(zx, zy, 8 + q * 48, 0, Math.PI * 2);
+        g.stroke();
+        g.restore();
+      }
+
+      const r = 9.5 * springOut(fd(t, t0, t0 + 0.9));
+      drawDot(zx, zy, r, COL.G, a, 24);
+      drawDot(zx, zy, r * 0.42, '#ffffff', a, 6);
+
+      // Floating glass coordinate tag
+      const tagX = zx + 28 + (1 - a) * 14;
+      g.save();
+      g.globalAlpha = a * 0.85;
+      roundRectPath(tagX, zy - 14, 152, 28, 7);
+      g.fillStyle = 'rgba(10, 18, 24, 0.72)';
+      g.fill();
+      g.strokeStyle = 'rgba(131, 193, 103, 0.35)';
+      g.lineWidth = 1;
+      g.stroke();
+      g.restore();
+      drawMono(`½ + ${z.toFixed(2)}i`, tagX + 12, zy + 5, 14, COL.G, a, 'left');
+    });
+
+    // Right side summary typography
+    const sumA = eo4(fd(t, 19.5, 22.8));
+    drawText('Trillions of zeros', 1320, 310, 40, COL.F, sumA, 'center', 'italic 400');
+    drawText('all on the line', 1320, 360, 42, COL.Y, eo4(fd(t, 20.6, 23.8)), 'center', 'italic 600', COL.Y, 20);
+    drawHairline(1320, 384, 110, COL.Y, fd(t, 21.0, 24.0), sumA * 0.75);
+    drawSans('COMPUTED UP TO 10¹³ ZEROS', 1320, 412, 11, COL.D, eo3(fd(t, 21.8, 24.5)) * 0.8, 'center', '600');
+
+    // Dramatic off-line anomaly ("One exception breaks RH")
+    const anomIn = eo4(fd(t, 29.8, 31.8));
+    const anomOut = 1 - eo3(fd(t, 37.2, 39.2));
+    const anomA = anomIn * anomOut;
+    if (anomA > 0.005) {
+      const ax = s3X(0.84), ay = s3Y(29.5);
+      // Crimson destabilizing shockwave
+      const rq = ((t - 29.8) % 1.4) / 1.4;
+      g.save();
+      g.globalAlpha = (1 - rq) * 0.55 * anomA;
+      g.strokeStyle = COL.R;
+      g.lineWidth = 2.5;
+      g.beginPath();
+      g.arc(ax, ay, 14 + rq * 85, 0, Math.PI * 2);
+      g.stroke();
+      g.restore();
+
+      // Subtle dashed tether back to critical line
+      g.save();
+      g.setLineDash([5, 5]);
+      drawLine(s3X(0.5), ay, ax, ay, COL.R, 1.5, anomIn, anomA * 0.65);
+      g.restore();
+
+      // Glowing crimson X
+      const sz = 14 * springOut(fd(t, 29.8, 30.8));
+      g.save();
+      g.globalAlpha = anomA;
+      g.strokeStyle = COL.R;
+      g.lineWidth = 4.5;
+      g.lineCap = 'round';
+      glow(COL.R, 24);
+      g.beginPath();
+      g.moveTo(ax - sz, ay - sz); g.lineTo(ax + sz, ay + sz);
+      g.moveTo(ax + sz, ay - sz); g.lineTo(ax - sz, ay + sz);
+      g.stroke();
+      g.restore();
+
+      drawText('A single zero here', 1320, ay - 6, 30, COL.R, anomA, 'center', 'italic 600', COL.R, 18);
+      drawText('would shatter RH', 1320, ay + 30, 30, COL.R, anomA, 'center', 'italic 400');
+    }
+  }
+
+  // =========================================================================
+  // SCENE 4 — THE MUSIC OF THE PRIMES (SMOOTH ADDITIVE HARMONICS)
+  // =========================================================================
+  function scene4(t, T) {
+    const x0 = 110, x1 = 1490, cy = 472;
+    const span = x1 - x0;
+
+    drawSans('RIEMANN’S EXPLICIT FORMULA', 800, 68, 12, COL.D, eo3(fd(t, 0.5, 2.8)) * 0.85, 'center', '600');
+    drawText('Each zero adds a wave to the prime-counting error', 800, 118, 44, COL.F, eo4(fd(t, 0.8, 3.8)), 'center', 'italic 400', COL.O, 20);
+    drawHairline(800, 138, 220, COL.O, fd(t, 1.8, 4.8), 0.7);
+
+    // Subtle background prime-staircase silhouette (evoking π(x) - Li(x))
+    const stairA = eo3(fd(t, 12.0, 18.0)) * 0.14;
+    if (stairA > 0) {
+      g.save();
+      g.globalAlpha = stairA;
+      g.strokeStyle = COL.Y;
+      g.lineWidth = 1.4;
+      g.beginPath();
+      let err = 0;
+      for (let i = 2; i <= 140; i++) {
+        const px = x0 + ((i - 2) / 138) * span;
+        err += SV[i] ? 1.8 : -0.36;
+        const py = cy - err * 12;
+        if (i === 2) g.moveTo(px, py); else { g.lineTo(px, cy - (err - (SV[i] ? 1.8 : -0.36)) * 12); g.lineTo(px, py); }
+      }
+      g.stroke();
+      g.restore();
+    }
+
+    // Axis line
+    drawLine(x0, cy, x1, cy, 'rgba(255, 180, 100, 0.25)', 1.5, eo4(fd(t, 0.6, 3.2)), 1);
+
+    // Smoothly faded-in individual harmonic weights (zero abrupt jumps!)
+    const weights = ZEROS.map((_, k) => {
+      const start = k === 0 ? 2.4 : 11.2 + (k - 1) * 2.6;
+      const w = eo4(fd(t, start, start + 2.0));
+      triggerSceneEvent(`s4_wave_${k}`, t > start && t < start + 0.25, () => {
+        audioEngine.playChime(329.63 * (1 + k * 0.18), 0.06);
+      });
+      return w;
+    });
+
+    const activeCount = weights.filter(w => w > 0.05).length;
+    const phaseDrift = T * 0.42;
+    const samples = 420;
+    const revealX = eo4(fd(t, 2.2, 6.0));
+    const maxI = Math.floor(samples * revealX);
+
+    // Draw individual translucent harmonic ribbons
+    ZEROS.forEach((z, k) => {
+      const wk = weights[k];
+      if (wk <= 0.005 || maxI < 2) return;
+      g.save();
+      g.globalAlpha = 0.28 * wk;
+      g.strokeStyle = WAVE_COLS[k];
+      g.lineWidth = 1.8;
+      g.beginPath();
+      for (let i = 0; i <= maxI; i++) {
+        const u = (i / samples) * 11.5;
+        const x = x0 + (i / samples) * span;
+        const y = cy - 720 * wk * Math.cos(z * u * 0.24 - phaseDrift * (1 + k * 0.12)) / z;
+        if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+      }
+      g.stroke();
+      g.restore();
+    });
+
+    // Luminous Superposition Composite Wave + Soft Gradient Area Fill
+    if (maxI >= 2) {
+      const pts = [];
+      for (let i = 0; i <= maxI; i++) {
+        const u = (i / samples) * 11.5;
+        const x = x0 + (i / samples) * span;
+        let s = 0;
+        for (let k = 0; k < ZEROS.length; k++) {
+          if (weights[k] > 0.001) {
+            s += weights[k] * Math.cos(ZEROS[k] * u * 0.24 - phaseDrift * (1 + k * 0.12)) / ZEROS[k];
+          }
+        }
+        pts.push([x, cy - 860 * s]);
+      }
+
+      // Soft warm ribbon fill beneath composite curve
+      g.save();
+      const fillGrad = g.createLinearGradient(0, cy - 170, 0, cy + 170);
+      fillGrad.addColorStop(0, 'rgba(255, 159, 67, 0.22)');
+      fillGrad.addColorStop(0.5, 'rgba(255, 159, 67, 0.02)');
+      fillGrad.addColorStop(1, 'rgba(255, 159, 67, 0.22)');
+      g.fillStyle = fillGrad;
+      g.beginPath();
+      g.moveTo(pts[0][0], cy);
+      for (let i = 0; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]);
+      g.lineTo(pts[pts.length - 1][0], cy);
+      g.closePath();
+      g.fill();
+      g.restore();
+
+      // Main glowing superposition stroke
+      g.save();
+      g.strokeStyle = COL.O;
+      g.lineWidth = 3.8;
+      g.lineJoin = 'round';
+      glow(COL.O, 24);
+      g.beginPath();
+      for (let i = 0; i < pts.length; i++) {
+        if (i === 0) g.moveTo(pts[i][0], pts[i][1]);
+        else g.lineTo(pts[i][0], pts[i][1]);
+      }
+      g.stroke();
+      // White-hot core
+      g.shadowBlur = 0;
+      g.strokeStyle = 'rgba(255, 245, 224, 0.72)';
+      g.lineWidth = 1.3;
+      g.stroke();
+      g.restore();
+
+      // Traveling energy sparks along the composite crest
+      for (let s = 0; s < 5; s++) {
+        const idx = Math.floor(((T * 0.14 + s * 0.2) % 1) * (pts.length - 1));
+        const pt = pts[idx];
+        if (pt) drawDot(pt[0], pt[1], 3.8, '#fff7e6', 0.85, 14);
+      }
+    }
+
+    // Graceful ±√x bounding envelope curves emerging around t = 26s
+    const envP = eo4(fd(t, 26.0, 30.2));
+    if (envP > 0) {
+      const envMax = Math.floor(240 * envP);
+      for (const sign of [-1, 1]) {
+        g.save();
+        g.globalAlpha = 0.78 * envP;
+        g.setLineDash([8, 7]);
+        g.strokeStyle = COL.Y;
+        g.lineWidth = 2.2;
+        glow(COL.Y, 14);
+        g.beginPath();
+        for (let i = 0; i <= envMax; i++) {
+          const frac = i / 240;
+          const x = x0 + frac * span;
+          const y = cy + sign * (42 + 128 * Math.sqrt(frac));
+          if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+        }
+        g.stroke();
+        g.restore();
+      }
+      drawText('+√x', x1 - 14, cy - 182, 26, COL.Y, envP, 'right', 'italic 600', COL.Y, 14);
+      drawText('−√x', x1 - 14, cy + 196, 26, COL.Y, envP, 'right', 'italic 600', COL.Y, 14);
+    }
+
+    // Harmonic chips indicator row
+    const chipA = eo3(fd(t, 3.0, 5.5));
+    if (chipA > 0) {
+      const startX = 800 - (ZEROS.length * 102) / 2 + 51;
+      ZEROS.forEach((z, k) => {
+        const cx = startX + k * 102;
+        const wk = weights[k];
+        g.save();
+        g.globalAlpha = chipA * (0.25 + 0.75 * wk);
+        roundRectPath(cx - 42, 682, 84, 30, 8);
+        g.fillStyle = wk > 0.1 ? 'rgba(20, 24, 36, 0.82)' : 'rgba(14, 17, 26, 0.45)';
+        g.fill();
+        g.strokeStyle = wk > 0.1 ? WAVE_COLS[k] : 'rgba(255,255,255,0.12)';
+        g.lineWidth = 1.2;
+        g.stroke();
+        g.restore();
+        drawMono(`γ${k + 1} ${z.toFixed(1)}`, cx - 32, 702, 12, wk > 0.1 ? WAVE_COLS[k] : COL.D, chipA * (0.4 + 0.6 * wk), 'left');
+      });
+    }
+
+    drawText(
+      `${Math.max(1, activeCount)} harmonic wave${activeCount > 1 ? 's' : ''} summed   ·   cos(γ · log x)`,
+      800, 748, 28, COL.O, eo3(fd(t, 3.2, 6.0)), 'center', 'italic'
+    );
+    drawText(
+      'All zeros on the line  ⇒  error ≈ √x, as small as possible',
+      800, 790, 28, COL.F, eo4(fd(t, 26.8, 30.2)), 'center', '400', COL.Y, 14
+    );
+  }
+
+  // =========================================================================
+  // SCENE 5 — THE CLAIMED ROUTE (FLOWING BÉZIER MILESTONE RIVER)
+  // =========================================================================
+  const STEPS = [
+    { name: 'Stepanov', l1: 'multiplicity method', l2: 'new over the integers', date: 'OCT 6', col: COL.B, t0: 13.8 },
+    { name: 'qᴺ = Mᵏ + R', l1: 'sign-only argument', l2: 'avoids cancellation', date: 'OCT 19', col: COL.G, t0: 18.8 },
+    { name: 'Theta Lifts', l1: 'chain of about √X', l2: 'builds multiplicity', date: 'NOV 15', col: COL.Y, t0: 25.4 },
+    { name: 'Positivity', l1: 'determinants forbid', l2: 'zeros off the line', date: 'NOV 16', col: COL.P, t0: 30.5 },
+    { name: 'Lean 4', l1: 'formalized proof,', l2: 'no extra axioms', date: 'NOV 20', col: COL.T, t0: 36.8 }
+  ];
+  const NODE_POS = [
+    [200, 490],
+    [500, 355],
+    [800, 490],
+    [1100, 355],
+    [1400, 490]
+  ];
+
+  function evalCubic(p0, p1, p2, p3, u) {
+    const m = 1 - u;
+    return m * m * m * p0 + 3 * m * m * u * p1 + 3 * m * u * u * p2 + u * u * u * p3;
+  }
+
+  function scene5(t, T) {
+    drawSans('NOVEMBER 2026  ·  LEVENT ALPÖGE & CLAUDE', 800, 66, 12, COL.D, eo3(fd(t, 0.5, 2.8)) * 0.85, 'center', '600');
+    drawText('The Claimed Route', 800, 120, 56, COL.T, eo4(fd(t, 0.8, 3.6)), 'center', 'italic 600', COL.T, 24);
+    drawHairline(800, 140, 180, COL.T, fd(t, 1.5, 4.5), 0.75);
+
+    // Subtle introductory bridge summary before nodes bloom
+    const introSubA = eo3(fd(t, 3.0, 6.0)) * (1 - eo3(fd(t, 13.2, 15.2)));
+    if (introSubA > 0.01) {
+      drawText('Five linked stages from arithmetic multiplicity to formal verification', 800, 440, 34, COL.F, introSubA, 'center', 'italic');
+    }
+
+    // Flowing cubic Bézier river segments connecting milestones
+    for (let i = 0; i < 4; i++) {
+      const [x1, y1] = NODE_POS[i];
+      const [x2, y2] = NODE_POS[i + 1];
+      const c1x = x1 + 145, c1y = y1;
+      const c2x = x2 - 145, c2y = y2;
+      const segStart = STEPS[i].t0 + 1.4;
+      const p = eo4(fd(t, segStart, segStart + 3.2));
+      if (p <= 0) continue;
+
+      // Partial cubic Bézier stroke
+      const segs = 48;
+      const maxS = Math.floor(segs * p);
+      g.save();
+      const grad = g.createLinearGradient(x1, y1, x2, y2);
+      grad.addColorStop(0, STEPS[i].col);
+      grad.addColorStop(1, STEPS[i + 1].col);
+      g.strokeStyle = grad;
+      g.lineWidth = 3;
+      g.globalAlpha = 0.65;
+      glow(STEPS[i].col, 14);
+      g.beginPath();
+      for (let s = 0; s <= maxS; s++) {
+        const u = s / segs;
+        const bx = evalCubic(x1, c1x, c2x, x2, u);
+        const by = evalCubic(y1, c1y, c2y, y2, u);
+        if (s === 0) g.moveTo(bx, by); else g.lineTo(bx, by);
+      }
+      g.stroke();
+      g.restore();
+
+      // Streaming light packets along completed river segments
+      if (p >= 0.95) {
+        for (let k = 0; k < 3; k++) {
+          const u = (T * 0.34 + k / 3 + i * 0.17) % 1;
+          const bx = evalCubic(x1, c1x, c2x, x2, u);
+          const by = evalCubic(y1, c1y, c2y, y2, u);
+          drawDot(bx, by, 4.2, '#ffffff', 0.9, 14);
+          drawDot(bx, by, 6.5, STEPS[i].col, 0.45, 16);
+        }
+      }
+    }
+
+    // Layered orbital glass milestone medallions
+    STEPS.forEach((s, i) => {
+      const a = eo4(fd(t, s.t0, s.t0 + 1.8));
+      if (a <= 0.005) return;
+
+      triggerSceneEvent(`s5_node_${i}`, t > s.t0 && t < s.t0 + 0.25, () => {
+        audioEngine.playChime(392.0 * Math.pow(1.12246, i * 2), 0.07);
+      });
+
+      const [x, y0] = NODE_POS[i];
+      const bob = Math.sin(T * 1.4 + i * 1.2) * 4.5;
+      const y = y0 + bob;
+      const rad = 60 * springOut(fd(t, s.t0, s.t0 + 1.4));
+
+      // Outer subtle rotating dashed orbital ring
+      g.save();
+      g.translate(x, y);
+      g.rotate(T * 0.25 * (i % 2 ? -1 : 1));
+      g.globalAlpha = a * 0.45;
+      g.setLineDash([7, 8]);
+      g.strokeStyle = s.col;
+      g.lineWidth = 1.5;
+      g.beginPath();
+      g.arc(0, 0, rad + 13, 0, Math.PI * 2);
+      g.stroke();
+      g.restore();
+
+      // Main obsidian glass medallion
+      g.save();
+      g.globalAlpha = a;
+      const rg = g.createRadialGradient(x - 16, y - 16, 4, x, y, rad);
+      rg.addColorStop(0, '#182433');
+      rg.addColorStop(1, '#090e16');
+      g.fillStyle = rg;
+      g.strokeStyle = s.col;
+      g.lineWidth = 3.2;
+      glow(s.col, 24);
+      g.beginPath();
+      g.arc(x, y, rad, 0, Math.PI * 2);
+      g.fill();
+      g.stroke();
+      g.restore();
+
+      // Step number
+      drawText(String(i + 1), x, y + 17, 48, s.col, a, 'center', 'italic 600', s.col, 14);
+
+      // Date pill above medallion
+      g.save();
+      g.globalAlpha = a * 0.85;
+      roundRectPath(x - 42, y - 112, 84, 24, 99);
+      g.fillStyle = 'rgba(12, 18, 28, 0.8)';
+      g.fill();
+      g.strokeStyle = s.col + '66';
+      g.lineWidth = 1;
+      g.stroke();
+      g.restore();
+      drawMono(s.date, x, y - 96, 11, s.col, a, 'center');
+
+      // Title & details below medallion
+      const txtA = eo3(fd(t, s.t0 + 0.5, s.t0 + 2.1));
+      drawText(s.name, x, y + 108, 34, s.col, txtA, 'center', 'italic 600', s.col, 16);
+      drawSans(s.l1, x, y + 140, 17, COL.F, txtA * 0.92, 'center', '400');
+      drawSans(s.l2, x, y + 165, 17, COL.D, txtA * 0.9, 'center', '400');
+    });
+
+    drawSans('Dates from the author’s note · steps shown are a high-level summary', 800, 816, 13, COL.D, eo3(fd(t, 38.5, 41.5)) * 0.72, 'center', '400');
+  }
+
+  // =========================================================================
+  // SCENE 6 — WHERE THINGS STAND (CINEMATIC EPILOGUE)
+  // =========================================================================
+  function scene6(t, T) {
+    drawSans('STATUS  ·  NOVEMBER 2026', 800, 68, 12, COL.D, eo3(fd(t, 0.5, 2.8)) * 0.85, 'center', '600');
+    drawText('Where Things Stand', 800, 122, 62, COL.F, eo4(fd(t, 0.8, 3.6)), 'center', 'italic 400', COL.R, 22);
+    drawHairline(800, 142, 200, COL.R, fd(t, 1.5, 4.4), 0.75);
+
+    const cards = [
+      {
+        title: 'Claimed',
+        tag: 'PREPRINT NOTE',
+        col: COL.B,
+        t0: 1.8,
+        lines: ['Levent Alpöge’s note', 'November 20, 2026', 'RH & GRH, built with Claude']
+      },
+      {
+        title: 'Released',
+        tag: 'FORMAL ARTIFACT',
+        col: COL.G,
+        t0: 5.4,
+        lines: ['Public Lean files, 14 parts', 'One mathematician reports', 'the project compiles']
+      },
+      {
+        title: 'Still Open',
+        tag: 'PEER REVIEW',
+        col: COL.R,
+        t0: 11.8,
+        lines: ['Independent expert review', 'Does Lean state true RH?', 'A human-readable proof']
+      }
+    ];
+
+    cards.forEach((card, i) => {
+      const a = eo4(fd(t, card.t0, card.t0 + 2.4));
+      if (a <= 0.005) return;
+      const cw = 415, ch = 286;
+      const x = 132 + i * 460;
+      const y = 186 + (1 - a) * 44;
+
+      // Frosted obsidian glass card
+      g.save();
+      g.globalAlpha = a;
+      roundRectPath(x, y, cw, ch, 18);
+      const bg = g.createLinearGradient(x, y, x, y + ch);
+      bg.addColorStop(0, 'rgba(20, 25, 38, 0.88)');
+      bg.addColorStop(1, 'rgba(9, 12, 20, 0.88)');
+      g.fillStyle = bg;
+      g.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      g.shadowBlur = 32;
+      g.shadowOffsetY = 14;
+      g.fill();
+      noGlow();
+      g.strokeStyle = card.col + '55';
+      g.lineWidth = 1.5;
+      g.stroke();
+
+      // Glowing top accent bar
+      const topGrad = g.createLinearGradient(x + 24, y, x + cw - 24, y);
+      topGrad.addColorStop(0, 'rgba(255,255,255,0)');
+      topGrad.addColorStop(0.5, card.col);
+      topGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      g.strokeStyle = topGrad;
+      g.lineWidth = 3;
+      glow(card.col, 16);
+      g.beginPath();
+      g.moveTo(x + 28, y + 1);
+      g.lineTo(x + cw - 28, y + 1);
+      g.stroke();
+      g.restore();
+
+      drawSans(card.tag, x + cw / 2, y + 40, 11, card.col, a * 0.85, 'center', '600');
+      drawText(card.title, x + cw / 2, y + 88, 44, card.col, a, 'center', 'italic 600', card.col, 18);
+
+      card.lines.forEach((line, j) => {
+        const la = eo3(fd(t, card.t0 + 0.6 + j * 0.5, card.t0 + 2.0 + j * 0.5));
+        drawSans(line, x + cw / 2, y + 146 + j * 44, 19, j === 0 ? COL.F : '#d3dceb', la, 'center', '400');
+      });
+    });
+
+    // Verified August 2026 milestone animated progress bar
+    const augA = eo4(fd(t, 26.2, 29.2));
+    if (augA > 0.005) {
+      const bx = 260, by = 524, bw = 1080, bh = 98;
+      g.save();
+      g.globalAlpha = augA;
+      roundRectPath(bx, by, bw, bh, 14);
+      g.fillStyle = 'rgba(13, 18, 28, 0.78)';
+      g.fill();
+      g.strokeStyle = 'rgba(255, 255, 255, 0.09)';
+      g.lineWidth = 1.2;
+      g.stroke();
+      g.restore();
+
+      const pct = lerp(41.6, 67.2, eo4(fd(t, 29.0, 34.5)));
+      drawSans('SEPARATE, VERIFIED RESULT (AUGUST 2026)  —  NOT A PROOF OF RH', bx + 28, by + 30, 12, COL.D, augA * 0.9, 'left', '600');
+      drawMono(`${pct.toFixed(1)}% of zeros on the line`, bx + bw - 28, by + 30, 15, COL.Y, augA, 'right', COL.Y);
+
+      const barX = bx + 28, barY = by + 54, barW = bw - 56;
+      g.save();
+      g.globalAlpha = augA * 0.25;
+      roundRectPath(barX, barY, barW, 14, 7);
+      g.fillStyle = '#253147';
+      g.fill();
+      g.restore();
+
+      // Previous 41.6% marker
+      const oldW = barW * 0.416;
+      const curW = barW * (pct / 100);
+      g.save();
+      g.globalAlpha = augA;
+      const pGrad = g.createLinearGradient(barX, barY, barX + curW, barY);
+      pGrad.addColorStop(0, COL.B);
+      pGrad.addColorStop(0.62, COL.G);
+      pGrad.addColorStop(1, COL.Y);
+      roundRectPath(barX, barY, curW, 14, 7);
+      glow(COL.Y, 16);
+      g.fillStyle = pGrad;
+      g.fill();
+      g.restore();
+
+      drawLine(barX + oldW, barY - 5, barX + oldW, barY + 19, 'rgba(255,255,255,0.55)', 1.5, 1, augA);
+      drawMono('41.6%', barX + oldW - 18, barY + 34, 11, COL.D, augA * 0.8, 'left');
+    }
+
+    // Grand golden cinematic thesis finale
+    const finA = eo4(fd(t, 37.5, 41.8));
+    if (finA > 0.005) {
+      const flare = 0.65 + 0.35 * Math.sin(T * 1.3);
+      const rg = g.createRadialGradient(800, 718, 10, 800, 718, 420);
+      rg.addColorStop(0, `rgba(255, 216, 102, ${0.14 * finA * flare})`);
+      rg.addColorStop(1, 'rgba(255, 216, 102, 0)');
+      g.fillStyle = rg;
+      g.fillRect(360, 620, 880, 190);
+
+      drawHairline(800, 672, 260, COL.Y, fd(t, 37.5, 41.0), finA * 0.8);
+      drawText(
+        'Extraordinary claims need independent verification.',
+        800, 730, 50, COL.Y, finA, 'center', 'italic 600', COL.Y, 26
+      );
+    }
+  }
+
+  // =========================================================================
+  // AMBIENT WEB AUDIO DOCUMENTARY SCORE + CHIMES + NARRATION AUDIO ENGINE
+  // =========================================================================
+  const firedEvents = new Set();
+  function triggerSceneEvent(key, cond, fn) {
+    if (!started || paused) return;
+    if (cond && !firedEvents.has(key)) {
+      firedEvents.add(key);
+      fn();
+    }
+  }
+
+  const audioEngine = {
+    ctx: null,
+    masterGain: null,
+    padGain: null,
+    padOscs: [],
+    padFilter: null,
+    currentChordIdx: -1,
+    musicEnabled: true,
+    voiceEnabled: true,
+    isSpeaking: false,
+
+    init() {
+      if (this.ctx) {
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        return;
+      }
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this.ctx = new AC();
+      this.masterGain = this.ctx.createGain();
+      this.masterGain.gain.value = 0.85;
+      this.masterGain.connect(this.ctx.destination);
+
+      // Warm low-pass filtered documentary pad (cello/cosmic ambient synth)
+      this.padFilter = this.ctx.createBiquadFilter();
+      this.padFilter.type = 'lowpass';
+      this.padFilter.frequency.value = 460;
+      this.padFilter.Q.value = 0.7;
+
+      this.padGain = this.ctx.createGain();
+      this.padGain.gain.value = 0.0001;
+      this.padFilter.connect(this.padGain);
+      this.padGain.connect(this.masterGain);
+
+      const baseChord = SCENES[0].chord;
+      baseChord.forEach((freq, i) => {
+        const osc = this.ctx.createOscillator();
+        osc.type = i === 0 ? 'triangle' : 'sine';
+        osc.frequency.value = i === 0 ? freq * 0.5 : freq;
+        osc.detune.value = (i - 1.5) * 4.5;
+        const gNode = this.ctx.createGain();
+        gNode.gain.value = i === 0 ? 0.36 : 0.19;
+        osc.connect(gNode);
+        gNode.connect(this.padFilter);
+        osc.start();
+        this.padOscs.push(osc);
+      });
+
+      // Subtle slow filter breathing LFO
+      const lfo = this.ctx.createOscillator();
+      lfo.type = 'sine';
+      lfo.frequency.value = 0.09;
+      const lfoGain = this.ctx.createGain();
+      lfoGain.gain.value = 140;
+      lfo.connect(lfoGain);
+      lfoGain.connect(this.padFilter.frequency);
+      lfo.start();
+    },
+
+    updateChord(sceneIdx) {
+      if (!this.ctx || this.currentChordIdx === sceneIdx) return;
+      this.currentChordIdx = sceneIdx;
+      const now = this.ctx.currentTime;
+      const chord = SCENES[sceneIdx].chord;
+      this.padOscs.forEach((osc, i) => {
+        const target = i === 0 ? chord[0] * 0.5 : chord[i];
+        osc.frequency.cancelScheduledValues(now);
+        osc.frequency.setTargetAtTime(target, now, 1.4);
+      });
+      // Soft chapter transition harmonic swell
+      if (this.musicEnabled && !paused && started) {
+        this.playChime(chord[3] * 1.5, 0.065);
+      }
+    },
+
+    updateGain() {
+      if (!this.ctx || !this.padGain) return;
+      const now = this.ctx.currentTime;
+      const target = (!this.musicEnabled || paused || !started)
+        ? 0.0001
+        : (this.isSpeaking ? 0.11 : 0.21);
+      this.padGain.gain.cancelScheduledValues(now);
+      this.padGain.gain.setTargetAtTime(target, now, 0.35);
+    },
+
+    playChime(freq, vol = 0.07) {
+      if (!this.ctx || !this.musicEnabled || paused) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const osc2 = this.ctx.createOscillator();
+      const env = this.ctx.createGain();
+      osc.type = 'sine';
+      osc2.type = 'triangle';
+      osc.frequency.value = freq;
+      osc2.frequency.value = freq * 2.003;
+
+      env.gain.setValueAtTime(0.0001, now);
+      env.gain.exponentialRampToValueAtTime(vol, now + 0.04);
+      env.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+
+      const g2 = this.ctx.createGain();
+      g2.gain.value = 0.18;
+      osc.connect(env);
+      osc2.connect(g2);
+      g2.connect(env);
+      env.connect(this.masterGain);
+
+      osc.start(now);
+      osc2.start(now);
+      osc.stop(now + 2.5);
+      osc2.stop(now + 2.5);
+    }
+  };
+
+  // Preload documentary narration MP3 clips
+  ALL_CUES.forEach(cue => {
+    const a = new Audio(`audio/${cue.id}.mp3`);
+    a.preload = 'auto';
+    a.addEventListener('error', () => { cue.failed = true; });
+    cue.audio = a;
+  });
+
+  let activeCue = null;
+
+  function stopNarration() {
+    if (activeCue && activeCue.audio) {
+      activeCue.audio.pause();
+    }
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    activeCue = null;
+    audioEngine.isSpeaking = false;
+    updateVoiceBadge();
+  }
+
+  function syncNarration(T, forceSeek = false) {
+    if (!started || paused || !audioEngine.voiceEnabled) {
+      if (activeCue) stopNarration();
+      return;
+    }
+
+    const cue = ALL_CUES.find(c => T >= c.globalStart && T < c.globalEnd - 0.08);
+    if (!cue) {
+      if (activeCue && T >= activeCue.globalEnd + 0.15) {
+        activeCue.audio && activeCue.audio.pause();
+        activeCue = null;
+        audioEngine.isSpeaking = false;
+        updateVoiceBadge();
+      }
+      return;
+    }
+
+    if (activeCue !== cue) {
+      if (activeCue && activeCue.audio) activeCue.audio.pause();
+      activeCue = cue;
+      const offset = Math.max(0, T - cue.globalStart);
+      if (!cue.failed && cue.audio) {
+        try {
+          cue.audio.currentTime = offset;
+          cue.audio.volume = 1.0;
+          const pr = cue.audio.play();
+          if (pr && pr.catch) pr.catch(() => {});
+          audioEngine.isSpeaking = true;
+        } catch (_) {}
+      } else if ('speechSynthesis' in window) {
+        // Fallback only if local MP3 files are missing
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(cue.cap);
+        u.rate = 0.92;
+        u.pitch = 0.94;
+        window.speechSynthesis.speak(u);
+        audioEngine.isSpeaking = true;
+      }
+      updateVoiceBadge();
+    } else if (forceSeek && cue.audio && !cue.failed) {
+      const offset = Math.max(0, T - cue.globalStart);
+      try {
+        cue.audio.currentTime = offset;
+        const pr = cue.audio.play();
+        if (pr && pr.catch) pr.catch(() => {});
+      } catch (_) {}
+    } else if (cue.audio && cue.audio.ended) {
+      audioEngine.isSpeaking = false;
+      updateVoiceBadge();
+    }
+  }
+
+  // =========================================================================
+  // MASTER COMPOSITOR (BACKDROP, STARFIELD, SUBTITLES, TRANSITIONS, VIGNETTE)
+  // =========================================================================
+  function renderScene(sceneIdx, lt, T, accentRGB = null) {
+    const s = SCENES[sceneIdx];
+    const rgb = accentRGB || s.rgb;
+    const rgbStr = `${rgb[0]},${rgb[1]},${rgb[2]}`;
+
+    // Full-bleed deep cosmic gradient background
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.fillStyle = COL.BG;
+    g.fillRect(0, 0, W, H);
+
+    const rad = Math.max(W, H);
+    const bgGrad = g.createRadialGradient(W * 0.5, H * 0.42, 0, W * 0.5, H * 0.5, rad * 0.85);
+    bgGrad.addColorStop(0, `rgba(${rgbStr}, 0.19)`);
+    bgGrad.addColorStop(0.5, `rgba(${rgbStr}, 0.045)`);
+    bgGrad.addColorStop(1, COL.BG);
+    g.fillStyle = bgGrad;
+    g.fillRect(0, 0, W, H);
+
+    // Logical 1600x900 cinema frame
+    g.setTransform(dpr * sc, 0, 0, dpr * sc, dpr * ox, dpr * oy);
+
+    // 3-layer parallax starfield
+    g.save();
+    for (let i = 0; i < STARS.length; i++) {
+      const st = STARS[i];
+      const sx = (st.x + T * 3.5 * st.z) % 1600;
+      const sy = (st.y - T * 2.2 * st.z + 9000) % 900;
+      const tw = 0.4 + 0.6 * Math.sin(T * st.twinkle + st.phase);
+      g.globalAlpha = (0.14 + 0.28 * st.z) * tw;
+      g.fillStyle = i % 5 === 0 ? `rgb(${rgbStr})` : '#dce6ff';
+      g.beginPath();
+      g.arc(sx, sy, st.size, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.restore();
+
+    // Subtle rising ambient primes in deep background
+    for (let k = 0; k < FLOAT_PRIMES.length; k++) {
+      const fp = FLOAT_PRIMES[k];
+      const y = 960 - ((T * fp.speed + fp.y0) % 1040);
+      drawText(fp.val, fp.x, y, fp.size, `rgba(${rgbStr}, ${fp.alpha})`, 1, 'center', 'italic');
+    }
+
+    // Scene artwork
+    g.save();
+    s.render(Math.min(lt, s.d), T);
+    g.restore();
+
+    // Cinema Subtitles with frosted pill backdrop
+    if (captionsEnabled && started) {
+      let activeCap = null;
+      for (const c of s.cues) {
+        if (lt >= c.t - 0.15 && lt <= c.t + c.dur + 0.85) {
+          activeCap = c;
+        }
+      }
+      if (activeCap) {
+        const fadeIn = eo3(fd(lt, activeCap.t - 0.15, activeCap.t + 0.45));
+        const fadeOut = 1 - eo3(fd(lt, activeCap.t + activeCap.dur + 0.25, activeCap.t + activeCap.dur + 0.85));
+        const a = fadeIn * fadeOut;
+        if (a > 0.01) {
+          g.save();
+          g.font = `italic 400 28px ${SERIF}`;
+          const tw = g.measureText(activeCap.cap).width;
+          const padX = 28, pillW = Math.min(1440, tw + padX * 2), pillH = 46;
+          const py = 834;
+          g.globalAlpha = a * 0.78;
+          roundRectPath(800 - pillW / 2, py, pillW, pillH, 12);
+          g.fillStyle = 'rgba(5, 8, 15, 0.82)';
+          g.fill();
+          g.strokeStyle = `rgba(${rgbStr}, 0.26)`;
+          g.lineWidth = 1;
+          g.stroke();
+          g.restore();
+
+          drawText(activeCap.cap, 800, 865, 28, '#f7f9ff', a, 'center', 'italic 400', '#000000', 10);
+        }
+      }
+    }
+
+    // Soft cinematic vignette
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const vig = g.createRadialGradient(W * 0.5, H * 0.5, Math.min(W, H) * 0.35, W * 0.5, H * 0.5, Math.hypot(W, H) * 0.58);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, 'rgba(3,5,10,0.52)');
+    g.fillStyle = vig;
+    g.fillRect(0, 0, W, H);
+  }
+
+  // =========================================================================
+  // PLAYBACK STATE, INTERACTIVE HUD & LOOP
+  // =========================================================================
+  let started = false;
+  let paused = false;
+  let captionsEnabled = true;
+  let filmTime = 0;
+  let lastNow = performance.now();
+  let looped = false;
+  let previewTime = 14.0; // gentle live background preview on intro screen
+
+  const introEl = document.getElementById('intro');
+  const startBtn = document.getElementById('startBtn');
+  const hudEl = document.getElementById('hud');
+  const hudTopEl = document.getElementById('hudTop');
+  const chDot = document.getElementById('chDot');
+  const chLabel = document.getElementById('chLabel');
+  const voiceBadge = document.getElementById('voiceBadge');
+  const voiceLabel = document.getElementById('voiceLabel');
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  const ppIcon = document.getElementById('ppIcon');
+  const prevChBtn = document.getElementById('prevChBtn');
+  const nextChBtn = document.getElementById('nextChBtn');
+  const voiceBtn = document.getElementById('voiceBtn');
+  const musicBtn = document.getElementById('musicBtn');
+  const ccBtn = document.getElementById('ccBtn');
+  const fsBtn = document.getElementById('fsBtn');
+  const timeline = document.getElementById('timeline');
+  const track = document.getElementById('track');
+  const fill = document.getElementById('fill');
+  const thumb = document.getElementById('thumb');
+  const hoverTip = document.getElementById('hoverTip');
+  const timeReadout = document.getElementById('timeReadout');
+
+  // Place chapter ticks along timeline
+  ST0.forEach((st, i) => {
+    if (i === 0) return;
+    const tick = document.createElement('div');
+    tick.className = 'chapter-tick';
+    tick.style.left = `${(st / TOT) * 100}%`;
+    track.appendChild(tick);
+  });
+
+  function fmtTime(sec) {
+    const s = Math.max(0, Math.floor(sec));
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+  }
+
+  function sceneIndexAt(T) {
+    let i = 0;
+    while (i < SCENES.length - 1 && T >= ST0[i + 1]) i++;
+    return i;
+  }
+
+  function updateVoiceBadge() {
+    if (!audioEngine.voiceEnabled) {
+      voiceBadge.classList.remove('speaking');
+      voiceLabel.textContent = 'Voice Muted';
+    } else if (audioEngine.isSpeaking && !paused) {
+      voiceBadge.classList.add('speaking');
+      voiceLabel.textContent = 'Narrating';
+    } else {
+      voiceBadge.classList.remove('speaking');
+      voiceLabel.textContent = 'Documentary Voice';
+    }
+  }
+
+  function updatePlayIcon() {
+    ppIcon.innerHTML = paused
+      ? '<path d="M8 5v14l11-7z"/>'
+      : '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
+  }
+
+  function seekTo(newT) {
+    filmTime = cl(newT, 0, TOT - 0.05);
+    firedEvents.clear();
+    syncNarration(filmTime, true);
+    const si = sceneIndexAt(filmTime);
+    audioEngine.updateChord(si);
+  }
+
+  function startFilm() {
+    if (started) return;
+    started = true;
+    paused = false;
+    filmTime = 0;
+    firedEvents.clear();
+    introEl.classList.add('hidden');
+    audioEngine.init();
+    audioEngine.updateChord(0);
+    audioEngine.updateGain();
+    updatePlayIcon();
+    updateVoiceBadge();
+    showHUD();
+  }
+
+  startBtn.addEventListener('click', startFilm);
+
+  playPauseBtn.addEventListener('click', () => {
+    if (!started) { startFilm(); return; }
+    paused = !paused;
+    if (paused) stopNarration();
+    else syncNarration(filmTime, true);
+    audioEngine.updateGain();
+    updatePlayIcon();
+  });
+
+  prevChBtn.addEventListener('click', () => {
+    const si = sceneIndexAt(filmTime);
+    const lt = filmTime - ST0[si];
+    const targetIdx = lt > 2.5 ? si : (si + SCENES.length - 1) % SCENES.length;
+    seekTo(ST0[targetIdx]);
+  });
+
+  nextChBtn.addEventListener('click', () => {
+    const si = sceneIndexAt(filmTime);
+    seekTo(ST0[(si + 1) % SCENES.length]);
+  });
+
+  voiceBtn.addEventListener('click', () => {
+    audioEngine.voiceEnabled = !audioEngine.voiceEnabled;
+    voiceBtn.classList.toggle('active', audioEngine.voiceEnabled);
+    voiceBtn.classList.toggle('off', !audioEngine.voiceEnabled);
+    if (!audioEngine.voiceEnabled) stopNarration();
+    else syncNarration(filmTime, true);
+    audioEngine.updateGain();
+    updateVoiceBadge();
+  });
+
+  musicBtn.addEventListener('click', () => {
+    audioEngine.musicEnabled = !audioEngine.musicEnabled;
+    musicBtn.classList.toggle('active', audioEngine.musicEnabled);
+    musicBtn.classList.toggle('off', !audioEngine.musicEnabled);
+    audioEngine.updateGain();
+  });
+
+  ccBtn.addEventListener('click', () => {
+    captionsEnabled = !captionsEnabled;
+    ccBtn.classList.toggle('active', captionsEnabled);
+    ccBtn.classList.toggle('off', !captionsEnabled);
+  });
+
+  fsBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen && document.exitFullscreen();
+    }
+  });
+
+  // Timeline scrubbing + chapter hover tooltip
+  let dragging = false;
+  function timeFromPointer(e) {
+    const rect = track.getBoundingClientRect();
+    const frac = cl((e.clientX - rect.left) / rect.width, 0, 1);
+    return frac * TOT;
+  }
+  timeline.addEventListener('pointerdown', e => {
+    dragging = true;
+    timeline.setPointerCapture(e.pointerId);
+    seekTo(timeFromPointer(e));
+  });
+  timeline.addEventListener('pointermove', e => {
+    const rect = track.getBoundingClientRect();
+    const frac = cl((e.clientX - rect.left) / rect.width, 0, 1);
+    const tHover = frac * TOT;
+    const si = sceneIndexAt(tHover);
+    hoverTip.textContent = `${fmtTime(tHover)}  ·  ${SCENES[si].title}`;
+    hoverTip.style.left = `${frac * 100}%`;
+    hoverTip.style.opacity = '1';
+    if (dragging) seekTo(tHover);
+  });
+  timeline.addEventListener('pointerleave', () => { if (!dragging) hoverTip.style.opacity = '0'; });
+  timeline.addEventListener('pointerup', () => { dragging = false; hoverTip.style.opacity = '0'; });
+
+  // Auto-hiding HUD & cursor
+  let hudTimer = null;
+  function showHUD() {
+    if (!started) return;
+    document.body.classList.remove('hide-cursor');
+    hudEl.classList.add('visible');
+    hudTopEl.classList.add('visible');
+    clearTimeout(hudTimer);
+    hudTimer = setTimeout(() => {
+      if (!paused && !dragging) {
+        hudEl.classList.remove('visible');
+        hudTopEl.classList.remove('visible');
+        document.body.classList.add('hide-cursor');
+      }
+    }, 2600);
+  }
+  window.addEventListener('mousemove', showHUD);
+  window.addEventListener('pointerdown', showHUD);
+
+  // Keyboard shortcuts
+  window.addEventListener('keydown', e => {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      if (!started) startFilm();
+      else playPauseBtn.click();
+      showHUD();
+    } else if (e.code === 'ArrowRight') {
+      nextChBtn.click(); showHUD();
+    } else if (e.code === 'ArrowLeft') {
+      prevChBtn.click(); showHUD();
+    } else if (e.key === 'v' || e.key === 'V') {
+      voiceBtn.click(); showHUD();
+    } else if (e.key === 'm' || e.key === 'M') {
+      musicBtn.click(); showHUD();
+    } else if (e.key === 'c' || e.key === 'C') {
+      ccBtn.click(); showHUD();
+    } else if (e.key === 'f' || e.key === 'F') {
+      fsBtn.click();
+    }
+  });
+
+  // Main animation loop
+  function frame(now) {
+    const dt = Math.min((now - lastNow) / 1000, 0.1);
+    lastNow = now;
+
+    if (!started) {
+      // Gentle living Ulam preview behind opening title card
+      previewTime = 14 + ((now / 1000) * 0.45) % 14;
+      renderScene(0, previewTime, now / 1000);
+      requestAnimationFrame(frame);
+      return;
+    }
+
+    if (!paused) {
+      filmTime += dt;
+      if (filmTime >= TOT) {
+        filmTime %= TOT;
+        looped = true;
+        firedEvents.clear();
+        stopNarration();
+      }
+    }
+
+    const T = filmTime;
+    const i = sceneIndexAt(T);
+    const lt = T - ST0[i];
+    const prev = (i + SCENES.length - 1) % SCENES.length;
+
+    // Sync audio score & voice-over
+    audioEngine.updateChord(i);
+    syncNarration(T, false);
+    audioEngine.updateGain();
+
+    // Update HUD state
+    chLabel.textContent = SCENES[i].title;
+    chDot.style.background = SCENES[i].hex;
+    chDot.style.boxShadow = `0 0 10px ${SCENES[i].hex}`;
+    const pct = (T / TOT) * 100;
+    fill.style.width = `${pct}%`;
+    fill.style.background = SCENES[i].hex;
+    fill.style.boxShadow = `0 0 14px ${SCENES[i].hex}`;
+    thumb.style.left = `${pct}%`;
+    timeReadout.textContent = `${fmtTime(T)} / ${fmtTime(TOT)}`;
+
+    // Seamless cinematic iris-bloom transition between chapters (1.6s)
+    const transDur = 1.6;
+    if (lt < transDur && (i > 0 || looped)) {
+      const p = eio5(lt / transDur);
+      const blendRGB = lerpRGB(SCENES[prev].rgb, SCENES[i].rgb, p);
+
+      renderScene(prev, SCENES[prev].d, T + TOT, blendRGB);
+
+      g.save();
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const maxR = Math.hypot(W, H) * 0.56;
+      const curR = p * maxR;
+      g.beginPath();
+      g.arc(W * 0.5, H * 0.5, curR, 0, Math.PI * 2);
+      g.clip();
+      renderScene(i, lt, T, blendRGB);
+      g.restore();
+
+      // Luminous soft light ring on the expanding iris
+      g.save();
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.globalAlpha = (1 - p) * 0.85;
+      g.strokeStyle = SCENES[i].hex;
+      g.lineWidth = 4 + (1 - p) * 6;
+      glow(SCENES[i].hex, 34);
+      g.beginPath();
+      g.arc(W * 0.5, H * 0.5, curR, 0, Math.PI * 2);
+      g.stroke();
+      g.restore();
+    } else {
+      renderScene(i, lt, T);
+    }
+
+    // Minimal 3px cinema progress hair at very bottom edge when HUD is hidden
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.fillStyle = `rgba(${SCENES[i].rgb.join(',')}, 0.85)`;
+    g.fillRect(0, H - 3, W * (T / TOT), 3);
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
